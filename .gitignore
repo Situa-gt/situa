@@ -1,3 +1,5 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
 # dependencies
 /node_modules
 /.pnp
@@ -21,7 +23,6 @@
 # misc
 .DS_Store
 *.pem
-Thumbs.db
 
 # debug
 npm-debug.log*
@@ -29,13 +30,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
-.env
-.env*.local
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# env files (can opt-in for committing if needed)
+.env*
 
 # vercel
 .vercel
@@ -44,20 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# IDE
-.vscode/
-.idea/
-*.swp
-
-# supabase
-supabase/.branches
-supabase/.temp
-
-# claude
-.claude/
-
-# all markdown files (docs and notes are kept locally, not in repo)
+# project-local docs and notes (kept out of version control intentionally)
 *.md
+docs/
 
-# misc
-*.log
+# claude code
+.claude/

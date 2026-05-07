@@ -1,0 +1,76 @@
+'use client'
+
+import { useCallback, useEffect, useState } from 'react'
+import useEmblaCarousel from 'embla-carousel-react'
+import Autoplay from 'embla-carousel-autoplay'
+import { ProjectCard } from '@/components/project/ProjectCard'
+import type { ProjectCardData } from '@/lib/queries/home'
+
+interface Props {
+  projects: ProjectCardData[]
+}
+
+export function ProjectSlider({ projects }: Props) {
+  const reduceMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { loop: true, align: 'start' },
+    reduceMotion ? [] : [Autoplay({ delay: 5000, stopOnInteraction: false })],
+  )
+
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [snapCount, setSnapCount] = useState(0)
+
+  useEffect(() => {
+    if (!emblaApi) return
+    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap())
+    setSnapCount(emblaApi.scrollSnapList().length)
+    onSelect()
+    emblaApi.on('select', onSelect)
+    emblaApi.on('reInit', onSelect)
+  }, [emblaApi])
+
+  const scrollTo = useCallback(
+    (idx: number) => emblaApi?.scrollTo(idx),
+    [emblaApi],
+  )
+
+  if (projects.length === 0) return null
+
+  return (
+    <section className="mx-auto w-full max-w-7xl overflow-visible px-6 pt-16">
+      <h2 className="mb-8 text-2xl font-semibold tracking-tight text-zinc-900">
+        Proyectos recientes
+      </h2>
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex gap-x-6 pb-8 overflow-visible">
+          {projects.map((p) => (
+            <div
+              key={p.id}
+              className="min-w-0 flex-[0_0_100%] sm:flex-[0_0_50%] lg:flex-[0_0_33.333%]"
+            >
+              <ProjectCard project={p} />
+            </div>
+          ))}
+        </div>
+      </div>
+      {snapCount > 1 && (
+        <div className="mt-6 flex justify-center gap-2">
+          {Array.from({ length: snapCount }).map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => scrollTo(i)}
+              aria-label={`Ir al slide ${i + 1}`}
+              className={`h-2 w-2 rounded-full transition ${
+                i === selectedIndex ? 'bg-zinc-900' : 'bg-zinc-300'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}

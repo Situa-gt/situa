@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" role="img" aria-label="">
+  <rect width="1920" height="1080" fill="#f3f4f6"/>
+  <g stroke="#d1d5db" stroke-width="1.5" fill="none">
+    <path d="M0 820 L300 720 L520 780 L780 640 L1080 720 L1340 600 L1620 700 L1920 580"/>
+    <path d="M0 880 L260 800 L560 860 L860 740 L1140 820 L1420 700 L1700 800 L1920 720"/>
+    <path d="M200 1080 L200 760 M340 1080 L340 720 M500 1080 L500 780 M700 1080 L700 640 M880 1080 L880 700 M1080 1080 L1080 720 M1260 1080 L1260 660 M1440 1080 L1440 700 M1640 1080 L1640 700 M1820 1080 L1820 620"/>
+  </g>
+</svg>

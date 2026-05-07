@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Imagen no disponible">
+  <rect width="1600" height="900" fill="#e5e7eb"/>
+  <g stroke="#9ca3af" stroke-width="2" fill="none">
+    <path d="M0 700 L600 380 L1000 540 L1600 240"/>
+    <path d="M0 760 L500 480 L900 600 L1600 320"/>
+    <circle cx="1300" cy="220" r="60"/>
+  </g>
+  <text x="800" y="470" text-anchor="middle" fill="#6b7280" font-family="system-ui, sans-serif" font-size="40" font-weight="500">Sitúa</text>
+</svg>

@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "migrate": "tsx --env-file=scripts/migrate/.env.migrate scripts/migrate/index.ts",
+    "migrate:verify": "tsx --env-file=scripts/migrate/.env.migrate scripts/migrate/verify.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
@@ -33,9 +35,13 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sharp": "^0.31.1",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.5",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

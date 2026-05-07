@@ -1,18 +1,21 @@
-import { ArrowUpRight } from 'lucide-react'
+import Image from 'next/image'
 
 export function HeroAccent() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute right-6 top-1/2 hidden -translate-y-1/2 lg:block"
+      className="pointer-events-none absolute right-2 top-1/3 hidden -translate-y-1/2 lg:block xl:right-6"
     >
       <div className="hero-accent-drop">
         <div className="hero-accent-bob">
-          <span
-            className="flex h-40 w-40 items-center justify-center rounded-full bg-brand-orange text-white shadow-[0_24px_60px_-18px_rgba(253,125,41,0.65),0_0_0_1px_rgba(255,255,255,0.18)_inset] xl:h-48 xl:w-48"
-          >
-            <ArrowUpRight className="h-16 w-16 xl:h-20 xl:w-20" strokeWidth={1.75} />
-          </span>
+          <Image
+            src="/situa_3d.png"
+            alt=""
+            width={530}
+            height={600}
+            priority
+            className="h-72 w-auto drop-shadow-[0_30px_45px_rgba(20,16,80,0.35)] xl:h-96"
+          />
         </div>
       </div>
     </div>

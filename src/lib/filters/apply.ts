@@ -27,10 +27,10 @@ async function zoneIdsForLocation(
   supabase: SupabaseClient,
   f: Filters,
 ): Promise<string[] | null> {
-  if (!f.departamento && !f.municipio && !f.zona) return null
+  if (!f.departamento && !f.municipio && f.zonas.length === 0) return null
 
   let query = supabase.from('zones').select('id, url_slug, municipalities!inner(slug, departments!inner(slug))').eq('is_active', true)
-  if (f.zona) query = query.eq('url_slug', f.zona)
+  if (f.zonas.length > 0) query = query.in('url_slug', f.zonas)
   if (f.municipio) query = query.eq('municipalities.slug', f.municipio)
   if (f.departamento) query = query.eq('municipalities.departments.slug', f.departamento)
 

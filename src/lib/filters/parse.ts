@@ -16,7 +16,7 @@ export interface Filters {
   tipo: Tipo | null
   departamento: string | null
   municipio: string | null
-  zona: string | null
+  zonas: string[]
   precio_min: number | null
   precio_max: number | null
   etapa: Stage | null
@@ -27,7 +27,7 @@ export const EMPTY_FILTERS: Filters = {
   tipo: null,
   departamento: null,
   municipio: null,
-  zona: null,
+  zonas: [],
   precio_min: null,
   precio_max: null,
   etapa: null,
@@ -65,12 +65,18 @@ function pickInt(raw: string | string[] | undefined): number | null {
   return Number.isInteger(n) ? n : null
 }
 
+function pickStringArray(raw: string | string[] | undefined): string[] {
+  if (!raw) return []
+  if (Array.isArray(raw)) return raw.filter((s) => s.trim().length > 0)
+  return raw.trim().length > 0 ? [raw] : []
+}
+
 export function parseFilters(raw: FilterParams): Filters {
   return {
     tipo: pickEnum(raw.tipo, TIPOS),
     departamento: pickString(raw.departamento),
     municipio: pickString(raw.municipio),
-    zona: pickString(raw.zona),
+    zonas: pickStringArray(raw.zona),
     precio_min: pickNumber(raw.precio_min),
     precio_max: pickNumber(raw.precio_max),
     etapa: pickEnum(raw.etapa, STAGES),
@@ -83,7 +89,7 @@ export function hasAnyFilter(f: Filters): boolean {
     f.tipo !== null ||
     f.departamento !== null ||
     f.municipio !== null ||
-    f.zona !== null ||
+    f.zonas.length > 0 ||
     f.precio_min !== null ||
     f.precio_max !== null ||
     f.etapa !== null ||

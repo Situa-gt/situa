@@ -1,39 +1,41 @@
 import { tipoSlug } from '@/lib/types/property'
 import type { Filters } from '@/lib/filters/parse'
 
-const ROUTING_KEYS: readonly (keyof Filters)[] = ['tipo', 'zona']
-
-function appendNonRouting(params: URLSearchParams, f: Filters) {
-  for (const [key, value] of Object.entries(f) as Array<[keyof Filters, Filters[keyof Filters]]>) {
-    if (ROUTING_KEYS.includes(key)) continue
-    if (value === null) continue
-    params.set(key, String(value))
-  }
-}
-
 function withQuery(path: string, params: URLSearchParams): string {
   const qs = params.toString()
   return qs.length > 0 ? `${path}?${qs}` : path
 }
 
+function extraParams(f: Filters): URLSearchParams {
+  const p = new URLSearchParams()
+  if (f.departamento) p.set('departamento', f.departamento)
+  if (f.municipio) p.set('municipio', f.municipio)
+  if (f.precio_min !== null) p.set('precio_min', String(f.precio_min))
+  if (f.precio_max !== null) p.set('precio_max', String(f.precio_max))
+  if (f.etapa) p.set('etapa', f.etapa)
+  if (f.dormitorios !== null) p.set('dormitorios', String(f.dormitorios))
+  return p
+}
+
 export function buildSearchUrl(f: Filters): string {
-  const remaining = new URLSearchParams()
-  appendNonRouting(remaining, f)
+  const tipoPath = f.tipo ? tipoSlug(f.tipo) : null
 
-  if (f.zona && f.tipo) {
-    return withQuery(`/${f.zona}/${tipoSlug(f.tipo)}`, remaining)
-  }
-  if (f.zona) {
-    return withQuery(`/${f.zona}`, remaining)
-  }
-  if (f.tipo) {
-    return withQuery(`/${tipoSlug(f.tipo)}`, remaining)
+  // Single zona → keep SEO-friendly path routing
+  if (f.zonas.length === 1) {
+    const extra = extraParams(f)
+    if (tipoPath) return withQuery(`/${f.zonas[0]}/${tipoPath}`, extra)
+    return withQuery(`/${f.zonas[0]}`, extra)
   }
 
-  const all = new URLSearchParams()
+  // No zona, tipo only → path routing
+  if (f.zonas.length === 0 && tipoPath) {
+    return withQuery(`/${tipoPath}`, extraParams(f))
+  }
+
+  // Multiple zonas or no routing key → full query params
+  const all = extraParams(f)
   if (f.tipo) all.set('tipo', f.tipo)
-  if (f.zona) all.set('zona', f.zona)
-  appendNonRouting(all, f)
+  for (const z of f.zonas) all.append('zona', z)
   const qs = all.toString()
   return qs.length > 0 ? `/?${qs}` : '/'
 }

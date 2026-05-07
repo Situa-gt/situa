@@ -5,12 +5,14 @@ import type { Database } from '@/lib/database.types'
 
 type ZoneRow = Database['public']['Tables']['zones']['Row']
 type ProjectRow = Database['public']['Tables']['projects']['Row']
+type ModelRow = Database['public']['Tables']['models']['Row']
 
 export type Resolved =
   | { kind: 'tipo'; data: { tipo: PropertyType } }
   | { kind: 'zone'; data: { zone: ZoneRow } }
   | { kind: 'zone-tipo'; data: { zone: ZoneRow; tipo: PropertyType } }
   | { kind: 'project'; data: { project: ProjectRow; zone: ZoneRow } }
+  | { kind: 'model'; data: { model: ModelRow; project: ProjectRow; zone: ZoneRow } }
   | { kind: 'not-found' }
 
 async function resolveOneSegment(slug: string): Promise<Resolved> {
@@ -76,17 +78,41 @@ async function resolveThreeSegments(
   return { kind: 'project', data: { project, zone } }
 }
 
+async function resolveFourSegments(
+  zoneSlug: string,
+  tipoStr: string,
+  projectSlug: string,
+  modelSlug: string,
+): Promise<Resolved> {
+  const parent = await resolveThreeSegments(zoneSlug, tipoStr, projectSlug)
+  if (parent.kind !== 'project') return { kind: 'not-found' }
+
+  const supabase = createServerClient()
+  const { data: model } = await supabase
+    .from('models')
+    .select('*')
+    .eq('project_id', parent.data.project.id)
+    .eq('slug', modelSlug)
+    .eq('is_active', true)
+    .maybeSingle()
+
+  if (!model) return { kind: 'not-found' }
+  return { kind: 'model', data: { model, project: parent.data.project, zone: parent.data.zone } }
+}
+
 async function resolveSlugUncached(segments: string[]): Promise<Resolved> {
   if (segments.length === 1) return resolveOneSegment(segments[0])
   if (segments.length === 2) return resolveTwoSegments(segments[0], segments[1])
   if (segments.length === 3) return resolveThreeSegments(segments[0], segments[1], segments[2])
+  if (segments.length === 4)
+    return resolveFourSegments(segments[0], segments[1], segments[2], segments[3])
   return { kind: 'not-found' }
 }
 
 export function resolveSlug(segments: string[]): Promise<Resolved> {
   const cached = unstable_cache(
     () => resolveSlugUncached(segments),
-    ['resolve-slug', ...segments],
+    ['resolve-slug-v2', String(segments.length), ...segments],
     { tags: buildTags(segments), revalidate: 3600 },
   )
   return cached()
@@ -96,5 +122,6 @@ function buildTags(segments: string[]): string[] {
   const tags = ['slug:' + segments.join('/')]
   if (segments.length >= 1) tags.push('zone:' + segments[0])
   if (segments.length >= 3) tags.push('project:' + segments[2])
+  if (segments.length >= 4) tags.push('model:' + segments[3])
   return tags
 }

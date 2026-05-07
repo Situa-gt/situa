@@ -8,6 +8,7 @@ import { EMPTY_FILTERS, type Filters } from '@/lib/filters/parse'
 import type { Database } from '@/lib/database.types'
 import { CtaButton } from '@/components/ui/cta-button'
 import { ZonaMultiSelect } from './ZonaMultiSelect'
+import { DormitoriosSelect } from './DormitoriosSelect'
 
 type Stage = Database['public']['Enums']['project_stage']
 type Tipo = Database['public']['Enums']['property_type']
@@ -132,18 +133,13 @@ export function HeroFilters({
           />
         </label>
 
-        <SelectField
-          label="Dormitorios"
-          value={state.dormitorios != null ? String(state.dormitorios) : ''}
-          onChange={(v) => set('dormitorios', v === '' ? null : Number(v))}
-        >
-          <option value="">Todos</option>
-          {[1, 2, 3, 4].map((n) => (
-            <option key={n} value={n}>
-              {n}+
-            </option>
-          ))}
-        </SelectField>
+        <label className="flex flex-col gap-1.5">
+          <span className={EYEBROW}>Dormitorios</span>
+          <DormitoriosSelect
+            value={state.dormitorios}
+            onChange={(v) => set('dormitorios', v)}
+          />
+        </label>
 
         <label className="flex flex-col gap-1.5">
           <span className={EYEBROW}>Precio (USD)</span>

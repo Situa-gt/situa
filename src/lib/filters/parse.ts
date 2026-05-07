@@ -20,7 +20,7 @@ export interface Filters {
   precio_min: number | null
   precio_max: number | null
   etapa: Stage | null
-  dormitorios: number | null
+  dormitorios: number[]
 }
 
 export const EMPTY_FILTERS: Filters = {
@@ -31,7 +31,7 @@ export const EMPTY_FILTERS: Filters = {
   precio_min: null,
   precio_max: null,
   etapa: null,
-  dormitorios: null,
+  dormitorios: [],
 }
 
 export type FilterParams = Record<string, string | string[] | undefined>
@@ -71,6 +71,15 @@ function pickStringArray(raw: string | string[] | undefined): string[] {
   return raw.trim().length > 0 ? [raw] : []
 }
 
+function pickIntArray(raw: string | string[] | undefined): number[] {
+  return pickStringArray(raw)
+    .map((s) => {
+      const n = Number(s)
+      return Number.isFinite(n) && Number.isInteger(n) && n >= 0 ? n : null
+    })
+    .filter((n): n is number => n !== null)
+}
+
 export function parseFilters(raw: FilterParams): Filters {
   return {
     tipo: pickEnum(raw.tipo, TIPOS),
@@ -80,7 +89,7 @@ export function parseFilters(raw: FilterParams): Filters {
     precio_min: pickNumber(raw.precio_min),
     precio_max: pickNumber(raw.precio_max),
     etapa: pickEnum(raw.etapa, STAGES),
-    dormitorios: pickInt(raw.dormitorios),
+    dormitorios: pickIntArray(raw.dormitorios),
   }
 }
 
@@ -93,6 +102,6 @@ export function hasAnyFilter(f: Filters): boolean {
     f.precio_min !== null ||
     f.precio_max !== null ||
     f.etapa !== null ||
-    f.dormitorios !== null
+    f.dormitorios.length > 0
   )
 }

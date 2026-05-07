@@ -10,11 +10,11 @@ async function projectIdsMatchingModelFilters(
   f: Filters,
 ): Promise<string[] | null> {
   const needsModelScan =
-    f.dormitorios !== null || f.precio_min !== null || f.precio_max !== null
+    f.dormitorios.length > 0 || f.precio_min !== null || f.precio_max !== null
   if (!needsModelScan) return null
 
   let query = supabase.from('models').select('project_id').eq('is_active', true)
-  if (f.dormitorios !== null) query = query.eq('bedrooms', f.dormitorios)
+  if (f.dormitorios.length > 0) query = query.in('bedrooms', f.dormitorios)
   if (f.precio_min !== null) query = query.gte('price_from', f.precio_min)
   if (f.precio_max !== null) query = query.lte('price_from', f.precio_max)
 

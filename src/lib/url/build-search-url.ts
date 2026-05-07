@@ -13,7 +13,7 @@ function extraParams(f: Filters): URLSearchParams {
   if (f.precio_min !== null) p.set('precio_min', String(f.precio_min))
   if (f.precio_max !== null) p.set('precio_max', String(f.precio_max))
   if (f.etapa) p.set('etapa', f.etapa)
-  if (f.dormitorios !== null) p.set('dormitorios', String(f.dormitorios))
+  for (const d of f.dormitorios) p.append('dormitorios', String(d))
   return p
 }
 

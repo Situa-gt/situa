@@ -10,6 +10,7 @@ import { IndexHero } from '@/components/index/IndexHero'
 import { ProjectGrid } from '@/components/index/ProjectGrid'
 import { ProjectHeader } from '@/components/project/ProjectHeader'
 import { ModelsGrid } from '@/components/project/ModelsGrid'
+import { ContactSection } from '@/components/contact/ContactSection'
 
 export const dynamicParams = true
 export const revalidate = 3600
@@ -157,20 +158,10 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>) {
             currency={project.base_currency}
             basePath={basePath}
           />
-          <section
-            id="contacto"
-            className="mx-auto w-full max-w-7xl px-6 py-12"
-            aria-labelledby="contacto-heading"
-          >
-            <div className="rounded-xl border border-dashed border-zinc-300 px-6 py-12 text-center">
-              <h2 id="contacto-heading" className="text-xl font-semibold text-zinc-900">
-                ¿Te interesa este proyecto?
-              </h2>
-              <p className="mt-2 text-sm text-zinc-500">
-                Pronto podrás contactar al desarrollador desde aquí.
-              </p>
-            </div>
-          </section>
+          <ContactSection
+            projectId={detail.project.id}
+            projectName={detail.project.name}
+          />
         </>
       )
     }

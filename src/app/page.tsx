@@ -3,6 +3,8 @@ import { Hero } from '@/components/home/Hero'
 import { HeroBackground } from '@/components/home/HeroBackground'
 import { HomeBelowFold } from '@/components/home/HomeBelowFold'
 import { SearchResults } from '@/components/home/SearchResults'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { buildOrganizationSitua, buildWebSite } from '@/lib/seo/jsonld'
 import { hasAnyFilter, parseFilters, type FilterParams } from '@/lib/filters/parse'
 
 export const revalidate = 3600
@@ -30,6 +32,7 @@ export default async function Home({ searchParams }: PageProps) {
 
   return (
     <main className="flex flex-1 flex-col">
+      <JsonLd data={[buildOrganizationSitua(), buildWebSite()]} />
       <HeroBackground>
         <Hero initial={filters} />
       </HeroBackground>

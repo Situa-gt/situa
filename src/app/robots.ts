@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next'
-
-const SITE_URL = 'https://situa.gt'
+import { SITE_URL } from '@/lib/seo/site'
 
 export default function robots(): MetadataRoute.Robots {
   return {

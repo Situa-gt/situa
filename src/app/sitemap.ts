@@ -2,8 +2,7 @@ import type { MetadataRoute } from 'next'
 import { unstable_cache } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import { tipoSlug, type PropertyType } from '@/lib/types/property'
-
-const SITE_URL = 'https://situa.gt'
+import { SITE_URL } from '@/lib/seo/site'
 
 const STATIC_ROUTES: ReadonlyArray<{ path: string; changeFrequency: 'daily' | 'monthly'; priority: number }> = [
   { path: '/', changeFrequency: 'daily', priority: 1.0 },

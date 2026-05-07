@@ -6,6 +6,11 @@ type ModelRow = Database['public']['Tables']['models']['Row']
 type ProjectRow = Database['public']['Tables']['projects']['Row']
 type MediaRow = Database['public']['Tables']['project_media']['Row']
 
+export type ModelImage = Pick<
+  MediaRow,
+  'url' | 'url_md' | 'url_sm' | 'alt' | 'blur_data_url' | 'width' | 'height' | 'kind'
+>
+
 export interface ModelDetailData {
   model: ModelRow
   project: Pick<
@@ -13,6 +18,7 @@ export interface ModelDetailData {
     'id' | 'name' | 'slug' | 'short_description' | 'base_currency' | 'exchange_rate' | 'stage'
   >
   cover: Pick<MediaRow, 'url' | 'url_md' | 'url_sm' | 'alt' | 'blur_data_url' | 'width' | 'height'> | null
+  images: ModelImage[]
 }
 
 async function fetchModelDetail(
@@ -24,7 +30,7 @@ async function fetchModelDetail(
   const [
     { data: model, error: modelErr },
     { data: project, error: projectErr },
-    { data: covers, error: coverErr },
+    { data: media, error: mediaErr },
   ] = await Promise.all([
     supabase
       .from('models')
@@ -40,22 +46,35 @@ async function fetchModelDetail(
       .maybeSingle(),
     supabase
       .from('project_media')
-      .select('url, url_md, url_sm, alt, blur_data_url, width, height')
+      .select('url, url_md, url_sm, alt, blur_data_url, width, height, kind, display_order')
       .eq('project_id', projectId)
-      .eq('kind', 'cover')
-      .order('display_order', { ascending: true })
-      .limit(1),
+      .in('kind', ['cover', 'gallery'])
+      .order('kind', { ascending: true })
+      .order('display_order', { ascending: true }),
   ])
 
   if (modelErr) throw modelErr
   if (projectErr) throw projectErr
-  if (coverErr) throw coverErr
+  if (mediaErr) throw mediaErr
   if (!model || !project) return null
+
+  const images: ModelImage[] = (media ?? []).map((m) => ({
+    url: m.url,
+    url_md: m.url_md,
+    url_sm: m.url_sm,
+    alt: m.alt,
+    blur_data_url: m.blur_data_url,
+    width: m.width,
+    height: m.height,
+    kind: m.kind,
+  }))
+  const cover = images.find((m) => m.kind === 'cover') ?? null
 
   return {
     model,
     project,
-    cover: covers && covers.length > 0 ? covers[0] : null,
+    cover,
+    images,
   }
 }
 
@@ -66,7 +85,7 @@ export function getModelDetail(
 ): Promise<ModelDetailData | null> {
   return unstable_cache(
     () => fetchModelDetail(modelId, projectId),
-    ['model-detail', modelId],
+    ['model-detail-v2', modelId],
     {
       tags: [
         'models:active',

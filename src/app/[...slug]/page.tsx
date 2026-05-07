@@ -2,12 +2,12 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { resolveSlug, type Resolved } from '@/lib/resolve-slug'
-import { tipoSlug, type PropertyType } from '@/lib/types/property'
+import { tipoSlug } from '@/lib/types/property'
 import { getProjectsForIndex } from '@/lib/queries/index-pages'
 import { getProjectDetail } from '@/lib/queries/project'
 import { getModelDetail } from '@/lib/queries/model'
 import { formatPriceFrom } from '@/lib/format/price'
-import { Breadcrumbs, type Crumb } from '@/components/breadcrumbs/Breadcrumbs'
+import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs'
 import { IndexHero } from '@/components/index/IndexHero'
 import { ProjectGrid } from '@/components/index/ProjectGrid'
 import { ProjectHeader } from '@/components/project/ProjectHeader'
@@ -15,6 +15,16 @@ import { ModelsGrid } from '@/components/project/ModelsGrid'
 import { ModelHeader } from '@/components/model/ModelHeader'
 import { ModelSpecs } from '@/components/model/ModelSpecs'
 import { ContactSection } from '@/components/contact/ContactSection'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { breadcrumbsFor, labelForTipo } from '@/lib/breadcrumbs'
+import {
+  buildBreadcrumbList,
+  buildItemList,
+  buildRealEstateListing,
+  buildPlace,
+  buildOrganizationDeveloper,
+  buildProductWithOffer,
+} from '@/lib/seo/jsonld'
 
 export const dynamicParams = true
 export const revalidate = 3600
@@ -134,148 +144,123 @@ export default async function CatchAllPage({ params }: PageProps) {
 
   if (resolved.kind === 'not-found') notFound()
 
-  const body = await renderBody(resolved)
+  const { body, jsonLd } = await renderBody(resolved)
+  const breadcrumbs = breadcrumbsFor(resolved)
   return (
     <main className="pb-20">
+      <JsonLd data={[buildBreadcrumbList(breadcrumbs), ...jsonLd]} />
       <div className="mx-auto w-full max-w-7xl px-6 pt-6">
-        <Breadcrumbs items={breadcrumbsFor(resolved)} />
+        <Breadcrumbs items={breadcrumbs} />
       </div>
       {body}
     </main>
   )
 }
 
-async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>) {
+interface RenderResult {
+  body: React.ReactNode
+  jsonLd: object[]
+}
+
+async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): Promise<RenderResult> {
   switch (resolved.kind) {
     case 'tipo': {
       const projects = await getProjectsForIndex({ tipo: resolved.data.tipo })
-      return (
-        <>
-          <IndexHero
-            title={`${labelForTipo(resolved.data.tipo)} en Guatemala`}
-            subtitle="Proyectos en preventa, construcción y entrega inmediata."
-          />
-          <ProjectGrid projects={projects} />
-        </>
-      )
+      return {
+        body: (
+          <>
+            <IndexHero
+              title={`${labelForTipo(resolved.data.tipo)} en Guatemala`}
+              subtitle="Proyectos en preventa, construcción y entrega inmediata."
+            />
+            <ProjectGrid projects={projects} />
+          </>
+        ),
+        jsonLd: [buildItemList(projects)],
+      }
     }
     case 'zone': {
       const projects = await getProjectsForIndex({ zoneId: resolved.data.zone.id })
-      return (
-        <>
-          <IndexHero
-            title={`Proyectos en ${resolved.data.zone.name}`}
-            subtitle="Apartamentos y casas en venta."
-          />
-          <ProjectGrid projects={projects} />
-        </>
-      )
+      return {
+        body: (
+          <>
+            <IndexHero
+              title={`Proyectos en ${resolved.data.zone.name}`}
+              subtitle="Apartamentos y casas en venta."
+            />
+            <ProjectGrid projects={projects} />
+          </>
+        ),
+        jsonLd: [buildItemList(projects)],
+      }
     }
     case 'zone-tipo': {
       const projects = await getProjectsForIndex({
         tipo: resolved.data.tipo,
         zoneId: resolved.data.zone.id,
       })
-      return (
-        <>
-          <IndexHero
-            title={`${labelForTipo(resolved.data.tipo)} en ${resolved.data.zone.name}`}
-          />
-          <ProjectGrid projects={projects} />
-        </>
-      )
+      return {
+        body: (
+          <>
+            <IndexHero
+              title={`${labelForTipo(resolved.data.tipo)} en ${resolved.data.zone.name}`}
+            />
+            <ProjectGrid projects={projects} />
+          </>
+        ),
+        jsonLd: [buildItemList(projects)],
+      }
     }
     case 'project': {
       const { project, zone } = resolved.data
       const detail = await getProjectDetail(project.id, project.slug)
       if (!detail) notFound()
       const basePath = `/${zone.url_slug}/${tipoSlug(project.property_type)}/${project.slug}`
-      return (
-        <>
-          <ProjectHeader detail={detail} zoneName={zone.name} />
-          <ModelsGrid
-            models={detail.models}
-            currency={project.base_currency}
-            basePath={basePath}
-          />
-          <ContactSection
-            projectId={detail.project.id}
-            projectName={detail.project.name}
-          />
-        </>
-      )
+      const jsonLd: object[] = [
+        buildRealEstateListing({ detail, zone, canonicalPath: basePath }),
+        buildPlace({ detail, zone, canonicalPath: basePath }),
+      ]
+      const developerNode = buildOrganizationDeveloper(detail)
+      if (developerNode) jsonLd.push(developerNode)
+      return {
+        body: (
+          <>
+            <ProjectHeader detail={detail} zoneName={zone.name} />
+            <ModelsGrid
+              models={detail.models}
+              currency={project.base_currency}
+              basePath={basePath}
+            />
+            <ContactSection
+              projectId={detail.project.id}
+              projectName={detail.project.name}
+            />
+          </>
+        ),
+        jsonLd,
+      }
     }
     case 'model': {
       const { model, project, zone } = resolved.data
       const detail = await getModelDetail(model.id, project.id, model.slug)
       if (!detail) notFound()
       const projectHref = `/${zone.url_slug}/${tipoSlug(project.property_type)}/${project.slug}`
-      return (
-        <>
-          <ModelHeader detail={detail} projectHref={projectHref} />
-          <ModelSpecs model={detail.model} />
-          <ContactSection
-            projectId={detail.project.id}
-            modelId={detail.model.id}
-            projectName={detail.project.name}
-          />
-        </>
-      )
+      const canonicalPath = `${projectHref}/${model.slug}`
+      return {
+        body: (
+          <>
+            <ModelHeader detail={detail} projectHref={projectHref} />
+            <ModelSpecs model={detail.model} />
+            <ContactSection
+              projectId={detail.project.id}
+              modelId={detail.model.id}
+              projectName={detail.project.name}
+            />
+          </>
+        ),
+        jsonLd: [buildProductWithOffer({ detail, canonicalPath })],
+      }
     }
   }
 }
 
-function breadcrumbsFor(
-  resolved: Exclude<Resolved, { kind: 'not-found' }>,
-): Crumb[] {
-  switch (resolved.kind) {
-    case 'tipo':
-      return [
-        { label: 'Inicio', href: '/' },
-        { label: labelForTipo(resolved.data.tipo) },
-      ]
-    case 'zone':
-      return [
-        { label: 'Inicio', href: '/' },
-        { label: resolved.data.zone.name },
-      ]
-    case 'zone-tipo':
-      return [
-        { label: 'Inicio', href: '/' },
-        { label: resolved.data.zone.name, href: `/${resolved.data.zone.url_slug}` },
-        { label: labelForTipo(resolved.data.tipo) },
-      ]
-    case 'project': {
-      const { project, zone } = resolved.data
-      return [
-        { label: 'Inicio', href: '/' },
-        { label: zone.name, href: `/${zone.url_slug}` },
-        {
-          label: labelForTipo(project.property_type),
-          href: `/${zone.url_slug}/${tipoSlug(project.property_type)}`,
-        },
-        { label: project.name },
-      ]
-    }
-    case 'model': {
-      const { model, project, zone } = resolved.data
-      return [
-        { label: 'Inicio', href: '/' },
-        { label: zone.name, href: `/${zone.url_slug}` },
-        {
-          label: labelForTipo(project.property_type),
-          href: `/${zone.url_slug}/${tipoSlug(project.property_type)}`,
-        },
-        {
-          label: project.name,
-          href: `/${zone.url_slug}/${tipoSlug(project.property_type)}/${project.slug}`,
-        },
-        { label: model.name },
-      ]
-    }
-  }
-}
-
-function labelForTipo(tipo: PropertyType): string {
-  return tipo === 'apartamento' ? 'Apartamentos' : 'Casas'
-}

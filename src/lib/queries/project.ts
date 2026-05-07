@@ -13,6 +13,7 @@ export interface ProjectDetailData {
   cover: Pick<MediaRow, 'url' | 'url_md' | 'url_sm' | 'alt' | 'blur_data_url' | 'width' | 'height'> | null
   models: ModelRow[]
   price_from: number | null
+  department: { name: string } | null
 }
 
 async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData | null> {
@@ -31,6 +32,7 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
     { data: developer, error: devErr },
     { data: covers, error: coverErr },
     { data: models, error: modelsErr },
+    { data: zoneWithDept, error: zoneErr },
   ] = await Promise.all([
     supabase
       .from('developers')
@@ -51,10 +53,16 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
       .eq('is_active', true)
       .order('display_order', { ascending: true })
       .order('price_from', { ascending: true }),
+    supabase
+      .from('zones')
+      .select('municipalities(departments(name))')
+      .eq('id', project.zone_id)
+      .maybeSingle(),
   ])
   if (devErr) throw devErr
   if (coverErr) throw coverErr
   if (modelsErr) throw modelsErr
+  if (zoneErr) throw zoneErr
 
   const cover = covers && covers.length > 0 ? covers[0] : null
 
@@ -66,12 +74,18 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
         )
       : null
 
+  const muni = (zoneWithDept?.municipalities ?? null) as
+    | { departments: { name: string } | null }
+    | null
+  const department = muni?.departments?.name ? { name: muni.departments.name } : null
+
   return {
     project,
     developer: developer ?? null,
     cover,
     models: models ?? [],
     price_from,
+    department,
   }
 }
 
@@ -81,7 +95,7 @@ export function getProjectDetail(
 ): Promise<ProjectDetailData | null> {
   return unstable_cache(
     () => fetchProjectDetail(projectId),
-    ['project-detail', projectId],
+    ['project-detail-v2', projectId],
     {
       tags: ['projects:active', `project:${projectSlug}`, `project-id:${projectId}`],
       revalidate: 3600,

@@ -4,9 +4,9 @@ import { useState, useTransition } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { CtaButton } from '@/components/ui/cta-button'
 import { submitContactLead } from '@/app/actions/contact'
 
 const ClientSchema = z.object({
@@ -21,12 +21,24 @@ type FieldErrors = Partial<Record<'full_name' | 'email' | 'phone' | 'message', s
 interface ContactFormProps {
   projectId: string
   modelId?: string
+  projectName?: string
+  modelName?: string
 }
 
-const INITIAL = { full_name: '', email: '', phone: '', message: '' }
+const EMPTY = { full_name: '', email: '', phone: '', message: '' }
 
-export function ContactForm({ projectId, modelId }: ContactFormProps) {
+function buildDefaultMessage(projectName?: string, modelName?: string) {
+  if (!projectName) return ''
+  if (modelName) {
+    return `Tengo interés en conocer más sobre ${projectName} el modelo ${modelName}`
+  }
+  return `Tengo interés en conocer más sobre ${projectName}`
+}
+
+export function ContactForm({ projectId, modelId, projectName, modelName }: ContactFormProps) {
   const searchParams = useSearchParams()
+  const defaultMessage = buildDefaultMessage(projectName, modelName)
+  const INITIAL = { ...EMPTY, message: defaultMessage }
   const [values, setValues] = useState(INITIAL)
   const [hp, setHp] = useState('')
   const [errors, setErrors] = useState<FieldErrors>({})
@@ -114,6 +126,7 @@ export function ContactForm({ projectId, modelId }: ContactFormProps) {
           onChange={(e) => update('full_name', e.target.value)}
           aria-invalid={!!errors.full_name}
           disabled={isPending}
+          placeholder="Ej. María Pérez"
           className="h-10"
         />
         {errors.full_name?.[0] && (
@@ -121,43 +134,43 @@ export function ContactForm({ projectId, modelId }: ContactFormProps) {
         )}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="grid gap-2">
-          <Label htmlFor="email">Correo</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            value={values.email}
-            onChange={(e) => update('email', e.target.value)}
-            aria-invalid={!!errors.email}
-            disabled={isPending}
-            className="h-10"
-          />
-          {errors.email?.[0] && (
-            <p className="text-xs text-destructive">{errors.email[0]}</p>
-          )}
-        </div>
+      <div className="grid gap-2">
+        <Label htmlFor="email">Correo</Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          value={values.email}
+          onChange={(e) => update('email', e.target.value)}
+          aria-invalid={!!errors.email}
+          disabled={isPending}
+          placeholder="tucorreo@ejemplo.com"
+          className="h-10"
+        />
+        {errors.email?.[0] && (
+          <p className="text-xs text-destructive">{errors.email[0]}</p>
+        )}
+      </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="phone">Teléfono (opcional)</Label>
-          <Input
-            id="phone"
-            name="phone"
-            type="tel"
-            autoComplete="tel"
-            value={values.phone}
-            onChange={(e) => update('phone', e.target.value)}
-            aria-invalid={!!errors.phone}
-            disabled={isPending}
-            className="h-10"
-          />
-          {errors.phone?.[0] && (
-            <p className="text-xs text-destructive">{errors.phone[0]}</p>
-          )}
-        </div>
+      <div className="grid gap-2">
+        <Label htmlFor="phone">Teléfono (opcional)</Label>
+        <Input
+          id="phone"
+          name="phone"
+          type="tel"
+          autoComplete="tel"
+          value={values.phone}
+          onChange={(e) => update('phone', e.target.value)}
+          aria-invalid={!!errors.phone}
+          disabled={isPending}
+          placeholder="Ej. 5555 5555"
+          className="h-10"
+        />
+        {errors.phone?.[0] && (
+          <p className="text-xs text-destructive">{errors.phone[0]}</p>
+        )}
       </div>
 
       <div className="grid gap-2">
@@ -193,9 +206,9 @@ export function ContactForm({ projectId, modelId }: ContactFormProps) {
       </div>
 
       <div className="flex items-center justify-end pt-2">
-        <Button type="submit" disabled={isPending} className="min-w-32">
+        <CtaButton type="submit" disabled={isPending}>
           {isPending ? 'Enviando…' : 'Enviar'}
-        </Button>
+        </CtaButton>
       </div>
     </form>
   )

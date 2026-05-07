@@ -9,12 +9,12 @@ export function Navbar() {
   const isHome = pathname === '/'
 
   const wrapperClass = isHome
-    ? 'absolute inset-x-0 top-0 z-30'
-    : 'sticky top-0 z-30 border-b border-zinc-200 bg-white'
+    ? 'absolute inset-x-0 top-0 z-30 text-white'
+    : 'sticky top-0 z-30 bg-brand-purple text-white shadow-[0_1px_0_rgba(255,255,255,0.08)]'
 
   return (
     <header className={wrapperClass}>
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 text-zinc-900">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
         <Link href="/" aria-label="Sitúa - Inicio" className="inline-flex items-center">
           <Image
             src="/logo-situa.svg"

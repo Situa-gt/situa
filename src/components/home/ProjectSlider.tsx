@@ -40,8 +40,8 @@ export function ProjectSlider({ projects }: Props) {
   if (projects.length === 0) return null
 
   return (
-    <section className="mx-auto w-full max-w-7xl overflow-visible px-6 pt-16">
-      <h2 className="mb-8 text-2xl font-semibold tracking-tight text-zinc-900">
+    <section className="mx-auto w-full max-w-7xl overflow-visible px-6 pt-20">
+      <h2 className="mb-10 text-3xl font-semibold tracking-[-0.015em] text-ink sm:text-[2rem]">
         Proyectos recientes
       </h2>
       <div className="overflow-hidden" ref={emblaRef}>
@@ -64,8 +64,8 @@ export function ProjectSlider({ projects }: Props) {
               type="button"
               onClick={() => scrollTo(i)}
               aria-label={`Ir al slide ${i + 1}`}
-              className={`h-2 w-2 rounded-full transition ${
-                i === selectedIndex ? 'bg-zinc-900' : 'bg-zinc-300'
+              className={`h-2 rounded-full transition-all ${
+                i === selectedIndex ? 'w-6 bg-brand-purple' : 'w-2 bg-zinc-300'
               }`}
             />
           ))}

@@ -10,11 +10,17 @@ import { formatPriceFrom } from '@/lib/format/price'
 import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs'
 import { IndexHero } from '@/components/index/IndexHero'
 import { ProjectGrid } from '@/components/index/ProjectGrid'
-import { ProjectHeader } from '@/components/project/ProjectHeader'
+import { ProjectHeaderInfo } from '@/components/project/ProjectHeader'
+import { ProjectGallery } from '@/components/project/ProjectGallery'
+import { ProjectMainDetails } from '@/components/project/ProjectMainDetails'
+import { ProjectAmenities } from '@/components/project/ProjectAmenities'
+import { ProjectLocation } from '@/components/project/ProjectLocation'
+import { ProjectStatusTimeline } from '@/components/project/ProjectStatusTimeline'
 import { ModelsGrid } from '@/components/project/ModelsGrid'
-import { ModelHeader } from '@/components/model/ModelHeader'
+import { ModelHeaderInfo } from '@/components/model/ModelHeader'
+import { ModelMainDetails } from '@/components/model/ModelMainDetails'
 import { ModelSpecs } from '@/components/model/ModelSpecs'
-import { ContactSection } from '@/components/contact/ContactSection'
+import { ContactSidebar } from '@/components/contact/ContactSidebar'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { breadcrumbsFor, labelForTipo } from '@/lib/breadcrumbs'
 import {
@@ -224,18 +230,48 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
       if (developerNode) jsonLd.push(developerNode)
       return {
         body: (
-          <>
-            <ProjectHeader detail={detail} zoneName={zone.name} />
-            <ModelsGrid
-              models={detail.models}
-              currency={project.base_currency}
-              basePath={basePath}
-            />
-            <ContactSection
-              projectId={detail.project.id}
-              projectName={detail.project.name}
-            />
-          </>
+          <div className="mx-auto w-full max-w-7xl px-6">
+            <div className="mt-8">
+              <ProjectGallery
+                images={detail.gallery}
+                projectName={detail.project.name}
+              />
+            </div>
+            <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
+              <div className="flex flex-col gap-12">
+                <div>
+                  <ProjectHeaderInfo detail={detail} zoneName={zone.name} />
+                  <div className="mt-8">
+                    <ProjectMainDetails
+                      baseCurrency={detail.project.base_currency}
+                      exchangeRate={detail.project.exchange_rate}
+                      priceFrom={detail.price_from}
+                      models={detail.models}
+                    />
+                  </div>
+                </div>
+                <ModelsGrid
+                  models={detail.models}
+                  currency={project.base_currency}
+                  basePath={basePath}
+                  images={detail.modelImages}
+                />
+                <ProjectAmenities amenities={detail.project.amenities} />
+                <ProjectLocation
+                  latitude={detail.project.latitude}
+                  longitude={detail.project.longitude}
+                  googleMapsUrl={detail.project.google_maps_url}
+                  zoneName={zone.name}
+                  projectName={detail.project.name}
+                />
+                <ProjectStatusTimeline current={detail.project.stage} />
+              </div>
+              <ContactSidebar
+                projectId={detail.project.id}
+                projectName={detail.project.name}
+              />
+            </div>
+          </div>
         ),
         jsonLd,
       }
@@ -248,15 +284,51 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
       const canonicalPath = `${projectHref}/${model.slug}`
       return {
         body: (
-          <>
-            <ModelHeader detail={detail} projectHref={projectHref} />
-            <ModelSpecs model={detail.model} />
-            <ContactSection
-              projectId={detail.project.id}
-              modelId={detail.model.id}
-              projectName={detail.project.name}
-            />
-          </>
+          <div className="mx-auto w-full max-w-7xl px-6">
+            <div className="mt-8">
+              <ProjectGallery
+                images={detail.images}
+                projectName={detail.project.name}
+              />
+            </div>
+            <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
+              <div className="flex flex-col gap-12">
+                <div>
+                  <ModelHeaderInfo detail={detail} projectHref={projectHref} />
+                  <div className="mt-8">
+                    <ModelMainDetails
+                      model={detail.model}
+                      baseCurrency={detail.project.base_currency}
+                      exchangeRate={detail.project.exchange_rate}
+                    />
+                  </div>
+                </div>
+                <ModelSpecs model={detail.model} />
+                <ModelsGrid
+                  models={detail.siblings}
+                  currency={detail.project.base_currency}
+                  basePath={projectHref}
+                  title={`Otros modelos de ${detail.project.name}`}
+                  images={detail.siblingImages}
+                />
+                <ProjectAmenities amenities={detail.project.amenities} />
+                <ProjectLocation
+                  latitude={detail.project.latitude}
+                  longitude={detail.project.longitude}
+                  googleMapsUrl={detail.project.google_maps_url}
+                  zoneName={detail.zone?.name ?? zone.name}
+                  projectName={detail.project.name}
+                />
+                <ProjectStatusTimeline current={detail.project.stage} />
+              </div>
+              <ContactSidebar
+                projectId={detail.project.id}
+                modelId={detail.model.id}
+                projectName={detail.project.name}
+                modelName={detail.model.name}
+              />
+            </div>
+          </div>
         ),
         jsonLd: [buildProductWithOffer({ detail, canonicalPath })],
       }

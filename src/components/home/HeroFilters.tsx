@@ -5,6 +5,7 @@ import { useState, type FormEvent } from 'react'
 import { buildSearchUrl } from '@/lib/url/build-search-url'
 import { EMPTY_FILTERS, type Filters } from '@/lib/filters/parse'
 import type { Database } from '@/lib/database.types'
+import { CtaButton } from '@/components/ui/cta-button'
 
 type Stage = Database['public']['Enums']['project_stage']
 type Tipo = Database['public']['Enums']['property_type']
@@ -34,7 +35,9 @@ const TIPO_LABEL: Record<Tipo, string> = {
 }
 
 const SELECT_BASE =
-  'h-10 rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900'
+  'h-11 rounded-full border border-hairline bg-white px-4 text-sm text-ink transition focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple/30'
+
+const LABEL_BASE = 'flex flex-col gap-1.5 text-xs font-medium text-muted-ink'
 
 export function HeroFilters({
   initial,
@@ -61,9 +64,9 @@ export function HeroFilters({
   return (
     <form
       onSubmit={onSubmit}
-      className="grid w-full grid-cols-1 gap-3 rounded-xl bg-white/95 p-5 shadow-lg ring-1 ring-zinc-200 backdrop-blur sm:grid-cols-2 lg:grid-cols-4"
+      className="grid w-full grid-cols-1 gap-4 rounded-3xl bg-white/95 p-6 shadow-[0_20px_50px_-12px_rgba(20,16,80,0.25)] ring-1 ring-white/40 backdrop-blur sm:grid-cols-2 lg:grid-cols-4"
     >
-      <label className="flex flex-col gap-1 text-xs font-medium text-zinc-700">
+      <label className={LABEL_BASE}>
         Tipo
         <select
           className={SELECT_BASE}
@@ -79,7 +82,7 @@ export function HeroFilters({
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-zinc-700">
+      <label className={LABEL_BASE}>
         Departamento
         <select
           className={SELECT_BASE}
@@ -95,7 +98,7 @@ export function HeroFilters({
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-zinc-700">
+      <label className={LABEL_BASE}>
         Municipio
         <select
           className={SELECT_BASE}
@@ -111,7 +114,7 @@ export function HeroFilters({
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-zinc-700">
+      <label className={LABEL_BASE}>
         Zona
         <select
           className={SELECT_BASE}
@@ -127,7 +130,7 @@ export function HeroFilters({
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-zinc-700">
+      <label className={LABEL_BASE}>
         Precio mín. (USD)
         <input
           type="number"
@@ -141,7 +144,7 @@ export function HeroFilters({
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-zinc-700">
+      <label className={LABEL_BASE}>
         Precio máx. (USD)
         <input
           type="number"
@@ -155,7 +158,7 @@ export function HeroFilters({
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-zinc-700">
+      <label className={LABEL_BASE}>
         Etapa
         <select
           className={SELECT_BASE}
@@ -171,7 +174,7 @@ export function HeroFilters({
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-zinc-700">
+      <label className={LABEL_BASE}>
         Dormitorios
         <select
           className={SELECT_BASE}
@@ -189,20 +192,15 @@ export function HeroFilters({
         </select>
       </label>
 
-      <div className="col-span-1 flex flex-col gap-2 sm:col-span-2 sm:flex-row sm:items-end lg:col-span-4">
-        <button
-          type="submit"
-          className="h-10 flex-1 rounded-md bg-zinc-900 px-6 text-sm font-medium text-white transition hover:bg-zinc-800"
-        >
-          Buscar
-        </button>
+      <div className="col-span-1 flex flex-col gap-3 pt-1 sm:col-span-2 sm:flex-row sm:items-center sm:justify-end lg:col-span-4">
         <button
           type="button"
           onClick={onClear}
-          className="h-10 rounded-md border border-zinc-300 bg-white px-6 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50"
+          className="h-11 rounded-full border border-hairline bg-white px-6 text-sm font-medium text-ink transition hover:border-ink"
         >
           Limpiar filtros
         </button>
+        <CtaButton type="submit">Buscar</CtaButton>
       </div>
     </form>
   )

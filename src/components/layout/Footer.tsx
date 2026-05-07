@@ -14,7 +14,7 @@ const ABOUT_LINKS = [
 ]
 
 const SOCIAL_LINK_CLASS =
-  'inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-300 text-zinc-700 transition hover:border-zinc-900 hover:text-zinc-900'
+  'inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/30 text-white transition hover:border-white hover:bg-white hover:text-brand-purple'
 
 type IconProps = { className?: string }
 
@@ -54,11 +54,11 @@ function TiktokIcon({ className }: IconProps) {
 
 export function Footer() {
   return (
-    <footer className="mt-auto border-t border-zinc-200 bg-zinc-50">
-      <div className="mx-auto max-w-7xl px-6 py-12">
+    <footer className="mt-auto bg-brand-purple text-white">
+      <div className="mx-auto max-w-7xl px-6 py-14">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
           <div className="md:col-span-2">
-            <Link href="/" aria-label="Sitúa - Inicio" className="inline-flex items-center text-zinc-900">
+            <Link href="/" aria-label="Sitúa - Inicio" className="inline-flex items-center">
               <Image
                 src="/logo-situa.svg"
                 alt="Sitúa"
@@ -67,29 +67,35 @@ export function Footer() {
                 className="h-9 w-auto"
               />
             </Link>
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-zinc-600">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent
-              euismod, urna at facilisis cursus, dolor lectus tristique massa,
-              sed convallis nibh quam vitae sapien.
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-white/80">
+              es el nuevo estándar para comercializar proyectos inmobiliarios.
+              Una plataforma validada y respaldada por ADIG, creada para ofrecer
+              certeza, orden y visibilidad real en el sector.
             </p>
             <div className="mt-6">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+              <p className="text-xs font-medium uppercase tracking-wide text-white/60">
                 Desarrollado por
               </p>
-              <div className="mt-2 inline-flex items-center text-zinc-700">
+              <a
+                href="https://www.adig.gt"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="ADIG (abre en nueva pestaña)"
+                className="mt-2 inline-flex items-center transition-opacity hover:opacity-80"
+              >
                 <Image
-                  src="/adig-logo.svg"
+                  src="/adig-logo.png"
                   alt="ADIG"
                   width={140}
                   height={42}
-                  className="h-10 w-auto"
+                  className="h-7 w-auto"
                 />
-              </div>
+              </a>
             </div>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold tracking-tight text-zinc-900">
+            <h3 className="text-sm font-semibold tracking-tight text-white">
               Navega en Sitúa
             </h3>
             <ul className="mt-4 space-y-3">
@@ -97,7 +103,7 @@ export function Footer() {
                 <li key={l.href}>
                   <Link
                     href={l.href}
-                    className="text-sm text-zinc-600 transition hover:text-zinc-900"
+                    className="text-sm text-white/80 transition hover:text-white"
                   >
                     {l.label}
                   </Link>
@@ -107,7 +113,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold tracking-tight text-zinc-900">
+            <h3 className="text-sm font-semibold tracking-tight text-white">
               Sobre Sitúa
             </h3>
             <ul className="mt-4 space-y-3">
@@ -115,7 +121,7 @@ export function Footer() {
                 <li key={l.href}>
                   <Link
                     href={l.href}
-                    className="text-sm text-zinc-600 transition hover:text-zinc-900"
+                    className="text-sm text-white/80 transition hover:text-white"
                   >
                     {l.label}
                   </Link>
@@ -123,7 +129,7 @@ export function Footer() {
               ))}
             </ul>
 
-            <h3 className="mt-8 text-sm font-semibold tracking-tight text-zinc-900">
+            <h3 className="mt-8 text-sm font-semibold tracking-tight text-white">
               Síguenos
             </h3>
             <div className="mt-4 flex items-center gap-3">
@@ -167,7 +173,7 @@ export function Footer() {
           </div>
         </div>
 
-        <p className="mt-12 border-t border-zinc-200 pt-6 text-xs text-zinc-500">
+        <p className="mt-12 border-t border-white/15 pt-6 text-xs text-white/70">
           © {new Date().getFullYear()} Sitúa.gt — Todos los derechos reservados.
         </p>
       </div>

@@ -18,23 +18,47 @@ async function fetchLegacyRedirects(): Promise<
 
     if (error) throw error;
 
-    return (data ?? []).map((r) => ({
-      source: r.old_path,
-      destination: r.new_path,
-      permanent: r.status_code === 308 || r.status_code === 301,
-    }));
+    return (data ?? [])
+      .filter((r) => r.new_path.startsWith("/")) // reject absolute URLs — prevents open redirect
+      .map((r) => ({
+        source: r.old_path,
+        destination: r.new_path,
+        permanent: r.status_code === 308 || r.status_code === 301,
+      }));
   } catch (err) {
     console.warn("[next.config] Could not fetch legacy redirects:", err);
     return [];
   }
 }
 
+const securityHeaders = [
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  {
+    key: "Content-Security-Policy",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://fxgbmjiymthrteqtakbg.supabase.co https://maps.googleapis.com https://maps.gstatic.com",
+      "connect-src 'self' https://fxgbmjiymthrteqtakbg.supabase.co https://www.google-analytics.com",
+      "font-src 'self'",
+      "frame-src https://www.google.com/maps/",
+      "frame-ancestors 'none'",
+    ].join("; "),
+  },
+];
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "fxgbmjiymthrteqtakbg.supabase.co" },
     ],
+  },
+  async headers() {
+    return [{ source: "/(.*)", headers: securityHeaders }];
   },
   async redirects() {
     const legacy = await fetchLegacyRedirects();

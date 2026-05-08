@@ -19,12 +19,14 @@ const EMPTY = {
   website: '',
   discount_code: '',
   message: '',
+  hp_company: '',
 }
 
 export function DeveloperModal() {
   const [open, setOpen] = useState(false)
   const [values, setValues] = useState(EMPTY)
   const [submitted, setSubmitted] = useState(false)
+  const [serverError, setServerError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   function update(key: keyof typeof EMPTY, value: string) {
@@ -34,19 +36,24 @@ export function DeveloperModal() {
   function onOpenChange(next: boolean) {
     setOpen(next)
     if (!next) {
-      // Reset after close animation
       setTimeout(() => {
         setValues(EMPTY)
         setSubmitted(false)
+        setServerError(null)
       }, 200)
     }
   }
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    setServerError(null)
     startTransition(async () => {
-      await submitDeveloperLead(values)
-      setSubmitted(true)
+      const result = await submitDeveloperLead(values)
+      if ('error' in result) {
+        setServerError(result.error)
+      } else {
+        setSubmitted(true)
+      }
     })
   }
 
@@ -191,6 +198,12 @@ export function DeveloperModal() {
                   className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground hover:border-brand-purple focus-visible:border-brand-purple disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 />
               </div>
+
+              <input type="text" name="hp_company" value={values.hp_company} onChange={(e) => update('hp_company', e.target.value)} tabIndex={-1} aria-hidden className="hidden" autoComplete="off" />
+
+              {serverError && (
+                <p className="text-sm text-red-600">{serverError}</p>
+              )}
 
               <div className="flex items-center justify-end pt-1">
                 <CtaButton type="submit" disabled={isPending}>

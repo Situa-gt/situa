@@ -10,6 +10,11 @@ const DeveloperLeadSchema = z.object({
   website: z.string().trim().max(500).optional().or(z.literal('').transform(() => undefined)),
   discount_code: z.string().trim().max(100).optional().or(z.literal('').transform(() => undefined)),
   message: z.string().trim().max(500).optional().or(z.literal('').transform(() => undefined)),
+  hp_company: z
+    .string()
+    .max(0)
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
 })
 
 export type DeveloperLeadInput = z.input<typeof DeveloperLeadSchema>
@@ -18,14 +23,26 @@ export type ActionResult =
   | { success: true }
   | { error: string; fields?: Record<string, string[]> }
 
+function escHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
 export async function submitDeveloperLead(input: unknown): Promise<ActionResult> {
   const parsed = DeveloperLeadSchema.safeParse(input)
   if (!parsed.success) {
     return { error: 'Datos inválidos', fields: parsed.error.flatten().fieldErrors }
   }
 
+  if (parsed.data.hp_company && parsed.data.hp_company.length > 0) {
+    return { success: true }
+  }
+
   const d = parsed.data
-  const rows = [
+  const rows: [string, string][] = [
     ['Nombre desarrolladora', d.developer_name],
     ['Nombre contacto', d.contact_name],
     ['Teléfono', d.phone],
@@ -35,18 +52,18 @@ export async function submitDeveloperLead(input: unknown): Promise<ActionResult>
   ]
 
   const html = `
-    <h2 style="margin-bottom:16px">Nueva desarrolladora interesada — ${d.developer_name}</h2>
+    <h2 style="margin-bottom:16px">Nueva desarrolladora interesada — ${escHtml(d.developer_name)}</h2>
     <table cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-family:sans-serif;font-size:14px">
       ${rows.map(([label, value]) => `
         <tr>
-          <td style="font-weight:600;color:#555;padding-right:24px;white-space:nowrap">${label}</td>
-          <td>${value}</td>
+          <td style="font-weight:600;color:#555;padding-right:24px;white-space:nowrap">${escHtml(label)}</td>
+          <td>${escHtml(value)}</td>
         </tr>`).join('')}
     </table>
   `
 
   try {
-    await sendEmail(`Nueva desarrolladora — ${d.developer_name}`, html)
+    await sendEmail(`Nueva desarrolladora — ${escHtml(d.developer_name)}`, html)
   } catch (err) {
     console.error('[developer-lead] email failed', err)
   }

@@ -6,6 +6,7 @@ import { SITE_URL } from '@/lib/seo/site'
 
 const STATIC_ROUTES: ReadonlyArray<{ path: string; changeFrequency: 'daily' | 'monthly'; priority: number }> = [
   { path: '/', changeFrequency: 'daily', priority: 1.0 },
+  { path: '/calculadora', changeFrequency: 'monthly', priority: 0.6 },
   { path: '/quienes-somos', changeFrequency: 'monthly', priority: 0.3 },
   { path: '/politica-de-privacidad', changeFrequency: 'monthly', priority: 0.3 },
   { path: '/terminos-y-condiciones', changeFrequency: 'monthly', priority: 0.3 },

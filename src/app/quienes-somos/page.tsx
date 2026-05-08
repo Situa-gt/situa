@@ -63,8 +63,14 @@ export default function Page() {
       <section className="bg-white px-6 py-20 lg:py-28">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Card left */}
-          {/* TODO: replace bg-zinc-800 with a real background image */}
-          <div className="relative overflow-hidden rounded-3xl bg-zinc-800">
+          <div className="relative overflow-hidden rounded-3xl bg-zinc-900">
+            <Image
+              src="/encuentra_tu_proyecto_ideal.png"
+              alt="Encuentra tu proyecto ideal"
+              fill
+              className="object-cover"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
             <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/30" />
             <div className="relative z-10 flex flex-col justify-end p-10 lg:min-h-96 lg:p-12">
               <h2 className="mb-4 text-2xl font-semibold leading-snug tracking-tight text-white lg:text-3xl">
@@ -81,8 +87,14 @@ export default function Page() {
           </div>
 
           {/* Card right */}
-          {/* TODO: replace bg-zinc-800 with a real background image */}
-          <div className="relative overflow-hidden rounded-3xl bg-zinc-800">
+          <div className="relative overflow-hidden rounded-3xl bg-zinc-900">
+            <Image
+              src="/respaldado_confianza.png"
+              alt="Respaldado por una comunidad de confianza"
+              fill
+              className="object-cover"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
             <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/30" />
             <div className="relative z-10 flex flex-col justify-end p-10 lg:min-h-96 lg:p-12">
               <h2 className="mb-4 text-2xl font-semibold leading-snug tracking-tight text-white lg:text-3xl">

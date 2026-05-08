@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import { BadgeCheck } from 'lucide-react'
-import { stageLabel } from '@/lib/format/stage'
+import { stageLabel, stageIcon, stageTooltip } from '@/lib/format/stage'
 import type { ProjectDetailData } from '@/lib/queries/project'
 
 interface Props {
@@ -36,8 +36,12 @@ export function ProjectHeaderInfo({ detail, zoneName }: Props) {
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="inline-flex items-center rounded-full bg-brand-purple/10 px-3 py-1 text-xs font-medium text-brand-purple">
+        <span className="group/stage relative inline-flex cursor-default items-center gap-1.5 rounded-full bg-brand-purple/10 px-3 py-1 text-xs font-medium text-brand-purple">
+          {(() => { const Icon = stageIcon(project.stage); return <Icon className="h-3.5 w-3.5 shrink-0" /> })()}
           {stageLabel(project.stage)}
+          <span className="pointer-events-none absolute bottom-full left-0 z-20 mb-2 hidden w-56 rounded-xl bg-zinc-900 px-3 py-2 text-xs font-normal leading-relaxed text-white shadow-lg group-hover/stage:block">
+            {stageTooltip(project.stage)}
+          </span>
         </span>
       </div>
 

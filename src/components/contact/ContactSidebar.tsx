@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { ContactForm } from './ContactForm'
+import { ContactNudge } from './ContactNudge'
 
 interface Props {
   projectId: string
@@ -15,6 +16,7 @@ export function ContactSidebar({ projectId, modelId, projectName, modelName }: P
       aria-labelledby="contacto-heading"
       className="lg:sticky lg:top-24 lg:self-start"
     >
+      <ContactNudge>
       <div className="animate-contact-glow rounded-3xl border border-hairline bg-white p-6 sm:p-7">
         <h2
           id="contacto-heading"
@@ -38,6 +40,7 @@ export function ContactSidebar({ projectId, modelId, projectName, modelName }: P
           </Suspense>
         </div>
       </div>
+      </ContactNudge>
     </aside>
   )
 }

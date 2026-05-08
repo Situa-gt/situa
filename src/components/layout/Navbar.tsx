@@ -25,7 +25,16 @@ export function Navbar() {
             className="h-8 w-auto"
           />
         </Link>
-        <div />
+        {!isHome && (
+          <div className="flex items-center gap-6">
+            <Link href="/" className="text-sm font-medium text-white/80 transition hover:text-white">
+              Proyectos
+            </Link>
+            <Link href="/calculadora" className="text-sm font-medium text-white/80 transition hover:text-white">
+              Calculadora
+            </Link>
+          </div>
+        )}
       </nav>
     </header>
   )

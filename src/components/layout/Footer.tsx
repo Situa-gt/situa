@@ -4,6 +4,7 @@ import { DeveloperModal } from '@/components/layout/DeveloperModal'
 import { AyudaModal } from '@/components/layout/AyudaModal'
 
 const NAV_LINKS = [
+  { href: '/calculadora', label: 'Calculadora de cuota' },
   { href: '/', label: 'Quiero comprar' },
 ]
 
@@ -54,8 +55,16 @@ function TiktokIcon({ className }: IconProps) {
 
 export function Footer() {
   return (
-    <footer className="mt-auto bg-brand-purple text-white">
-      <div className="mx-auto max-w-7xl px-6 py-14">
+    <footer className="relative mt-auto overflow-hidden bg-brand-purple text-white">
+      <Image
+        src="/footer_bg.png"
+        alt=""
+        aria-hidden
+        fill
+        className="object-cover object-right-top opacity-60 pointer-events-none select-none"
+        sizes="100vw"
+      />
+      <div className="relative mx-auto max-w-7xl px-6 py-14">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
           <div className="md:col-span-2">
             <Link href="/" aria-label="Sitúa - Inicio" className="inline-flex items-center">

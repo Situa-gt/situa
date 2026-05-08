@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react'
 import type { ProjectGalleryImage } from '@/lib/queries/project'
@@ -136,21 +137,19 @@ function GalleryModal({ images, index, setIndex, projectName, onClose }: ModalPr
     return () => window.removeEventListener('keydown', onKey)
   }, [prev, next, onClose])
 
-  // Lock body scroll while open
   useEffect(() => {
     const original = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = original
-    }
+    return () => { document.body.style.overflow = original }
   }, [])
 
-  return (
+  // Portal to document.body so the transform on .route-fade doesn't trap our z-index
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-label={`Galería de ${projectName}`}
-      className="fixed inset-0 z-50 flex flex-col bg-black/90 p-4 sm:p-8"
+      className="fixed inset-0 z-[200] flex flex-col bg-black/92 p-4 sm:p-8"
       onClick={onClose}
     >
       <button
@@ -162,12 +161,12 @@ function GalleryModal({ images, index, setIndex, projectName, onClose }: ModalPr
         <X className="h-5 w-5" />
       </button>
 
-      {/* Stop propagation so clicking the inner area doesn't close */}
       <div
-        className="flex flex-1 flex-col gap-4"
+        className="flex min-h-0 flex-1 flex-col gap-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative flex flex-1 items-center justify-center">
+        {/* Image area — min-h-0 lets flex-1 shrink so thumbnails are always visible */}
+        <div className="relative flex min-h-0 flex-1 items-center justify-center">
           <button
             type="button"
             onClick={prev}
@@ -177,7 +176,7 @@ function GalleryModal({ images, index, setIndex, projectName, onClose }: ModalPr
             <ChevronLeft className="h-6 w-6" />
           </button>
 
-          <div className="relative h-full max-h-[75vh] w-full">
+          <div className="relative h-full min-h-0 w-full">
             <Image
               key={current.id}
               src={current.url}
@@ -229,6 +228,7 @@ function GalleryModal({ images, index, setIndex, projectName, onClose }: ModalPr
           ))}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

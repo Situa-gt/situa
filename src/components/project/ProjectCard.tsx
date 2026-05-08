@@ -11,7 +11,7 @@ interface Props {
 }
 
 // Note: every ancestor up to the section must keep `overflow-visible`,
-// because the Cotizar button is intentionally half outside the card.
+// because the Ver button is intentionally half outside the card.
 export function ProjectCard({ project, priority = false }: Props) {
   const cover = project.cover_url ?? '/placeholder-card.svg'
   const alt = project.cover_alt ?? `Imagen de ${project.name}`
@@ -33,13 +33,18 @@ export function ProjectCard({ project, priority = false }: Props) {
             className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             priority={priority}
           />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-5 pb-5 pt-12 text-white">
+          {/* Eased multi-stop scrim — simulates a natural ease-in curve so the fade reads as smooth to the eye */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-[70%]"
+            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.70) 22%, rgba(0,0,0,0.46) 42%, rgba(0,0,0,0.20) 62%, rgba(0,0,0,0.06) 78%, transparent 100%)' }}
+          />
+          <div className="absolute inset-x-0 bottom-0 px-5 pb-5 text-white">
             <h3 className="text-lg font-semibold leading-tight tracking-tight">{project.name}</h3>
             {zoneName && (
               <p className="mt-0.5 text-xs text-white/75">{zoneName}</p>
             )}
             {project.price_from !== null && (
-              <p className="mt-1.5 text-sm font-medium text-white/95">
+              <p className="mt-1.5 text-sm font-medium text-white/90">
                 {formatPriceFrom(project.price_from, project.base_currency)}
               </p>
             )}
@@ -47,11 +52,11 @@ export function ProjectCard({ project, priority = false }: Props) {
         </div>
       </Link>
       <CtaButton
-        href={cotizarHref}
-        aria-label={`Cotizar ${project.name}`}
+        href={href}
+        aria-label={`Conocer más sobre ${project.name}`}
         className="absolute -bottom-5 right-4 shadow-lg"
       >
-        Cotizar
+        Conocer más
       </CtaButton>
     </article>
   )

@@ -13,7 +13,7 @@ export async function SearchResults({ filters }: Props) {
   const cards = await getProjectCardsByIds(projects.map((p) => p.id))
 
   return (
-    <section className="mx-auto w-full max-w-7xl overflow-visible px-6 py-16">
+    <section id="resultados" className="mx-auto w-full max-w-7xl overflow-visible px-6 py-16">
       {cards.length === 0 ? (
         <div className="flex flex-col items-center gap-4 py-12 text-center">
           <p className="text-lg text-zinc-700">

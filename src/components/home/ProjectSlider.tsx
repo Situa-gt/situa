@@ -45,11 +45,11 @@ export function ProjectSlider({ projects }: Props) {
         Proyectos recientes
       </h2>
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex gap-x-6 pb-8 overflow-visible">
+        <div className="flex pb-8 overflow-visible">
           {projects.map((p) => (
             <div
               key={p.id}
-              className="min-w-0 flex-[0_0_100%] sm:flex-[0_0_50%] lg:flex-[0_0_33.333%]"
+              className="min-w-0 mr-6 flex-[0_0_calc(100%_-_1.5rem)] sm:flex-[0_0_calc(50%_-_1.5rem)] lg:flex-[0_0_calc(33.333%_-_1.5rem)]"
             >
               <ProjectCard project={p} />
             </div>

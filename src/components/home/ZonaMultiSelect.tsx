@@ -84,7 +84,7 @@ export function ZonaMultiSelect({ options, value, onChange }: Props) {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-[calc(100%+6px)] z-50 w-full min-w-[180px] overflow-hidden rounded-2xl border border-hairline bg-white py-1.5 shadow-[0_8px_24px_-4px_rgba(20,16,80,0.15)]">
+        <div className="absolute left-0 top-[calc(100%+6px)] z-[200] w-full min-w-[180px] max-h-64 overflow-y-auto rounded-2xl border border-hairline bg-white py-1.5 shadow-[0_8px_24px_-4px_rgba(20,16,80,0.15)]">
           {options.map((o) => {
             const selected = value.includes(o.slug)
             return (

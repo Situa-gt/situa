@@ -8,7 +8,7 @@ interface BProject {
   _id: string
   cover_image?: string
   gallery_list_image?: string[]
-  logo_image?: string  // project-level logo (unused — developer logo used instead)
+  logo_image?: string
 }
 
 interface BModel {
@@ -208,4 +208,47 @@ export async function runPhase5() {
   })
 
   console.log('\n  ✓ Developer logos')
+
+  // ── Project logos ──────────────────────────────────────────────────────────
+  // Uses a separate log key so it runs independently of the cover/gallery migration
+  const PROJECT_LOGO_LOG = 'project_logo_processed'
+  console.log(`  Processing ${projects.length} project logos...`)
+
+  await withPool(projects, 4, async (p) => {
+    const projectId = projectMap.get(p._id)
+    if (!projectId) return
+
+    if (await getSupabaseId(p._id, PROJECT_LOGO_LOG)) return
+
+    const logoUrl = bubbleImageUrl(p.logo_image)
+    if (!logoUrl) {
+      await logMigration(p._id, projectId, PROJECT_LOGO_LOG)
+      return
+    }
+
+    const info = projectSlugMap.get(projectId)
+    if (!info) return
+
+    const typeSlug = info.type === 'casa' ? 'casas' : 'apartamentos'
+    const base = `${info.zoneSlug}/${typeSlug}/${info.slug}`
+
+    try {
+      const result = await processAndUpload(logoUrl, `${base}/logo/logo`)
+      await supabase.from('project_media').insert({
+        project_id: projectId,
+        developer_id: null,
+        kind: 'logo',
+        display_order: 0,
+        ...result,
+        alt: `Logo de ${info.slug}`,
+      })
+
+      await logMigration(p._id, projectId, PROJECT_LOGO_LOG)
+      process.stdout.write('.')
+    } catch (err) {
+      console.error(`\n  ✗ Project logo failed [${info.slug}]: ${(err as Error).message}`)
+    }
+  })
+
+  console.log('\n  ✓ Project logos')
 }

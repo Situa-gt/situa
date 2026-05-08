@@ -23,7 +23,7 @@ type LinkProps = CommonProps & {
 type Props = ButtonProps | LinkProps
 
 const SHELL =
-  'group inline-flex items-center gap-2 rounded-full bg-brand-orange font-medium text-white shadow-sm transition-colors hover:bg-brand-orange-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-purple/40 focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none'
+  'group inline-flex cursor-pointer items-center gap-2 rounded-full bg-brand-orange font-medium text-white shadow-sm transition-colors hover:bg-brand-orange-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-purple/40 focus-visible:ring-offset-2 disabled:opacity-40 disabled:pointer-events-none'
 
 const SIZE = {
   md: 'pl-5 pr-1.5 py-1.5 text-sm',

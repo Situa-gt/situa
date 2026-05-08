@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      bubble_migration_log: {
+        Row: {
+          bubble_id: string
+          id: string
+          migrated_at: string
+          supabase_id: string
+          table_name: string
+        }
+        Insert: {
+          bubble_id: string
+          id?: string
+          migrated_at?: string
+          supabase_id: string
+          table_name: string
+        }
+        Update: {
+          bubble_id?: string
+          id?: string
+          migrated_at?: string
+          supabase_id?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
       contact_leads: {
         Row: {
           channel: Database["public"]["Enums"]["lead_channel"]
@@ -166,6 +190,7 @@ export type Database = {
       }
       models: {
         Row: {
+          amenities: string[]
           bathrooms: number | null
           bedrooms: number | null
           created_at: string
@@ -174,6 +199,7 @@ export type Database = {
           id: string
           is_active: boolean
           legacy_slugs: string[]
+          monthly_payment_from: number | null
           name: string
           parking_spots: number
           price_from: number
@@ -183,6 +209,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          amenities?: string[]
           bathrooms?: number | null
           bedrooms?: number | null
           created_at?: string
@@ -191,6 +218,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           legacy_slugs?: string[]
+          monthly_payment_from?: number | null
           name: string
           parking_spots?: number
           price_from: number
@@ -200,6 +228,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          amenities?: string[]
           bathrooms?: number | null
           bedrooms?: number | null
           created_at?: string
@@ -208,6 +237,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           legacy_slugs?: string[]
+          monthly_payment_from?: number | null
           name?: string
           parking_spots?: number
           price_from?: number

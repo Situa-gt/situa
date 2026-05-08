@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Building2, ChevronDown, House } from 'lucide-react'
-import { buildSearchUrl } from '@/lib/url/build-search-url'
 import { EMPTY_FILTERS, type Filters } from '@/lib/filters/parse'
 import type { Database } from '@/lib/database.types'
 import { CtaButton } from '@/components/ui/cta-button'
@@ -85,7 +84,17 @@ export function HeroFilters({
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    router.push(buildSearchUrl(state))
+    const p = new URLSearchParams()
+    if (state.tipo) p.set('tipo', state.tipo)
+    for (const z of state.zonas) p.append('zona', z)
+    if (state.departamento) p.set('departamento', state.departamento)
+    if (state.municipio) p.set('municipio', state.municipio)
+    if (state.precio_min !== null) p.set('precio_min', String(state.precio_min))
+    if (state.precio_max !== null) p.set('precio_max', String(state.precio_max))
+    if (state.etapa) p.set('etapa', state.etapa)
+    for (const d of state.dormitorios) p.append('dormitorios', String(d))
+    const qs = p.toString()
+    router.push(qs ? `/?${qs}#resultados` : '/')
   }
 
   const onClear = () => {
@@ -238,7 +247,7 @@ export function HeroFilters({
         <button
           type="button"
           onClick={onClear}
-          className="text-sm font-medium text-muted-ink transition hover:text-ink"
+          className="cursor-pointer text-sm font-medium text-muted-ink transition hover:text-ink"
         >
           Limpiar filtros
         </button>

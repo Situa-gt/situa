@@ -123,7 +123,16 @@ async function fetchOptions(table: 'zones' | 'departments' | 'municipalities'): 
     .order('name', { ascending: true })
   if (error) throw error
   type Row = { name: string } & Record<string, string>
-  return (data as Row[] ?? []).map((r) => ({ name: r.name, slug: r[slugColumn] }))
+  const rows = (data as Row[] ?? []).map((r) => ({ name: r.name, slug: r[slugColumn] }))
+  // Deduplicate by slug — same name can appear in multiple departments
+  const seen = new Set<string>()
+  const unique = rows.filter((r) => {
+    if (seen.has(r.slug)) return false
+    seen.add(r.slug)
+    return true
+  })
+  // Natural sort so "Zona 2" comes before "Zona 10"
+  return unique.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
 }
 
 export const getZoneOptions = unstable_cache(

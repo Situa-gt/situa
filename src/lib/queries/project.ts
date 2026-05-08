@@ -21,6 +21,8 @@ export interface ProjectDetailData {
   modelImages: Record<string, ProjectGalleryImage>
   price_from: number | null
   department: { name: string } | null
+  projectLogo: string | null
+  developerLogo: string | null
 }
 
 async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData | null> {
@@ -40,6 +42,7 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
     { data: media, error: mediaErr },
     { data: models, error: modelsErr },
     { data: zoneWithDept, error: zoneErr },
+    { data: projectLogoRow },
   ] = await Promise.all([
     supabase
       .from('developers')
@@ -65,11 +68,28 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
       .select('municipalities(departments(name))')
       .eq('id', project.zone_id)
       .maybeSingle(),
+    supabase
+      .from('project_media')
+      .select('url')
+      .eq('project_id', projectId)
+      .eq('kind', 'logo')
+      .maybeSingle(),
   ])
   if (devErr) throw devErr
   if (mediaErr) throw mediaErr
   if (modelsErr) throw modelsErr
   if (zoneErr) throw zoneErr
+
+  // Developer logo is stored in project_media with developer_id set (fetched after developer is resolved)
+  const developerLogoRow = developer
+    ? await supabase
+        .from('project_media')
+        .select('url')
+        .eq('developer_id', developer.id)
+        .eq('kind', 'logo')
+        .maybeSingle()
+        .then(({ data }) => data)
+    : null
 
   const allMedia = (media ?? []) as Array<ProjectGalleryImage & { model_id: string | null }>
   const projectMedia = allMedia.filter((m) => m.model_id === null)
@@ -122,6 +142,8 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
     modelImages,
     price_from,
     department,
+    projectLogo: projectLogoRow?.url ?? null,
+    developerLogo: developerLogoRow?.url ?? null,
   }
 }
 

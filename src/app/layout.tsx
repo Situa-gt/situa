@@ -14,9 +14,27 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://situa.gt"),
   title: "Sitúa | Proyectos en preventa en Guatemala",
   description:
-    "Encuentra apartamentos y casas en preventa y construcción en Guatemala.",
+    "Explora más de 50 proyectos de apartamentos y casas en preventa y construcción en Guatemala. Compara precios, modelos y zonas. Plataforma verificada por ADIG.",
+  openGraph: {
+    siteName: "Sitúa",
+    locale: "es_GT",
+    type: "website",
+    images: [
+      {
+        url: "/og-default.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Sitúa – Proyectos en preventa en Guatemala",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@situagt_",
+  },
 };
 
 export default function RootLayout({

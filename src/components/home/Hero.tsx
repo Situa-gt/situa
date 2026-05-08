@@ -23,13 +23,13 @@ export async function Hero({ initial }: Props) {
       <HeroAccent />
       <div className="mb-10 max-w-2xl">
         <h1 className="hero-enter text-[clamp(2.5rem,5vw,3.5rem)] font-semibold leading-[1.05] tracking-[-0.02em] text-white">
-          Encuentra tu próximo hogar en Guatemala
+          Proyectos en preventa en Guatemala, directo del desarrollador
         </h1>
         <p
           className="hero-enter mt-5 max-w-lg text-lg leading-relaxed text-white/85"
           style={{ animationDelay: '120ms' }}
         >
-          Apartamentos y casas en preventa y construcción, directo de los desarrolladores.
+          Más de 50 proyectos de apartamentos y casas verificados por ADIG. Compara modelos, precios y cuotas en un solo lugar.
         </p>
       </div>
       <div className="hero-enter" style={{ animationDelay: '240ms' }}>

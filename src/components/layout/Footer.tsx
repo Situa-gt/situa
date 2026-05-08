@@ -6,7 +6,8 @@ import { getZoneOptions } from '@/lib/queries/home'
 
 const NAV_LINKS = [
   { href: '/calculadora', label: 'Calculadora de cuota' },
-  { href: '/', label: 'Quiero comprar' },
+  { href: '/apartamentos', label: 'Apartamentos en preventa' },
+  { href: '/casas', label: 'Casas en preventa' },
 ]
 
 const ABOUT_LINKS = [
@@ -80,7 +81,7 @@ export async function Footer() {
               />
             </Link>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-white/80">
-              es el nuevo estándar para comercializar proyectos inmobiliarios.
+              Sitúa es el nuevo estándar para comercializar proyectos inmobiliarios.
               Una plataforma validada y respaldada por ADIG, creada para ofrecer
               certeza, orden y visibilidad real en el sector.
             </p>
@@ -192,19 +193,35 @@ export async function Footer() {
         </div>
 
         {zones.length > 0 && (
-          <nav aria-label="Explorar proyectos" className="mt-12 border-t border-white/15 pt-8">
-            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.08em] text-white/50">
-              Apartamentos en preventa Guatemala
-            </p>
-            <ul className="flex flex-wrap gap-x-4 gap-y-2">
-              {zones.map((z) => (
-                <li key={z.slug}>
-                  <Link href={`/${z.slug}/apartamentos`} className="text-sm text-white/70 transition hover:text-white">
-                    Apartamentos en {z.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          <nav aria-label="Explorar proyectos" className="mt-12 border-t border-white/15 pt-8 space-y-6">
+            <div>
+              <p className="mb-5 text-xs font-semibold uppercase tracking-[0.08em] text-white/50">
+                Apartamentos en preventa Guatemala
+              </p>
+              <ul className="flex flex-wrap gap-x-4 gap-y-2">
+                {zones.map((z) => (
+                  <li key={z.slug}>
+                    <Link href={`/${z.slug}/apartamentos`} className="text-sm text-white/70 transition hover:text-white">
+                      Apartamentos en {z.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="mb-5 text-xs font-semibold uppercase tracking-[0.08em] text-white/50">
+                Casas en preventa Guatemala
+              </p>
+              <ul className="flex flex-wrap gap-x-4 gap-y-2">
+                {zones.map((z) => (
+                  <li key={z.slug}>
+                    <Link href={`/${z.slug}/casas`} className="text-sm text-white/70 transition hover:text-white">
+                      Casas en {z.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </nav>
         )}
 

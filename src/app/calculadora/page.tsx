@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'Calculadora de cuota mensual | Sitúa',
   description:
     'Simula tu cuota mensual hipotecaria y encuentra proyectos en preventa en Guatemala que se ajusten a tu presupuesto.',
-  alternates: { canonical: 'https://situa.gt/calculadora' },
+  alternates: { canonical: '/calculadora' },
 }
 
 export default function CalculadoraPage() {

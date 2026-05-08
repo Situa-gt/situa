@@ -106,16 +106,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     case 'tipo':
       return {
         title: `${labelForTipo(resolved.data.tipo)} en preventa Guatemala | Sitúa`,
+        description: `Explora todos los ${labelForTipo(resolved.data.tipo).toLowerCase()} en preventa y construcción en Guatemala. Compara proyectos, precios y modelos disponibles.`,
         alternates: { canonical: `/${tipoSlug(resolved.data.tipo)}` },
       }
     case 'zone':
       return {
-        title: `Proyectos en ${resolved.data.zone.name} | Apartamentos y Casas | Sitúa`,
+        title: `Proyectos en ${resolved.data.zone.name} | Preventa Guatemala | Sitúa`,
+        description: `Proyectos de apartamentos y casas en ${resolved.data.zone.name}, Guatemala. Preventa y construcción. Compara modelos, precios y amenidades.`,
         alternates: { canonical: `/${resolved.data.zone.url_slug}` },
       }
     case 'zone-tipo':
       return {
         title: `${labelForTipo(resolved.data.tipo)} en ${resolved.data.zone.name} | Sitúa`,
+        description: `${labelForTipo(resolved.data.tipo)} en ${resolved.data.zone.name}, Guatemala. Proyectos en preventa, construcción y entrega inmediata. Contacta directamente al desarrollador.`,
         alternates: {
           canonical: `/${resolved.data.zone.url_slug}/${tipoSlug(resolved.data.tipo)}`,
         },
@@ -124,7 +127,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       const { project, zone } = resolved.data
       return {
         title: `${project.name} | ${zone.name} | Sitúa`,
-        description: project.short_description ?? undefined,
+        description:
+          project.short_description ??
+          `${project.name} – ${labelForTipo(project.property_type).slice(0, -1)} en preventa en ${zone.name}, Guatemala. Contacta al desarrollador directamente.`,
         alternates: {
           canonical: `/${zone.url_slug}/${tipoSlug(project.property_type)}/${project.slug}`,
         },
@@ -193,7 +198,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
           <>
             <IndexHero
               title={`Proyectos en ${resolved.data.zone.name}`}
-              subtitle="Apartamentos y casas en venta."
+              subtitle={`Proyectos en preventa y construcción en ${resolved.data.zone.name}. Contacta directamente al desarrollador.`}
             />
             <ProjectGrid projects={projects} />
           </>
@@ -211,6 +216,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
           <>
             <IndexHero
               title={`${labelForTipo(resolved.data.tipo)} en ${resolved.data.zone.name}`}
+              subtitle={`${labelForTipo(resolved.data.tipo)} en ${resolved.data.zone.name}, Guatemala. Proyectos en preventa y construcción.`}
             />
             <ProjectGrid projects={projects} />
           </>

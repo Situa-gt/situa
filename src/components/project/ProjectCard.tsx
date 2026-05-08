@@ -2,6 +2,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { tipoSlug } from '@/lib/types/property'
 import { formatPriceFrom } from '@/lib/format/price'
+import { stageLabel, stageIcon } from '@/lib/format/stage'
+import { formatPriceValue } from '@/lib/format/price'
 import { CtaButton } from '@/components/ui/cta-button'
 import type { ProjectCardData } from '@/lib/queries/home'
 
@@ -20,6 +22,7 @@ export function ProjectCard({ project, priority = false }: Props) {
     ? `/${project.zone.url_slug}/${tipoSlug(project.property_type)}/${project.slug}`
     : '#'
   const cotizarHref = `${href}#contacto`
+  const StageIcon = project.stage ? stageIcon(project.stage) : null
 
   return (
     <article className="relative">
@@ -33,19 +36,30 @@ export function ProjectCard({ project, priority = false }: Props) {
             className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             priority={priority}
           />
+          {StageIcon && project.stage && (
+            <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full bg-brand-purple/90 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+              <StageIcon className="h-3 w-3 shrink-0" />
+              {stageLabel(project.stage)}
+            </div>
+          )}
           {/* Eased multi-stop scrim — simulates a natural ease-in curve so the fade reads as smooth to the eye */}
           <div
             className="absolute inset-x-0 bottom-0 h-[70%]"
             style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.70) 22%, rgba(0,0,0,0.46) 42%, rgba(0,0,0,0.20) 62%, rgba(0,0,0,0.06) 78%, transparent 100%)' }}
           />
-          <div className="absolute inset-x-0 bottom-0 px-5 pb-5 text-white">
+          <div className="absolute inset-x-0 bottom-0 px-5 pb-8 text-white">
             <h3 className="text-lg font-semibold leading-tight tracking-tight">{project.name}</h3>
             {zoneName && (
               <p className="mt-0.5 text-xs text-white/75">{zoneName}</p>
             )}
             {project.price_from !== null && (
-              <p className="mt-1.5 text-sm font-medium text-white/90">
+              <p className="mt-1.5 flex flex-wrap items-baseline gap-x-2 text-sm font-medium text-white/90">
                 {formatPriceFrom(project.price_from, project.base_currency)}
+                {project.monthly_payment_from !== null && (
+                  <span className="text-xs font-normal text-white/70">
+                    · Cuota desde {formatPriceValue(project.monthly_payment_from, project.base_currency)}/mes
+                  </span>
+                )}
               </p>
             )}
           </div>
@@ -53,8 +67,9 @@ export function ProjectCard({ project, priority = false }: Props) {
       </Link>
       <CtaButton
         href={href}
+        size="sm"
         aria-label={`Conocer más sobre ${project.name}`}
-        className="absolute -bottom-5 right-4 shadow-lg"
+        className="absolute -bottom-4 right-4 shadow-lg"
       >
         Conocer más
       </CtaButton>

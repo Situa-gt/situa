@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { DeveloperModal } from '@/components/layout/DeveloperModal'
 import { AyudaModal } from '@/components/layout/AyudaModal'
+import { getZoneOptions } from '@/lib/queries/home'
 
 const NAV_LINKS = [
   { href: '/calculadora', label: 'Calculadora de cuota' },
@@ -53,7 +54,9 @@ function TiktokIcon({ className }: IconProps) {
   )
 }
 
-export function Footer() {
+export async function Footer() {
+  const zones = await getZoneOptions()
+
   return (
     <footer className="relative mt-auto overflow-hidden bg-brand-purple text-white">
       <Image
@@ -188,7 +191,24 @@ export function Footer() {
           </div>
         </div>
 
-        <p className="mt-12 border-t border-white/15 pt-6 text-xs text-white/70">
+        {zones.length > 0 && (
+          <nav aria-label="Explorar proyectos" className="mt-12 border-t border-white/15 pt-8">
+            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.08em] text-white/50">
+              Apartamentos en preventa Guatemala
+            </p>
+            <ul className="flex flex-wrap gap-x-4 gap-y-2">
+              {zones.map((z) => (
+                <li key={z.slug}>
+                  <Link href={`/${z.slug}/apartamentos`} className="text-sm text-white/70 transition hover:text-white">
+                    Apartamentos en {z.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
+
+        <p className="mt-8 border-t border-white/15 pt-6 text-xs text-white/70">
           © {new Date().getFullYear()} Sitúa.gt — Todos los derechos reservados.
         </p>
       </div>

@@ -11,11 +11,13 @@ export interface ProjectCardData {
   slug: string
   property_type: ProjectRow['property_type']
   base_currency: ProjectRow['base_currency']
+  stage: ProjectRow['stage'] | null
   short_description: string | null
   zone: { name: string; url_slug: string } | null
   cover_url: string | null
   cover_alt: string | null
   price_from: number | null
+  monthly_payment_from: number | null
 }
 
 interface OptionRow {
@@ -31,7 +33,7 @@ async function fetchProjectCards(opts: {
 
   let projectsQuery = supabase
     .from('projects')
-    .select('id, name, slug, property_type, base_currency, short_description, is_featured, featured_priority, featured_until, created_at, zones(name, url_slug)')
+    .select('id, name, slug, property_type, base_currency, stage, short_description, is_featured, featured_priority, featured_until, created_at, zones(name, url_slug)')
     .eq('is_active', true)
 
   if (opts.featuredOnly) {
@@ -60,7 +62,7 @@ async function fetchProjectCards(opts: {
       .order('display_order', { ascending: true }),
     supabase
       .from('models')
-      .select('project_id, price_from')
+      .select('project_id, price_from, monthly_payment_from')
       .in('project_id', ids)
       .eq('is_active', true),
   ])
@@ -75,10 +77,17 @@ async function fetchProjectCards(opts: {
   }
 
   const minPriceByProject = new Map<string, number>()
+  const minPaymentByProject = new Map<string, number>()
   for (const p of prices ?? []) {
-    const current = minPriceByProject.get(p.project_id)
-    if (current === undefined || p.price_from < current) {
+    const cur = minPriceByProject.get(p.project_id)
+    if (cur === undefined || p.price_from < cur) {
       minPriceByProject.set(p.project_id, p.price_from)
+    }
+    if (p.monthly_payment_from !== null) {
+      const curPmt = minPaymentByProject.get(p.project_id)
+      if (curPmt === undefined || p.monthly_payment_from < curPmt) {
+        minPaymentByProject.set(p.project_id, p.monthly_payment_from)
+      }
     }
   }
 
@@ -92,11 +101,13 @@ async function fetchProjectCards(opts: {
       slug: p.slug,
       property_type: p.property_type,
       base_currency: p.base_currency,
+      stage: p.stage,
       short_description: p.short_description,
       zone: zoneRel ? { name: zoneRel.name, url_slug: zoneRel.url_slug } : null,
       cover_url: cover?.url ?? null,
       cover_alt: cover?.alt ?? null,
       price_from: price,
+      monthly_payment_from: minPaymentByProject.get(p.id) ?? null,
     }
   })
 }
@@ -194,7 +205,7 @@ export async function getProjectCardsByIds(ids: string[]): Promise<ProjectCardDa
 
   const { data: projects, error } = await supabase
     .from('projects')
-    .select('id, name, slug, property_type, base_currency, short_description, created_at, zones(name, url_slug)')
+    .select('id, name, slug, property_type, base_currency, stage, short_description, created_at, zones(name, url_slug)')
     .in('id', ids)
     .eq('is_active', true)
     .order('created_at', { ascending: false })
@@ -212,7 +223,7 @@ export async function getProjectCardsByIds(ids: string[]): Promise<ProjectCardDa
       .order('display_order', { ascending: true }),
     supabase
       .from('models')
-      .select('project_id, price_from')
+      .select('project_id, price_from, monthly_payment_from')
       .in('project_id', projectIds)
       .eq('is_active', true),
   ])
@@ -227,10 +238,17 @@ export async function getProjectCardsByIds(ids: string[]): Promise<ProjectCardDa
   }
 
   const minPriceByProject = new Map<string, number>()
+  const minPaymentByProject = new Map<string, number>()
   for (const p of prices ?? []) {
-    const current = minPriceByProject.get(p.project_id)
-    if (current === undefined || p.price_from < current) {
+    const cur = minPriceByProject.get(p.project_id)
+    if (cur === undefined || p.price_from < cur) {
       minPriceByProject.set(p.project_id, p.price_from)
+    }
+    if (p.monthly_payment_from !== null) {
+      const curPmt = minPaymentByProject.get(p.project_id)
+      if (curPmt === undefined || p.monthly_payment_from < curPmt) {
+        minPaymentByProject.set(p.project_id, p.monthly_payment_from)
+      }
     }
   }
 
@@ -244,11 +262,13 @@ export async function getProjectCardsByIds(ids: string[]): Promise<ProjectCardDa
       slug: p.slug,
       property_type: p.property_type,
       base_currency: p.base_currency,
+      stage: p.stage,
       short_description: p.short_description,
       zone: zoneRel ? { name: zoneRel.name, url_slug: zoneRel.url_slug } : null,
       cover_url: cover?.url ?? null,
       cover_alt: cover?.alt ?? null,
       price_from: price,
+      monthly_payment_from: minPaymentByProject.get(p.id) ?? null,
     }
   })
 }

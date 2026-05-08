@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { Building2, ChevronDown, House } from 'lucide-react'
+import { Building2, Calculator, ChevronDown, House } from 'lucide-react'
 import { EMPTY_FILTERS, type Filters } from '@/lib/filters/parse'
 import type { Database } from '@/lib/database.types'
 import { CtaButton } from '@/components/ui/cta-button'
@@ -107,26 +107,35 @@ export function HeroFilters({
       onSubmit={onSubmit}
       className="w-full rounded-3xl bg-white/95 p-6 shadow-[0_20px_50px_-12px_rgba(20,16,80,0.25)] ring-1 ring-white/40 backdrop-blur"
     >
-      {/* Tipo chips */}
-      <div className="mb-5 flex flex-wrap gap-2">
-        {TIPO_CHIPS.map(({ value, label, icon }) => {
-          const active = state.tipo === value
-          return (
-            <button
-              key={label}
-              type="button"
-              onClick={() => set('tipo', value)}
-              className={`flex cursor-pointer items-center gap-1.5 h-9 rounded-full px-5 text-sm font-medium transition ${
-                active
-                  ? 'bg-brand-purple text-white shadow-sm'
-                  : 'border border-hairline bg-white text-ink hover:border-brand-purple hover:text-brand-purple'
-              }`}
-            >
-              {icon}
-              {label}
-            </button>
-          )
-        })}
+      {/* Top bar: tipo chips + calculadora link */}
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap gap-2">
+          {TIPO_CHIPS.map(({ value, label, icon }) => {
+            const active = state.tipo === value
+            return (
+              <button
+                key={label}
+                type="button"
+                onClick={() => set('tipo', value)}
+                className={`flex cursor-pointer items-center gap-1.5 h-9 rounded-full px-5 text-sm font-medium transition ${
+                  active
+                    ? 'bg-brand-purple text-white shadow-sm'
+                    : 'border border-hairline bg-white text-ink hover:border-brand-purple hover:text-brand-purple'
+                }`}
+              >
+                {icon}
+                {label}
+              </button>
+            )
+          })}
+        </div>
+        <a
+          href="/calculadora"
+          className="flex items-center gap-1.5 text-sm font-medium text-brand-purple transition hover:text-brand-purple/70"
+        >
+          <Calculator className="h-4 w-4 shrink-0" />
+          Buscar por cuota mensual
+        </a>
       </div>
 
       <div className="mb-5 border-t border-hairline" />

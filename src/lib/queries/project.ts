@@ -53,7 +53,7 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
       .from('project_media')
       .select('id, url, url_md, url_sm, alt, blur_data_url, width, height, kind, display_order, model_id')
       .eq('project_id', projectId)
-      .in('kind', ['cover', 'gallery'])
+      .in('kind', ['cover', 'gallery', 'floorplan'])
       .order('kind', { ascending: true })
       .order('display_order', { ascending: true }),
     supabase
@@ -98,8 +98,16 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
   const galleryItems = projectMedia.filter((m) => m.kind === 'gallery')
 
   const modelImages: Record<string, ProjectGalleryImage> = {}
+  // First pass: prefer floorplan
   for (const m of modelMedia) {
-    if (m.model_id && !modelImages[m.model_id]) {
+    if (m.model_id && m.kind === 'floorplan' && !modelImages[m.model_id]) {
+      const { model_id: _omit, ...rest } = m
+      modelImages[m.model_id] = rest
+    }
+  }
+  // Second pass: fill gaps with first gallery item
+  for (const m of modelMedia) {
+    if (m.model_id && m.kind === 'gallery' && !modelImages[m.model_id]) {
       const { model_id: _omit, ...rest } = m
       modelImages[m.model_id] = rest
     }

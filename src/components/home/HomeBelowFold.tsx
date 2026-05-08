@@ -1,12 +1,10 @@
-import { getSliderProjects } from '@/lib/queries/home'
 import { Reveal } from '@/components/ui/reveal'
-import { ProjectSlider } from './ProjectSlider'
 import { FeaturedProjects } from './FeaturedProjects'
+import { AvailableProjects } from './AvailableProjects'
 import { HomeBanner } from './HomeBanner'
 import { DeveloperTicker } from './DeveloperTicker'
 
 export async function HomeBelowFold() {
-  const sliderProjects = await getSliderProjects()
   return (
     <>
       <Reveal>
@@ -16,7 +14,7 @@ export async function HomeBelowFold() {
         <HomeBanner />
       </Reveal>
       <Reveal>
-        <ProjectSlider projects={sliderProjects} />
+        <AvailableProjects />
       </Reveal>
       <Reveal>
         <DeveloperTicker />

@@ -18,15 +18,12 @@ interface Props {
   models: ModelRow[]
 }
 
-function bedroomsRange(models: ModelRow[]): string | null {
-  const values = models
-    .map((m) => m.bedrooms)
-    .filter((b): b is number => b !== null)
-  if (values.length === 0) return null
-  const min = Math.min(...values)
-  const max = Math.max(...values)
-  if (min === max) return `${min}`
-  return `${min}–${max}`
+function bedroomOptions(models: ModelRow[]): number[] {
+  const seen = new Set<number>()
+  for (const m of models) {
+    if (m.bedrooms !== null) seen.add(m.bedrooms)
+  }
+  return Array.from(seen).sort((a, b) => a - b)
 }
 
 const TOGGLE_BTN =
@@ -39,7 +36,7 @@ export function ProjectMainDetails({
   models,
 }: Props) {
   const [currency, setCurrency] = useState<Currency>(baseCurrency)
-  const range = bedroomsRange(models)
+  const bedrooms = bedroomOptions(models)
 
   const priceConverted =
     priceFrom !== null
@@ -49,7 +46,7 @@ export function ProjectMainDetails({
     priceConverted !== null ? estimateMonthlyPayment(priceConverted) : null
 
   return (
-    <div className="border-t border-hairline pt-6">
+    <div className="border-t border-hairline pt-8">
       <div className="flex items-center justify-start">
         <div
           role="group"
@@ -107,11 +104,29 @@ export function ProjectMainDetails({
           <dt className="text-xs font-medium uppercase tracking-[0.06em] text-muted-ink">
             Dormitorios
           </dt>
-          <dd className="mt-2 text-3xl font-semibold tracking-tight text-ink">
-            {range ?? '—'}
+          <dd className="mt-2">
+            {bedrooms.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {bedrooms.map((n) => (
+                  <span
+                    key={n}
+                    className="inline-flex items-center rounded-full bg-brand-purple/10 px-3 py-1 text-sm font-semibold text-brand-purple"
+                  >
+                    {n}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span className="text-3xl font-semibold tracking-tight text-ink">—</span>
+            )}
           </dd>
         </div>
       </dl>
+      <div className="mt-4">
+        <span className="inline-flex items-center rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-600">
+          Este proyecto se comercializa en {baseCurrency}
+        </span>
+      </div>
     </div>
   )
 }

@@ -57,10 +57,10 @@ export function ZonaMultiSelect({ options, value, onChange }: Props) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`flex h-11 w-full cursor-pointer items-center justify-between rounded-full border px-4 text-sm transition ${
+        className={`flex h-11 w-full cursor-pointer items-center justify-between rounded-full border px-4 text-sm transition hover:border-brand-purple ${
           open || hasSelection
-            ? 'border-brand-purple bg-white ring-2 ring-brand-purple/30'
-            : 'border-hairline bg-white hover:border-ink'
+            ? 'border-brand-purple bg-white'
+            : 'border-hairline bg-white'
         }`}
       >
         <span className={hasSelection ? 'font-medium text-brand-purple' : 'text-ink'}>

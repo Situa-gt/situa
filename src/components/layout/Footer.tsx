@@ -1,10 +1,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { DeveloperModal } from '@/components/layout/DeveloperModal'
+import { AyudaModal } from '@/components/layout/AyudaModal'
 
 const NAV_LINKS = [
   { href: '/', label: 'Quiero comprar' },
-  { href: '/desarrolladoras', label: 'Soy Desarrolladora' },
-  { href: '/ayuda', label: 'Ayuda' },
 ]
 
 const ABOUT_LINKS = [
@@ -109,6 +109,12 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <DeveloperModal />
+              </li>
+              <li>
+                <AyudaModal />
+              </li>
             </ul>
           </div>
 
@@ -134,7 +140,7 @@ export function Footer() {
             </h3>
             <div className="mt-4 flex items-center gap-3">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/profile.php?id=61578996510469"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
@@ -143,7 +149,7 @@ export function Footer() {
                 <FacebookIcon className="h-4 w-4" />
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/situagt_"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -152,7 +158,7 @@ export function Footer() {
                 <InstagramIcon className="h-4 w-4" />
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/company/situagt"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
@@ -161,7 +167,7 @@ export function Footer() {
                 <LinkedinIcon className="h-4 w-4" />
               </a>
               <a
-                href="https://tiktok.com"
+                href="https://www.tiktok.com/@situagt"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="TikTok"

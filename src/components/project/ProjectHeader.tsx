@@ -47,33 +47,32 @@ export function ProjectHeaderInfo({ detail, zoneName }: Props) {
         </p>
       )}
 
-      {/* Developer badge */}
       {developer && (
-        <div className="mt-6 flex items-center gap-4 rounded-2xl border border-hairline bg-white p-4 shadow-sm w-fit">
-          {developerLogo ? (
-            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-hairline bg-white">
-              <Image
-                src={developerLogo}
-                alt={`Logo de ${developer.name}`}
-                fill
-                sizes="40px"
-                className="object-contain p-0.5"
-              />
-            </div>
-          ) : (
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-purple/10 text-sm font-semibold text-brand-purple">
-              {developer.name.charAt(0)}
-            </div>
-          )}
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.07em] text-muted-ink">
-              Desarrollado por
-            </p>
+        <div className="mt-6 border-t border-hairline pt-6">
+          <h2 className="text-xl font-semibold tracking-tight text-ink">
+            Desarrolladora
+          </h2>
+          <div className="mt-4 flex items-center gap-4">
+            {developerLogo ? (
+              <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-hairline bg-white">
+                <Image
+                  src={developerLogo}
+                  alt={`Logo de ${developer.name}`}
+                  fill
+                  sizes="40px"
+                  className="object-contain p-0.5"
+                />
+              </div>
+            ) : (
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-purple/10 text-sm font-semibold text-brand-purple">
+                {developer.name.charAt(0)}
+              </div>
+            )}
             <p className="text-sm font-semibold text-ink">{developer.name}</p>
-          </div>
-          <div className="ml-2 flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-            <BadgeCheck className="h-3.5 w-3.5 text-emerald-500" />
-            Verificado por Sitúa
+            <div className="ml-auto flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+              <BadgeCheck className="h-3.5 w-3.5 text-emerald-500" />
+              Verificado por Sitúa
+            </div>
           </div>
         </div>
       )}

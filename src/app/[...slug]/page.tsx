@@ -20,6 +20,7 @@ import { ModelsGrid } from '@/components/project/ModelsGrid'
 import { ModelHeaderInfo } from '@/components/model/ModelHeader'
 import { ModelMainDetails } from '@/components/model/ModelMainDetails'
 import { ModelSpecs } from '@/components/model/ModelSpecs'
+import { ModelFloorplan } from '@/components/model/ModelFloorplan'
 import { ContactSidebar } from '@/components/contact/ContactSidebar'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { breadcrumbsFor, labelForTipo } from '@/lib/breadcrumbs'
@@ -304,6 +305,12 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                   </div>
                 </div>
                 <ModelSpecs model={detail.model} />
+                {detail.floorplan && (
+                  <ModelFloorplan
+                    floorplan={detail.floorplan}
+                    modelName={detail.model.name}
+                  />
+                )}
                 <ModelsGrid
                   models={detail.siblings}
                   currency={detail.project.base_currency}

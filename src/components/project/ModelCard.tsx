@@ -20,6 +20,7 @@ interface Props {
 
 export function ModelCard({ model, currency, basePath, image }: Props) {
   const href = `${basePath}/${model.slug}`
+  const modelName = model.name.trim().length === 1 ? `Modelo ${model.name}` : model.name
 
   return (
     <Link
@@ -45,7 +46,7 @@ export function ModelCard({ model, currency, basePath, image }: Props) {
       <div className="flex flex-1 flex-col p-6">
         <div className="flex items-start justify-between gap-4">
           <h3 className="text-lg font-semibold tracking-tight text-ink">
-            {model.name}
+            {modelName}
           </h3>
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-muted-ink transition group-hover:bg-brand-purple group-hover:text-white">
             <ArrowUpRight className="h-4 w-4" strokeWidth={2.25} />

@@ -38,10 +38,10 @@ const TIPO_CHIPS: { value: Tipo | null; label: string; icon?: ReactNode }[] = [
 ]
 
 const SELECT_BASE =
-  'h-11 w-full appearance-none rounded-full border border-hairline bg-white pl-4 pr-9 text-sm text-ink transition focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple/30'
+  'h-11 w-full appearance-none rounded-full border border-hairline bg-white pl-4 pr-9 text-sm text-ink transition hover:border-brand-purple focus:border-brand-purple focus:outline-none'
 
 const INPUT_BASE =
-  'h-11 w-full rounded-full border border-hairline bg-white px-4 text-sm text-ink transition placeholder:text-muted-ink focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple/30'
+  'h-11 w-full rounded-full border border-hairline bg-white px-4 text-sm text-ink transition placeholder:text-muted-ink hover:border-brand-purple focus:border-brand-purple focus:outline-none'
 
 const EYEBROW = 'text-[11px] font-medium uppercase tracking-[0.06em] text-muted-ink'
 
@@ -153,29 +153,35 @@ export function HeroFilters({
         <label className="flex flex-col gap-1.5">
           <span className={EYEBROW}>Precio (USD)</span>
           <div className="flex items-center gap-2">
-            <input
-              type="number"
-              min={0}
-              inputMode="numeric"
-              placeholder="Mín"
-              className={INPUT_BASE}
-              value={state.precio_min ?? ''}
-              onChange={(e) =>
-                set('precio_min', e.target.value === '' ? null : Number(e.target.value))
-              }
-            />
+            <div className="relative w-full">
+              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 select-none text-sm text-muted-ink">$</span>
+              <input
+                type="number"
+                min={0}
+                inputMode="numeric"
+                placeholder="Mín"
+                className={`${INPUT_BASE} pl-7 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                value={state.precio_min ?? ''}
+                onChange={(e) =>
+                  set('precio_min', e.target.value === '' ? null : Number(e.target.value))
+                }
+              />
+            </div>
             <span className="shrink-0 text-sm text-muted-ink">–</span>
-            <input
-              type="number"
-              min={0}
-              inputMode="numeric"
-              placeholder="Máx"
-              className={INPUT_BASE}
-              value={state.precio_max ?? ''}
-              onChange={(e) =>
-                set('precio_max', e.target.value === '' ? null : Number(e.target.value))
-              }
-            />
+            <div className="relative w-full">
+              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 select-none text-sm text-muted-ink">$</span>
+              <input
+                type="number"
+                min={0}
+                inputMode="numeric"
+                placeholder="Máx"
+                className={`${INPUT_BASE} pl-7 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                value={state.precio_max ?? ''}
+                onChange={(e) =>
+                  set('precio_max', e.target.value === '' ? null : Number(e.target.value))
+                }
+              />
+            </div>
           </div>
         </label>
       </div>

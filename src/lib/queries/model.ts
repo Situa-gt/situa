@@ -27,8 +27,12 @@ export interface ModelDetailData {
     | 'longitude'
     | 'google_maps_url'
   >
+  developer: { id: string; name: string } | null
   cover: Pick<MediaRow, 'url' | 'url_md' | 'url_sm' | 'alt' | 'blur_data_url' | 'width' | 'height'> | null
   images: ModelImage[]
+  floorplan: ModelImage | null
+  projectLogo: string | null
+  developerLogo: string | null
   siblings: ModelRow[]
   siblingImages: Record<string, ModelImage>
   zone: { name: string; url_slug: string } | null
@@ -55,7 +59,7 @@ async function fetchModelDetail(
     supabase
       .from('projects')
       .select(
-        'id, name, slug, short_description, base_currency, exchange_rate, stage, amenities, latitude, longitude, google_maps_url, zones(name, url_slug)',
+        'id, name, slug, short_description, base_currency, exchange_rate, stage, amenities, latitude, longitude, google_maps_url, developers(id, name), zones(name, url_slug)',
       )
       .eq('id', projectId)
       .eq('is_active', true)
@@ -64,7 +68,7 @@ async function fetchModelDetail(
       .from('project_media')
       .select('id, url, url_md, url_sm, alt, blur_data_url, width, height, kind, display_order, model_id')
       .eq('project_id', projectId)
-      .in('kind', ['cover', 'gallery'])
+      .in('kind', ['cover', 'gallery', 'floorplan'])
       .order('kind', { ascending: true })
       .order('display_order', { ascending: true }),
     supabase
@@ -83,7 +87,31 @@ async function fetchModelDetail(
   if (siblingsErr) throw siblingsErr
   if (!model || !project) return null
 
-  const zoneRel = (project as unknown as { zones: { name: string; url_slug: string } | null }).zones
+  const projectRaw = project as unknown as {
+    developers: { id: string; name: string } | null
+    zones: { name: string; url_slug: string } | null
+  }
+  const developer = projectRaw.developers ?? null
+  const zoneRel = projectRaw.zones ?? null
+
+  const [{ data: projectLogoRow }, developerLogoData] = await Promise.all([
+    supabase
+      .from('project_media')
+      .select('url')
+      .eq('project_id', projectId)
+      .eq('kind', 'logo')
+      .maybeSingle(),
+    developer?.id
+      ? supabase
+          .from('project_media')
+          .select('url')
+          .eq('developer_id', developer.id)
+          .eq('kind', 'logo')
+          .maybeSingle()
+          .then((r) => r.data)
+      : Promise.resolve(null),
+  ])
+
   const projectFields = {
     id: project.id,
     name: project.name,
@@ -99,24 +127,30 @@ async function fetchModelDetail(
   }
 
   const allMedia = (media ?? []) as Array<ModelImage & { model_id: string | null }>
-  const projectMedia = allMedia.filter((m) => m.model_id === null)
-  const images: ModelImage[] = projectMedia.map((m) => ({
-    id: m.id,
-    url: m.url,
-    url_md: m.url_md,
-    url_sm: m.url_sm,
-    alt: m.alt,
-    blur_data_url: m.blur_data_url,
-    width: m.width,
-    height: m.height,
-    kind: m.kind,
-    display_order: m.display_order,
-  }))
+
+  // Gallery for this model only (cover + gallery kinds, not floorplan — that gets its own section)
+  const thisModelMedia = allMedia.filter(
+    (m) => m.model_id === modelId && (m.kind === 'cover' || m.kind === 'gallery'),
+  )
+  const images: ModelImage[] = thisModelMedia.map(({ model_id: _omit, ...rest }) => rest)
   const cover = images.find((m) => m.kind === 'cover') ?? null
 
+  // Floorplan for this model
+  const floorplanItem = allMedia.find((m) => m.model_id === modelId && m.kind === 'floorplan')
+  const floorplan: ModelImage | null = floorplanItem
+    ? (({ model_id: _omit, ...rest }) => rest)(floorplanItem)
+    : null
+
+  // Sibling card images: prefer floorplan, fallback to gallery
   const siblingImages: Record<string, ModelImage> = {}
   for (const m of allMedia) {
-    if (m.model_id && !siblingImages[m.model_id]) {
+    if (m.model_id && m.kind === 'floorplan' && !siblingImages[m.model_id]) {
+      const { model_id: _omit, ...rest } = m
+      siblingImages[m.model_id] = rest
+    }
+  }
+  for (const m of allMedia) {
+    if (m.model_id && m.kind === 'gallery' && !siblingImages[m.model_id]) {
       const { model_id: _omit, ...rest } = m
       siblingImages[m.model_id] = rest
     }
@@ -125,8 +159,12 @@ async function fetchModelDetail(
   return {
     model,
     project: projectFields,
+    developer,
     cover,
     images,
+    floorplan,
+    projectLogo: projectLogoRow?.url ?? null,
+    developerLogo: developerLogoData?.url ?? null,
     siblings: siblings ?? [],
     siblingImages,
     zone: zoneRel ?? null,
@@ -140,7 +178,7 @@ export function getModelDetail(
 ): Promise<ModelDetailData | null> {
   return unstable_cache(
     () => fetchModelDetail(modelId, projectId),
-    ['model-detail-v5', modelId],
+    ['model-detail-v7', modelId],
     {
       tags: [
         'models:active',

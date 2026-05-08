@@ -102,7 +102,7 @@ async function fetchProjectCards(opts: {
 }
 
 export const getSliderProjects = unstable_cache(
-  async () => fetchProjectCards({ featuredOnly: false, limit: 5 }),
+  async () => fetchProjectCards({ featuredOnly: false, limit: 100 }),
   ['home', 'slider'],
   { tags: ['projects:slider', 'projects:active'], revalidate: 3600 },
 )
@@ -151,6 +151,41 @@ export const getMunicipalityOptions = unstable_cache(
   async () => fetchOptions('municipalities'),
   ['home', 'municipality-options'],
   { tags: ['municipalities:list'], revalidate: 3600 },
+)
+
+export interface DeveloperLogoData {
+  developerId: string
+  developerName: string
+  url: string
+  alt: string | null
+}
+
+async function fetchDeveloperLogos(): Promise<DeveloperLogoData[]> {
+  const supabase = createServerClient()
+  const { data, error } = await supabase
+    .from('project_media')
+    .select('url, alt, developer_id, developers(id, name)')
+    .eq('kind', 'logo')
+    .not('developer_id', 'is', null)
+    .is('project_id', null)
+  if (error) throw error
+  type Row = typeof data extends (infer R)[] | null ? R : never
+  return (data ?? [])
+    .filter((r): r is Row & { developer_id: string; developers: { id: string; name: string } } =>
+      r.developer_id !== null && r.developers !== null,
+    )
+    .map((r) => ({
+      developerId: r.developer_id,
+      developerName: (r.developers as { id: string; name: string }).name,
+      url: r.url,
+      alt: r.alt,
+    }))
+}
+
+export const getDeveloperLogos = unstable_cache(
+  fetchDeveloperLogos,
+  ['home', 'developer-logos'],
+  { tags: ['projects:active'], revalidate: 3600 },
 )
 
 export async function getProjectCardsByIds(ids: string[]): Promise<ProjectCardData[]> {

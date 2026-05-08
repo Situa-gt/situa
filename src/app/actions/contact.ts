@@ -3,6 +3,7 @@
 import { headers } from 'next/headers'
 import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
+import { sendEmail } from '@/lib/email/sendgrid'
 
 const ContactSchema = z.object({
   project_id: z.string().uuid(),
@@ -29,6 +30,8 @@ const ContactSchema = z.object({
   utm_source: z.string().max(64).optional(),
   utm_medium: z.string().max(64).optional(),
   utm_campaign: z.string().max(64).optional(),
+  project_name: z.string().max(200).optional(),
+  model_name: z.string().max(200).optional(),
 })
 
 export type ContactInput = z.input<typeof ContactSchema>
@@ -57,7 +60,7 @@ export async function submitContactLead(
   const ua = h.get('user-agent') ?? null
 
   const supabase = createServerClient()
-  const { hp_company: _hp, ...payload } = parsed.data
+  const { hp_company: _hp, project_name, model_name, ...payload } = parsed.data
   const { error } = await supabase.from('contact_leads').insert({
     ...payload,
     channel: 'form',
@@ -70,7 +73,31 @@ export async function submitContactLead(
     return { error: 'Error al enviar. Intenta de nuevo.' }
   }
 
-  // TODO: schedule sendLeadNotification via after() once email provider is wired.
+  const rows = [
+    ['Nombre', parsed.data.full_name],
+    ['Correo', parsed.data.email],
+    ['Teléfono', parsed.data.phone ?? '—'],
+    ['Proyecto', project_name ?? parsed.data.project_id],
+    ['Modelo', model_name ?? parsed.data.model_id ?? '—'],
+    ['Mensaje', parsed.data.message ?? '—'],
+  ]
+
+  const html = `
+    <h2 style="margin-bottom:16px">Nueva consulta — ${project_name ?? 'Proyecto'}</h2>
+    <table cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-family:sans-serif;font-size:14px">
+      ${rows.map(([label, value]) => `
+        <tr>
+          <td style="font-weight:600;color:#555;padding-right:24px;white-space:nowrap">${label}</td>
+          <td>${value}</td>
+        </tr>`).join('')}
+    </table>
+  `
+
+  try {
+    await sendEmail(`Nueva consulta — ${project_name ?? 'Proyecto'}`, html)
+  } catch (err) {
+    console.error('[contact] email failed', err)
+  }
 
   return { success: true }
 }

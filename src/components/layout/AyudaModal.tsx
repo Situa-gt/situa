@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { submitAyudaLead } from '@/app/actions/ayuda-lead'
 
 const EMPTY = {
   name: '',
@@ -22,7 +23,7 @@ export function AyudaModal() {
   const [open, setOpen] = useState(false)
   const [values, setValues] = useState(EMPTY)
   const [submitted, setSubmitted] = useState(false)
-  const [isPending, setIsPending] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   function update(key: keyof typeof EMPTY, value: string) {
     setValues((v) => ({ ...v, [key]: value }))
@@ -40,12 +41,10 @@ export function AyudaModal() {
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setIsPending(true)
-    // TODO: wire SendGrid — submit general help lead
-    setTimeout(() => {
-      setIsPending(false)
+    startTransition(async () => {
+      await submitAyudaLead(values)
       setSubmitted(true)
-    }, 800)
+    })
   }
 
   return (

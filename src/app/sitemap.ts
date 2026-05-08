@@ -9,8 +9,6 @@ const STATIC_ROUTES: ReadonlyArray<{ path: string; changeFrequency: 'daily' | 'm
   { path: '/quienes-somos', changeFrequency: 'monthly', priority: 0.3 },
   { path: '/politica-de-privacidad', changeFrequency: 'monthly', priority: 0.3 },
   { path: '/terminos-y-condiciones', changeFrequency: 'monthly', priority: 0.3 },
-  { path: '/desarrolladoras', changeFrequency: 'monthly', priority: 0.3 },
-  { path: '/ayuda', changeFrequency: 'monthly', priority: 0.3 },
 ]
 
 interface ZoneRow {

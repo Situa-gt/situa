@@ -1,15 +1,11 @@
 import Image from 'next/image'
 
-// TODO: swap for a real Guatemala City asset hosted in Supabase Storage when available.
-const BG_IMAGE =
-  'https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=1920&q=80'
-
 export function HomeBanner() {
   return (
     <section className="mx-auto w-full max-w-7xl px-6 py-16">
       <div className="relative isolate overflow-hidden rounded-3xl bg-brand-purple">
         <Image
-          src={BG_IMAGE}
+          src="/aerea_ciudad_gt.png"
           alt=""
           aria-hidden
           fill
@@ -18,10 +14,10 @@ export function HomeBanner() {
         />
         <div
           aria-hidden
-          className="absolute inset-0"
+          className="absolute inset-0 mix-blend-multiply"
           style={{
             backgroundImage:
-              'linear-gradient(to right, rgba(107,102,235,0.85) 0%, rgba(107,102,235,0.5) 35%, rgba(107,102,235,0) 80%)',
+              'linear-gradient(to right, rgba(107,102,235,1) 0%, rgba(107,102,235,1) 20%, rgba(107,102,235,0.17) 100%)',
           }}
         />
         <div className="relative max-w-2xl px-8 py-20 text-white sm:px-14 sm:py-28">

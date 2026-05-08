@@ -71,8 +71,8 @@ export default function Page() {
               className="object-cover"
               sizes="(min-width: 1024px) 50vw, 100vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/30" />
-            <div className="relative z-10 flex flex-col justify-end p-10 lg:min-h-96 lg:p-12">
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-purple to-brand-purple/[17%] mix-blend-multiply" />
+            <div className="relative z-10 flex flex-col justify-center p-10 lg:min-h-96 lg:p-12">
               <h2 className="mb-4 text-2xl font-semibold leading-snug tracking-tight text-white lg:text-3xl">
                 Encuentra tu proyecto ideal
               </h2>
@@ -95,8 +95,8 @@ export default function Page() {
               className="object-cover"
               sizes="(min-width: 1024px) 50vw, 100vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/30" />
-            <div className="relative z-10 flex flex-col justify-end p-10 lg:min-h-96 lg:p-12">
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-purple to-brand-purple/[17%] mix-blend-multiply" />
+            <div className="relative z-10 flex flex-col justify-center p-10 lg:min-h-96 lg:p-12">
               <h2 className="mb-4 text-2xl font-semibold leading-snug tracking-tight text-white lg:text-3xl">
                 Respaldado por una comunidad de confianza
               </h2>

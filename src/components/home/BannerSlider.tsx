@@ -38,8 +38,7 @@ export function BannerSlider({ projects }: BannerSliderProps) {
   return (
     <section className="mx-auto w-full max-w-7xl px-6 py-12">
       <div
-        className="relative isolate overflow-hidden rounded-3xl"
-        style={{ aspectRatio: '16 / 7' }}
+        className="relative isolate overflow-hidden rounded-3xl aspect-[4/3] sm:aspect-[16/7]"
         onMouseEnter={pause}
         onMouseLeave={resume}
       >

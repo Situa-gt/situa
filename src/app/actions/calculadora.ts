@@ -12,7 +12,7 @@ export async function fetchAllActiveProjects(): Promise<ProjectCardData[]> {
   const { data: projects, error } = await supabase
     .from('projects')
     .select(
-      'id, name, slug, property_type, base_currency, stage, exchange_rate, short_description, created_at, zones(name, url_slug)',
+      'id, name, slug, property_type, base_currency, stage, exchange_rate, short_description, is_featured, created_at, zones(name, url_slug)',
     )
     .eq('is_active', true)
     .order('created_at', { ascending: false })
@@ -74,6 +74,7 @@ export async function fetchAllActiveProjects(): Promise<ProjectCardData[]> {
       base_currency: p.base_currency,
       stage: p.stage,
       short_description: p.short_description,
+      is_featured: p.is_featured,
       zone: zoneRel ? { name: zoneRel.name, url_slug: zoneRel.url_slug } : null,
       cover_url: cover?.url ?? null,
       cover_alt: cover?.alt ?? null,

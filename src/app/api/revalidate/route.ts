@@ -43,6 +43,7 @@ function deriveTags(table: AllowedTable, row: Record<string, unknown>): string[]
       tags.add('projects:active')
       tags.add('projects:slider')
       tags.add('projects:featured')
+      tags.add('projects:banner')
       if (p.slug) tags.add(`project:${p.slug}`)
       if (p.id) tags.add(`project-id:${p.id}`)
       if (p.property_type) tags.add(`tipo:${p.property_type}`)
@@ -52,6 +53,7 @@ function deriveTags(table: AllowedTable, row: Record<string, unknown>): string[]
     case 'models': {
       const m = row as Partial<ModelRow>
       tags.add('models:active')
+      tags.add('models:featured')
       if (m.slug) tags.add(`model:${m.slug}`)
       if (m.id) tags.add(`model-id:${m.id}`)
       if (m.project_id) tags.add(`project-id:${m.project_id}`)

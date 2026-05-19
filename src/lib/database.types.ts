@@ -198,6 +198,7 @@ export type Database = {
           display_order: number
           id: string
           is_active: boolean
+          is_featured: boolean
           legacy_slugs: string[]
           monthly_payment_from: number | null
           name: string
@@ -217,6 +218,7 @@ export type Database = {
           display_order?: number
           id?: string
           is_active?: boolean
+          is_featured?: boolean
           legacy_slugs?: string[]
           monthly_payment_from?: number | null
           name: string
@@ -236,6 +238,7 @@ export type Database = {
           display_order?: number
           id?: string
           is_active?: boolean
+          is_featured?: boolean
           legacy_slugs?: string[]
           monthly_payment_from?: number | null
           name?: string
@@ -380,6 +383,7 @@ export type Database = {
           longitude: number | null
           name: string
           property_type: Database["public"]["Enums"]["property_type"]
+          publicidad_banner: boolean
           short_description: string | null
           slug: string
           stage: Database["public"]["Enums"]["project_stage"]
@@ -404,6 +408,7 @@ export type Database = {
           longitude?: number | null
           name: string
           property_type: Database["public"]["Enums"]["property_type"]
+          publicidad_banner?: boolean
           short_description?: string | null
           slug: string
           stage: Database["public"]["Enums"]["project_stage"]
@@ -428,6 +433,7 @@ export type Database = {
           longitude?: number | null
           name?: string
           property_type?: Database["public"]["Enums"]["property_type"]
+          publicidad_banner?: boolean
           short_description?: string | null
           slug?: string
           stage?: Database["public"]["Enums"]["project_stage"]

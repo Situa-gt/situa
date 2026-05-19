@@ -18,7 +18,6 @@ const RANGES = {
   GTQ: { min: 400_000, max: 12_000_000, step: 100_000, default: 2_000_000 },
 } as const
 
-const INCOME_MIN = { USD: 400, GTQ: 3_000 } as const
 const TERM_OPTIONS = [5, 10, 15, 20, 25, 30] as const
 
 const INPUT_BASE =
@@ -78,7 +77,6 @@ const TOGGLE_BTN = 'h-7 cursor-pointer px-3 text-xs font-medium rounded-full tra
 
 export function Calculadora() {
   const [currency, setCurrency] = useState<Currency>('USD')
-  const [income, setIncome] = useState('')
   const [propertyPrice, setPropertyPrice] = useState<number>(RANGES.USD.default)
   const [downPaymentPct, setDownPaymentPct] = useState(20)
   const [termYears, setTermYears] = useState<number>(25)
@@ -94,6 +92,7 @@ export function Calculadora() {
   const monthlyPayment = calcMonthlyPayment(loanAmount, rate, termYears)
 
   const allValuesSet = propertyPrice > 0 && downPaymentPct > 0 && termYears > 0 && rate >= 0
+  const minIncome = allValuesSet ? Math.ceil(monthlyPayment * 3 / 100) * 100 : 0
 
   function handleCurrencySwitch(next: Currency) {
     if (next === currency) return
@@ -108,11 +107,6 @@ export function Calculadora() {
 
   function sliderVal(val: number | readonly number[]): number {
     return typeof val === 'number' ? val : (val as readonly number[])[0] ?? 0
-  }
-
-  function handleIncomeChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const raw = e.target.value.replace(/[^\d]/g, '')
-    setIncome(raw)
   }
 
   function handleRateBlur() {
@@ -144,7 +138,6 @@ export function Calculadora() {
   }
 
   const sym = currency === 'USD' ? '$' : 'Q'
-  const incomeMin = INCOME_MIN[currency]
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12 lg:py-16">
@@ -185,30 +178,6 @@ export function Calculadora() {
                 GTQ
               </button>
             </div>
-          </div>
-
-          {/* Income */}
-          <div>
-            <FieldLabel>
-              Ingreso familiar mensual
-              <Tooltip text="Cuánto ganas al mes (opcional si ya tienes crédito aprobado)." />
-            </FieldLabel>
-            <div className="relative mt-2">
-              <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-medium text-muted-ink">
-                {sym}
-              </span>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={income ? parseInt(income).toLocaleString('en-US') : ''}
-                onChange={handleIncomeChange}
-                placeholder={incomeMin.toLocaleString('en-US')}
-                className={`${INPUT_BASE} w-full pl-8 pr-4 sm:max-w-xs`}
-              />
-            </div>
-            <p className="mt-1.5 text-xs text-muted-ink">
-              Mínimo recomendado: {sym}{incomeMin.toLocaleString('en-US')}/mes
-            </p>
           </div>
 
           {/* Property price slider */}
@@ -334,6 +303,10 @@ export function Calculadora() {
               <OutputItem
                 label="Monto a financiar"
                 value={allValuesSet ? formatPriceValue(loanAmount, currency) : '—'}
+              />
+              <OutputItem
+                label="Ingresos familiares mínimos recomendados"
+                value={allValuesSet ? formatPriceValue(minIncome, currency) + '/mes' : '—'}
               />
             </div>
 

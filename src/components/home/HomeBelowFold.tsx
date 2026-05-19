@@ -3,10 +3,15 @@ import { FeaturedProjects } from './FeaturedProjects'
 import { AvailableProjects } from './AvailableProjects'
 import { HomeBanner } from './HomeBanner'
 import { DeveloperTicker } from './DeveloperTicker'
+import { BannerSliderSection } from './BannerSliderSection'
+import { FeaturedModels } from './FeaturedModels'
 
 export async function HomeBelowFold() {
   return (
     <>
+      <Reveal>
+        <BannerSliderSection />
+      </Reveal>
       <Reveal>
         <FeaturedProjects />
       </Reveal>
@@ -15,6 +20,9 @@ export async function HomeBelowFold() {
       </Reveal>
       <Reveal>
         <AvailableProjects />
+      </Reveal>
+      <Reveal>
+        <FeaturedModels />
       </Reveal>
       <Reveal>
         <DeveloperTicker />

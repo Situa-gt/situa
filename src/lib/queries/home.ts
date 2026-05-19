@@ -27,6 +27,7 @@ interface OptionRow {
 
 async function fetchProjectCards(opts: {
   featuredOnly: boolean
+  bannerOnly?: boolean
   limit: number
 }): Promise<ProjectCardData[]> {
   const supabase = createServerClient()
@@ -36,7 +37,11 @@ async function fetchProjectCards(opts: {
     .select('id, name, slug, property_type, base_currency, stage, short_description, is_featured, featured_priority, featured_until, created_at, zones(name, url_slug)')
     .eq('is_active', true)
 
-  if (opts.featuredOnly) {
+  if (opts.bannerOnly) {
+    projectsQuery = projectsQuery
+      .eq('publicidad_banner', true)
+      .order('created_at', { ascending: false })
+  } else if (opts.featuredOnly) {
     const nowIso = new Date().toISOString()
     projectsQuery = projectsQuery
       .eq('is_featured', true)
@@ -46,6 +51,7 @@ async function fetchProjectCards(opts: {
   } else {
     projectsQuery = projectsQuery.order('created_at', { ascending: false })
   }
+
 
   const { data: projects, error } = await projectsQuery.limit(opts.limit)
   if (error) throw error
@@ -122,6 +128,90 @@ export const getFeaturedProjects = unstable_cache(
   async () => fetchProjectCards({ featuredOnly: true, limit: 12 }),
   ['home', 'featured'],
   { tags: ['projects:featured', 'projects:active'], revalidate: 3600 },
+)
+
+export interface FeaturedModelCardData {
+  id: string
+  name: string
+  slug: string
+  price_from: number
+  monthly_payment_from: number | null
+  bedrooms: number | null
+  project: {
+    name: string
+    slug: string
+    property_type: ProjectRow['property_type']
+    base_currency: ProjectRow['base_currency']
+  }
+  zone: { name: string; url_slug: string } | null
+  cover_url: string | null
+  cover_alt: string | null
+}
+
+async function fetchFeaturedModels(): Promise<FeaturedModelCardData[]> {
+  const supabase = createServerClient()
+
+  const { data: models, error } = await supabase
+    .from('models')
+    .select('id, name, slug, price_from, monthly_payment_from, bedrooms, project_id, projects(id, name, slug, property_type, base_currency, zones(name, url_slug))')
+    .eq('is_featured', true)
+    .eq('is_active', true)
+    .order('display_order', { ascending: true })
+    .limit(12)
+
+  if (error) throw error
+  if (!models || models.length === 0) return []
+
+  const ids = models.map((m) => m.id)
+  const { data: covers, error: coversErr } = await supabase
+    .from('project_media')
+    .select('model_id, url, alt')
+    .in('model_id', ids)
+    .eq('kind', 'cover')
+    .order('display_order', { ascending: true })
+  if (coversErr) throw coversErr
+
+  const coverByModel = new Map<string, { url: string; alt: string | null }>()
+  for (const c of covers ?? []) {
+    if (c.model_id && !coverByModel.has(c.model_id)) {
+      coverByModel.set(c.model_id, { url: c.url, alt: c.alt })
+    }
+  }
+
+  return models.map((m) => {
+    const projectRel = m.projects as unknown as {
+      name: string; slug: string; property_type: ProjectRow['property_type']
+      base_currency: ProjectRow['base_currency']
+      zones: { name: string; url_slug: string } | null
+    } | null
+    const cover = coverByModel.get(m.id) ?? null
+    return {
+      id: m.id,
+      name: m.name,
+      slug: m.slug,
+      price_from: m.price_from,
+      monthly_payment_from: m.monthly_payment_from,
+      bedrooms: m.bedrooms,
+      project: projectRel
+        ? { name: projectRel.name, slug: projectRel.slug, property_type: projectRel.property_type, base_currency: projectRel.base_currency }
+        : { name: '', slug: '', property_type: 'apartamento' as const, base_currency: 'USD' as const },
+      zone: projectRel?.zones ?? null,
+      cover_url: cover?.url ?? null,
+      cover_alt: cover?.alt ?? null,
+    }
+  })
+}
+
+export const getFeaturedModels = unstable_cache(
+  fetchFeaturedModels,
+  ['home', 'featured-models'],
+  { tags: ['models:featured', 'models:active'], revalidate: 3600 },
+)
+
+export const getBannerProjects = unstable_cache(
+  async () => fetchProjectCards({ featuredOnly: false, bannerOnly: true, limit: 10 }),
+  ['home', 'banner'],
+  { tags: ['projects:banner', 'projects:active'], revalidate: 3600 },
 )
 
 async function fetchOptions(table: 'zones' | 'departments' | 'municipalities'): Promise<OptionRow[]> {

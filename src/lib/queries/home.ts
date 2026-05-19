@@ -12,6 +12,7 @@ export interface ProjectCardData {
   property_type: ProjectRow['property_type']
   base_currency: ProjectRow['base_currency']
   stage: ProjectRow['stage'] | null
+  is_featured: boolean
   short_description: string | null
   zone: { name: string; url_slug: string } | null
   cover_url: string | null
@@ -108,6 +109,7 @@ async function fetchProjectCards(opts: {
       property_type: p.property_type,
       base_currency: p.base_currency,
       stage: p.stage,
+      is_featured: p.is_featured,
       short_description: p.short_description,
       zone: zoneRel ? { name: zoneRel.name, url_slug: zoneRel.url_slug } : null,
       cover_url: cover?.url ?? null,
@@ -295,7 +297,7 @@ export async function getProjectCardsByIds(ids: string[]): Promise<ProjectCardDa
 
   const { data: projects, error } = await supabase
     .from('projects')
-    .select('id, name, slug, property_type, base_currency, stage, short_description, created_at, zones(name, url_slug)')
+    .select('id, name, slug, property_type, base_currency, stage, is_featured, short_description, created_at, zones(name, url_slug)')
     .in('id', ids)
     .eq('is_active', true)
     .order('created_at', { ascending: false })
@@ -353,6 +355,7 @@ export async function getProjectCardsByIds(ids: string[]): Promise<ProjectCardDa
       property_type: p.property_type,
       base_currency: p.base_currency,
       stage: p.stage,
+      is_featured: p.is_featured,
       short_description: p.short_description,
       zone: zoneRel ? { name: zoneRel.name, url_slug: zoneRel.url_slug } : null,
       cover_url: cover?.url ?? null,

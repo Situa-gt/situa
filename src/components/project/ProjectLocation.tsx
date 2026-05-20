@@ -35,10 +35,9 @@ export function ProjectLocation({
           {hasMap ? (
             <iframe
               title={`Ubicación de ${projectName}`}
-              src={`https://www.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`}
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${longitude - 0.0015},${latitude - 0.0015},${longitude + 0.0015},${latitude + 0.0015}&layer=mapnik&marker=${latitude},${longitude}`}
               loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="absolute inset-0 h-full w-full border-0"
+              className="absolute inset-0 h-full w-full border-0 grayscale"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-muted-ink">

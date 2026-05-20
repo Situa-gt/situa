@@ -45,7 +45,7 @@ const securityHeaders = [
       "img-src 'self' data: blob: https://fxgbmjiymthrteqtakbg.supabase.co https://maps.googleapis.com https://maps.gstatic.com",
       "connect-src 'self' https://fxgbmjiymthrteqtakbg.supabase.co https://www.google-analytics.com",
       "font-src 'self'",
-      "frame-src https://www.google.com/maps/",
+      "frame-src https://www.openstreetmap.org",
       "frame-ancestors 'none'",
     ].join("; "),
   },

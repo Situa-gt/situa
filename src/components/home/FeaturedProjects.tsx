@@ -11,7 +11,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 export async function FeaturedProjects() {
-  const projects = shuffle(await getFeaturedProjects())
+  const projects = shuffle(await getFeaturedProjects()).slice(0, 9)
   if (projects.length === 0) return null
 
   return (

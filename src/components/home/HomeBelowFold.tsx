@@ -9,14 +9,14 @@ import { FeaturedModels } from './FeaturedModels'
 export async function HomeBelowFold() {
   return (
     <>
-      <Reveal>
+{/*       <Reveal>
         <BannerSliderSection />
-      </Reveal>
+      </Reveal> */}
       <Reveal>
         <FeaturedProjects />
       </Reveal>
       <Reveal>
-        <HomeBanner />
+        <BannerSliderSection />
       </Reveal>
       <Reveal>
         <AvailableProjects />

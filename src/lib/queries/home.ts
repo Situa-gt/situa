@@ -167,15 +167,22 @@ async function fetchFeaturedModels(): Promise<FeaturedModelCardData[]> {
   const ids = models.map((m) => m.id)
   const { data: covers, error: coversErr } = await supabase
     .from('project_media')
-    .select('model_id, url, alt')
+    .select('model_id, url, alt, kind')
     .in('model_id', ids)
-    .eq('kind', 'cover')
+    .in('kind', ['floorplan', 'gallery'])
     .order('display_order', { ascending: true })
   if (coversErr) throw coversErr
 
   const coverByModel = new Map<string, { url: string; alt: string | null }>()
+  // First pass: prefer floorplan
   for (const c of covers ?? []) {
-    if (c.model_id && !coverByModel.has(c.model_id)) {
+    if (c.model_id && c.kind === 'floorplan' && !coverByModel.has(c.model_id)) {
+      coverByModel.set(c.model_id, { url: c.url, alt: c.alt })
+    }
+  }
+  // Second pass: fill gaps with gallery
+  for (const c of covers ?? []) {
+    if (c.model_id && c.kind === 'gallery' && !coverByModel.has(c.model_id)) {
       coverByModel.set(c.model_id, { url: c.url, alt: c.alt })
     }
   }

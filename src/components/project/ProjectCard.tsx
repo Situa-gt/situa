@@ -37,20 +37,20 @@ export function ProjectCard({ project, priority = false }: Props) {
             className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             priority={priority}
           />
+          {StageIcon && project.stage && (
+            <div className="absolute left-3 top-3 z-10 flex items-center gap-1 rounded-full border border-white bg-orange-500/90 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+              <StageIcon className="h-3 w-3 shrink-0" />
+              {stageLabel(project.stage)}
+            </div>
+          )}
           {project.is_featured && (
-            <div className="group/feat absolute left-3 top-3 z-10">
+            <div className="group/feat absolute right-3 top-3 z-10">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-400/90 backdrop-blur-sm">
                 <Star className="h-3.5 w-3.5 fill-white text-white" />
               </div>
-              <span className="pointer-events-none absolute left-0 top-full z-20 mt-1.5 hidden whitespace-nowrap rounded-lg bg-zinc-900 px-2.5 py-1.5 text-xs text-white shadow-lg group-hover/feat:block">
+              <span className="pointer-events-none absolute right-0 top-full z-20 mt-1.5 hidden whitespace-nowrap rounded-lg bg-zinc-900 px-2.5 py-1.5 text-xs text-white shadow-lg group-hover/feat:block">
                 Proyecto destacado
               </span>
-            </div>
-          )}
-          {StageIcon && project.stage && (
-            <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full bg-brand-purple/90 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
-              <StageIcon className="h-3 w-3 shrink-0" />
-              {stageLabel(project.stage)}
             </div>
           )}
           {/* Eased multi-stop scrim — simulates a natural ease-in curve so the fade reads as smooth to the eye */}

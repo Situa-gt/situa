@@ -19,7 +19,7 @@ export async function Hero({ initial }: Props) {
   ])
 
   return (
-    <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-6 pb-20 pt-32 sm:pt-40">
+    <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-6 pb-36 pt-32 sm:pt-40">
       <HeroAccent />
       <div className="mb-10 max-w-2xl">
         <h1 className="hero-enter text-[clamp(2.5rem,5vw,3.5rem)] font-semibold leading-[1.05] tracking-[-0.02em] text-white">

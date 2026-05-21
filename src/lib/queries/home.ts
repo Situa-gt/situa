@@ -223,6 +223,65 @@ export const getBannerProjects = unstable_cache(
   { tags: ['projects:banner', 'projects:active'], revalidate: 3600 },
 )
 
+export interface HeroProjectData {
+  id: string
+  name: string
+  slug: string
+  property_type: ProjectRow['property_type']
+  zone: { name: string; url_slug: string } | null
+  cover_url: string | null
+  cover_alt: string | null
+}
+
+async function fetchHeroProjects(): Promise<HeroProjectData[]> {
+  const supabase = createServerClient()
+
+  const { data: projects, error } = await supabase
+    .from('projects')
+    .select('id, name, slug, property_type, zones(name, url_slug)')
+    .eq('is_active', true)
+    .filter('toma_canal_principal', 'eq', true)
+
+  if (error) throw error
+  if (!projects || projects.length === 0) return []
+
+  const ids = projects.map((p) => p.id)
+  const { data: covers, error: coversErr } = await supabase
+    .from('project_media')
+    .select('project_id, url, alt, display_order')
+    .in('project_id', ids)
+    .eq('kind', 'cover')
+    .order('display_order', { ascending: true })
+  if (coversErr) throw coversErr
+
+  const coverByProject = new Map<string, { url: string; alt: string | null }>()
+  for (const c of covers ?? []) {
+    if (c.project_id && !coverByProject.has(c.project_id)) {
+      coverByProject.set(c.project_id, { url: c.url, alt: c.alt })
+    }
+  }
+
+  return projects.map((p) => {
+    const zoneRel = p.zones as { name: string; url_slug: string } | null
+    const cover = coverByProject.get(p.id) ?? null
+    return {
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      property_type: p.property_type,
+      zone: zoneRel,
+      cover_url: cover?.url ?? null,
+      cover_alt: cover?.alt ?? null,
+    }
+  })
+}
+
+export const getHeroProjects = unstable_cache(
+  fetchHeroProjects,
+  ['home', 'hero-projects'],
+  { tags: ['projects:hero', 'projects:active'], revalidate: 3600 },
+)
+
 async function fetchOptions(table: 'zones' | 'departments' | 'municipalities'): Promise<OptionRow[]> {
   const supabase = createServerClient()
   const slugColumn = table === 'zones' ? 'url_slug' : 'slug'

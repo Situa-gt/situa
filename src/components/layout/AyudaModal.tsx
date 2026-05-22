@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { submitAyudaLead } from '@/app/actions/ayuda-lead'
+import { pushEvent } from '@/lib/gtm'
 
 const EMPTY = {
   name: '',
@@ -50,6 +51,7 @@ export function AyudaModal() {
       if ('error' in result) {
         setServerError(result.error)
       } else {
+        pushEvent('ayuda_lead')
         setSubmitted(true)
       }
     })

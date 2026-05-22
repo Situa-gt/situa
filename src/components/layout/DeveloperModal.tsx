@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { submitDeveloperLead } from '@/app/actions/developer-lead'
+import { pushEvent } from '@/lib/gtm'
 
 const EMPTY = {
   developer_name: '',
@@ -52,6 +53,7 @@ export function DeveloperModal() {
       if ('error' in result) {
         setServerError(result.error)
       } else {
+        pushEvent('developer_lead', { developer_name: values.developer_name })
         setSubmitted(true)
       }
     })

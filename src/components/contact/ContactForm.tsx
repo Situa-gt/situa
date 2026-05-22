@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { CtaButton } from '@/components/ui/cta-button'
 import { submitContactLead } from '@/app/actions/contact'
+import { pushEvent } from '@/lib/gtm'
 
 const ClientSchema = z.object({
   full_name: z.string().trim().min(2, 'Ingresa tu nombre completo').max(100),
@@ -78,6 +79,12 @@ export function ContactForm({ projectId, modelId, projectName, modelName }: Cont
         toast.error(result.error)
         return
       }
+      pushEvent('generate_lead', {
+        project_id: projectId,
+        project_name: projectName,
+        model_id: modelId,
+        model_name: modelName,
+      })
       toast.success('¡Mensaje enviado! Pronto te contactaremos.')
       setValues(INITIAL)
       setHp('')

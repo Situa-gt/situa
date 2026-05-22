@@ -14,8 +14,8 @@ type Currency = 'USD' | 'GTQ'
 const EXCHANGE_RATE = 7.7
 
 const RANGES = {
-  USD: { min: 50_000, max: 1_500_000, step: 10_000, default: 250_000 },
-  GTQ: { min: 400_000, max: 12_000_000, step: 100_000, default: 2_000_000 },
+  USD: { min: 30_000, max: 1_500_000, step: 10_000, default: 250_000 },
+  GTQ: { min: 250_000, max: 12_000_000, step: 100_000, default: 2_000_000 },
 } as const
 
 const TERM_OPTIONS = [5, 10, 15, 20, 25, 30] as const

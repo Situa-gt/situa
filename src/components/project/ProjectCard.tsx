@@ -80,7 +80,8 @@ export function ProjectCard({ project, priority = false }: Props) {
         href={href}
         size="sm"
         aria-label={`Conocer más sobre ${project.name}`}
-        className="absolute -bottom-4 right-4 shadow-lg"
+        className="absolute -bottom-4 right-4 bg-brand-purple hover:bg-brand-purple-hover shadow-lg"
+        circleClassName="bg-brand-orange"
       >
         Conocer más
       </CtaButton>

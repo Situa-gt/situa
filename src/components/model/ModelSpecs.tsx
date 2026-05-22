@@ -1,4 +1,4 @@
-import { BedDouble, Bath, Car, Maximize2 } from 'lucide-react'
+import { BedDouble, Bath, Car, Maximize2, ConciergeBell } from 'lucide-react'
 import type { Database } from '@/lib/database.types'
 
 type ModelRow = Database['public']['Tables']['models']['Row']
@@ -22,6 +22,8 @@ export function ModelSpecs({ model }: Props) {
   if (model.bathrooms !== null)
     specs.push({ label: 'Baños', value: String(model.bathrooms), icon: Bath })
   specs.push({ label: 'Parqueo', value: String(model.parking_spots), icon: Car })
+  if (model.has_service_room)
+    specs.push({ label: 'Cuarto de servicio', value: '', icon: ConciergeBell })
 
   return (
     <section className="border-t border-hairline pt-8">
@@ -40,7 +42,7 @@ export function ModelSpecs({ model }: Props) {
                 <dt className="text-xs font-medium uppercase tracking-[0.06em] text-muted-ink">
                   {s.label}
                 </dt>
-                <dd className="mt-0.5 text-lg font-semibold text-ink">{s.value}</dd>
+                {s.value && <dd className="mt-0.5 text-lg font-semibold text-ink">{s.value}</dd>}
               </div>
             </div>
           )

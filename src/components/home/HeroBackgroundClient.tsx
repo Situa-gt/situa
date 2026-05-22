@@ -84,7 +84,7 @@ export function HeroBackgroundClient({ projects, children }: Props) {
       {project && href && (
         <div
           aria-hidden
-          className="pointer-events-none absolute bottom-5 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-0.5 rounded-2xl bg-white/15 px-5 py-3 text-center backdrop-blur-sm sm:flex"
+          className="pointer-events-none absolute bottom-5 left-1/2 flex -translate-x-1/2 flex-col items-center gap-0.5 rounded-2xl bg-white/15 px-5 py-3 text-center backdrop-blur-sm"
         >
           <span className="text-[11px] font-normal text-white/70">Conoce más acerca de</span>
           <span className="text-sm font-semibold text-white">

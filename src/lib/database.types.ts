@@ -196,6 +196,7 @@ export type Database = {
           created_at: string
           description: string | null
           display_order: number
+          has_service_room: boolean
           id: string
           is_active: boolean
           is_featured: boolean
@@ -216,6 +217,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          has_service_room?: boolean
           id?: string
           is_active?: boolean
           is_featured?: boolean
@@ -236,6 +238,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          has_service_room?: boolean
           id?: string
           is_active?: boolean
           is_featured?: boolean

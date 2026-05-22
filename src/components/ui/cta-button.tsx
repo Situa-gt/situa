@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 type CommonProps = {
   children: React.ReactNode
   className?: string
+  circleClassName?: string
   size?: 'md' | 'sm'
 }
 
@@ -40,7 +41,7 @@ const ICON = {
   sm: 'h-3.5 w-3.5',
 } as const
 
-function Inner({ children, size = 'md' }: { children: React.ReactNode; size?: 'md' | 'sm' }) {
+function Inner({ children, size = 'md', circleClassName }: { children: React.ReactNode; size?: 'md' | 'sm'; circleClassName?: string }) {
   return (
     <>
       <span className="leading-none">{children}</span>
@@ -48,6 +49,7 @@ function Inner({ children, size = 'md' }: { children: React.ReactNode; size?: 'm
         className={cn(
           'flex items-center justify-center rounded-full bg-brand-purple text-white transition-transform group-hover:rotate-[-12deg]',
           CIRCLE[size],
+          circleClassName,
         )}
         aria-hidden
       >
@@ -58,7 +60,7 @@ function Inner({ children, size = 'md' }: { children: React.ReactNode; size?: 'm
 }
 
 export function CtaButton(props: Props) {
-  const { children, className, size = 'md' } = props
+  const { children, className, circleClassName, size = 'md' } = props
   const classes = cn(SHELL, SIZE[size], className)
 
   if ('href' in props && props.href !== undefined) {
@@ -71,7 +73,7 @@ export function CtaButton(props: Props) {
         aria-label={props['aria-label']}
         className={classes}
       >
-        <Inner size={size}>{children}</Inner>
+        <Inner size={size} circleClassName={circleClassName}>{children}</Inner>
       </Link>
     )
   }
@@ -80,7 +82,7 @@ export function CtaButton(props: Props) {
   void _href
   return (
     <button {...rest} className={classes}>
-      <Inner size={size}>{children}</Inner>
+      <Inner size={size} circleClassName={circleClassName}>{children}</Inner>
     </button>
   )
 }

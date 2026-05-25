@@ -14,9 +14,9 @@ export default function CalculadoraPage() {
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <section className="bg-brand-purple text-white">
         <div className="mx-auto max-w-7xl px-6 py-14 lg:py-20">
-          <p className="text-xs font-medium uppercase tracking-[0.08em] text-white/60">
+{/*           <p className="text-xs font-medium uppercase tracking-[0.08em] text-white/60">
             Herramienta gratuita
-          </p>
+          </p> */}
           <h1 className="mt-3 text-4xl font-semibold leading-[1.05] tracking-[-0.02em] sm:text-5xl">
             Calculadora de
             <br />

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { Building2, Calculator, ChevronDown, House } from 'lucide-react'
+import { Building2, Calculator, ChevronDown, House, Search } from 'lucide-react'
 import { EMPTY_FILTERS, type Filters } from '@/lib/filters/parse'
 import type { Database } from '@/lib/database.types'
 import { CtaButton } from '@/components/ui/cta-button'
@@ -92,8 +92,10 @@ export function HeroFilters({
       precio_max: state.precio_max,
       etapa: state.etapa,
       dormitorios: state.dormitorios,
+      q: state.q,
     })
     const p = new URLSearchParams()
+    if (state.q) p.set('q', state.q)
     if (state.tipo) p.set('tipo', state.tipo)
     for (const z of state.zonas) p.append('zona', z)
     if (state.departamento) p.set('departamento', state.departamento)
@@ -149,7 +151,22 @@ export function HeroFilters({
 
       <div className="mb-5 border-t border-hairline" />
 
-      {/* Primary row: Zona · Etapa · Precio */}
+      {/* Project name search */}
+      <label className="mb-4 flex flex-col gap-1.5">
+        <span className={EYEBROW}>Nombre del proyecto</span>
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-ink" />
+          <input
+            type="text"
+            placeholder="Buscar por nombre de proyecto..."
+            className={`${INPUT_BASE} pl-10`}
+            value={state.q ?? ''}
+            onChange={(e) => set('q', e.target.value.trim() || null)}
+          />
+        </div>
+      </label>
+
+      {/* Primary row: Zona · Dormitorios · Precio */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <label className="flex flex-col gap-1.5">
           <span className={EYEBROW}>Zonas</span>

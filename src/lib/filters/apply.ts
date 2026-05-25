@@ -58,6 +58,7 @@ export async function applyFilters(f: Filters): Promise<ProjectRow[]> {
 
   if (f.tipo) query = query.eq('property_type', f.tipo)
   if (f.etapa) query = query.eq('stage', f.etapa)
+  if (f.q) query = query.ilike('name', `%${f.q}%`)
   if (modelProjectIds !== null) query = query.in('id', modelProjectIds)
   if (zoneIds !== null) query = query.in('zone_id', zoneIds)
 

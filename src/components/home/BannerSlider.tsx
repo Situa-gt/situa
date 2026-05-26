@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { ProjectCardData } from '@/lib/queries/home'
 import { formatPriceValue } from '@/lib/format/price'
+import { tipoSlug } from '@/lib/types/property'
 
 interface BannerSliderProps {
   projects: ProjectCardData[]
@@ -42,49 +44,59 @@ export function BannerSlider({ projects }: BannerSliderProps) {
         onMouseEnter={pause}
         onMouseLeave={resume}
       >
-        {projects.map((p, i) => (
-          <div
-            key={p.id}
-            className={`absolute inset-0 transition-opacity duration-700 ${i === current ? 'z-10 opacity-100' : 'z-0 opacity-0'}`}
-            aria-hidden={i !== current}
-          >
-            {p.cover_url ? (
-              <Image
-                src={p.cover_url}
-                alt={p.cover_alt ?? p.name}
-                fill
-                sizes="(max-width: 1280px) 100vw, 1280px"
-                className="object-cover"
-                priority={i === 0}
-              />
-            ) : (
-              <div className="absolute inset-0 bg-brand-purple" />
-            )}
+        {projects.map((p, i) => {
+          const href = p.zone
+            ? `/${p.zone.url_slug}/${tipoSlug(p.property_type)}/${p.slug}`
+            : '#'
+          return (
             <div
-              aria-hidden
-              className="absolute inset-0"
-              style={{
-                backgroundImage:
-                  'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.08) 100%)',
-              }}
-            />
-            <div className="relative z-10 flex h-full flex-col justify-end p-8 sm:p-12">
-              {p.zone && (
-                <span className="mb-3 inline-flex w-fit rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                  {p.zone.name}
-                </span>
+              key={p.id}
+              className={`absolute inset-0 transition-opacity duration-700 ${i === current ? 'z-10 opacity-100' : 'z-0 opacity-0'}`}
+              aria-hidden={i !== current}
+            >
+              {p.cover_url ? (
+                <Image
+                  src={p.cover_url}
+                  alt={p.cover_alt ?? p.name}
+                  fill
+                  sizes="(max-width: 1280px) 100vw, 1280px"
+                  className="object-cover"
+                  priority={i === 0}
+                />
+              ) : (
+                <div className="absolute inset-0 bg-brand-purple" />
               )}
-              <h2 className="max-w-lg text-3xl font-semibold leading-tight tracking-[-0.02em] text-white sm:text-4xl">
-                {p.name}
-              </h2>
-              {p.price_from !== null && (
-                <p className="mt-2 text-sm font-medium text-white/80">
-                  Desde {formatPriceValue(p.price_from, p.base_currency)}
-                </p>
-              )}
+              <div
+                aria-hidden
+                className="absolute inset-0"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.08) 100%)',
+                }}
+              />
+              <Link
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative z-10 flex h-full flex-col justify-end p-8 sm:p-12"
+              >
+                {p.zone && (
+                  <span className="mb-3 inline-flex w-fit rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                    {p.zone.name}
+                  </span>
+                )}
+                <h2 className="max-w-lg text-3xl font-semibold leading-tight tracking-[-0.02em] text-white sm:text-4xl">
+                  {p.name}
+                </h2>
+                {p.price_from !== null && (
+                  <p className="mt-2 text-sm font-medium text-white/80">
+                    Desde {formatPriceValue(p.price_from, p.base_currency)}
+                  </p>
+                )}
+              </Link>
             </div>
-          </div>
-        ))}
+          )
+        })}
 
         {hasMultiple && (
           <>

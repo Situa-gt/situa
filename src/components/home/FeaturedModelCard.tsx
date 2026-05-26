@@ -19,6 +19,8 @@ export function FeaturedModelCard({ model }: Props) {
   return (
     <Link
       href={href}
+      target="_blank"
+      rel="noopener noreferrer"
       className="group flex flex-col overflow-hidden rounded-2xl border border-hairline bg-white transition hover:border-brand-purple hover:shadow-[0_12px_32px_-12px_rgba(107,102,235,0.25)]"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-100">

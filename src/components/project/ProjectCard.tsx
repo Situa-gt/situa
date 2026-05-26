@@ -27,7 +27,7 @@ export function ProjectCard({ project, priority = false }: Props) {
 
   return (
     <article className="relative">
-      <Link href={href} className="group block">
+      <Link href={href} target="_blank" rel="noopener noreferrer" className="group block">
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-zinc-100">
           <Image
             src={cover}
@@ -78,6 +78,8 @@ export function ProjectCard({ project, priority = false }: Props) {
       </Link>
       <CtaButton
         href={href}
+        target="_blank"
+        rel="noopener noreferrer"
         size="sm"
         aria-label={`Conocer más sobre ${project.name}`}
         className="absolute -bottom-4 right-4 bg-brand-purple hover:bg-brand-purple-hover shadow-lg"

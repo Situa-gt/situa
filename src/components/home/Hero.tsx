@@ -25,12 +25,14 @@ export async function Hero({ initial }: Props) {
         <h1 className="hero-enter text-[clamp(2.5rem,5vw,3.5rem)] font-semibold leading-[1.05] tracking-[-0.02em] text-white">
           Vivienda Nueva en Guatemala
         </h1>
-        <p
-          className="hero-enter mt-5 max-w-lg text-lg leading-relaxed text-white/85"
+        <div
+          className="hero-enter mt-5 inline-block rounded-xl border border-white/40 bg-white/10 px-4 py-3 backdrop-blur-sm"
           style={{ animationDelay: '120ms' }}
         >
-          Busca, compara, cotiza y compra<br />la mejor opción en un solo lugar.
-        </p>
+          <p className="max-w-lg text-2xl leading-relaxed text-white/90">
+            Busca, compara, cotiza y compra<br />la mejor opción en un solo lugar.
+          </p>
+        </div>
       </div>
       <div className="hero-enter" style={{ animationDelay: '240ms' }}>
         <HeroFilters

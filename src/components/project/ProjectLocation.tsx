@@ -37,7 +37,7 @@ export function ProjectLocation({
               title={`Ubicación de ${projectName}`}
               src={`https://www.openstreetmap.org/export/embed.html?bbox=${longitude - 0.0015},${latitude - 0.0015},${longitude + 0.0015},${latitude + 0.0015}&layer=mapnik&marker=${latitude},${longitude}`}
               loading="lazy"
-              className="absolute inset-0 h-full w-full border-0 grayscale"
+              className="absolute inset-0 h-full w-full border-0"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-muted-ink">

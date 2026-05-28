@@ -63,10 +63,10 @@ export async function submitContactLead(
 
   const supabase = createServerClient()
 
-  // Verify project exists and is active; fetch name for the email
+  // Verify project exists and is active; fetch developer email for notification
   const { data: project, error: projectErr } = await supabase
     .from('projects')
-    .select('id, name')
+    .select('id, name, developers(contact_email, notification_emails)')
     .eq('id', parsed.data.project_id)
     .eq('is_active', true)
     .maybeSingle()
@@ -126,8 +126,28 @@ export async function submitContactLead(
     </table>
   `
 
+  const adminEmail = process.env.SITUA_ADMIN_EMAIL!
+  const dev = project.developers
+  const devEmails: string[] = [
+    ...(dev?.contact_email ? [dev.contact_email] : []),
+    ...((dev?.notification_emails as string[] | null) ?? []),
+  ]
+
+  // Primary recipient: developer (if available), else admin
+  // Admin is always CC'd when developer receives the email
+  const to = devEmails[0] ?? adminEmail
+  const cc = devEmails[0]
+    ? [...new Set([adminEmail, ...devEmails.slice(1)])]
+    : undefined
+
   try {
-    await sendEmail(`Nueva consulta — ${escHtml(project.name)}`, html)
+    await sendEmail({
+      subject: `Nueva consulta — ${project.name}`,
+      html,
+      to,
+      cc,
+      replyTo: parsed.data.email,
+    })
   } catch (err) {
     console.error('[contact] email failed', err)
   }

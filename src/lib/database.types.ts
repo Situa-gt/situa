@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      ayuda_leads: {
+        Row: {
+          id: string
+          full_name: string
+          email: string
+          phone: string
+          message: string | null
+          ip_address: string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          full_name: string
+          email: string
+          phone: string
+          message?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          full_name?: string
+          email?: string
+          phone?: string
+          message?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      developer_leads: {
+        Row: {
+          id: string
+          developer_name: string
+          contact_name: string
+          phone: string
+          website: string | null
+          discount_code: string | null
+          message: string | null
+          ip_address: string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          developer_name: string
+          contact_name: string
+          phone: string
+          website?: string | null
+          discount_code?: string | null
+          message?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          developer_name?: string
+          contact_name?: string
+          phone?: string
+          website?: string | null
+          discount_code?: string | null
+          message?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           id: string

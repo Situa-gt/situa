@@ -1,6 +1,8 @@
 'use server'
 
 import { z } from 'zod'
+import { headers } from 'next/headers'
+import { createServerClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/sendgrid'
 
 const AyudaLeadSchema = z.object({
@@ -40,6 +42,25 @@ export async function submitAyudaLead(input: unknown): Promise<ActionResult> {
   }
 
   const d = parsed.data
+  const h = await headers()
+  const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
+  const ua = h.get('user-agent') ?? null
+
+  const supabase = createServerClient()
+  const { error: dbError } = await supabase.from('ayuda_leads').insert({
+    full_name: d.name,
+    email: d.email,
+    phone: d.phone,
+    message: d.message ?? null,
+    ip_address: ip,
+    user_agent: ua,
+  })
+
+  if (dbError) {
+    console.error('[ayuda-lead] insert failed', dbError)
+    return { error: 'Error al enviar. Intenta de nuevo.' }
+  }
+
   const rows: [string, string][] = [
     ['Nombre', d.name],
     ['Correo', d.email],
@@ -59,7 +80,7 @@ export async function submitAyudaLead(input: unknown): Promise<ActionResult> {
   `
 
   try {
-    await sendEmail(`Nueva solicitud de ayuda — ${escHtml(d.name)}`, html)
+    await sendEmail({ subject: `Nueva solicitud de ayuda — ${d.name}`, html, to: process.env.SITUA_ADMIN_EMAIL! })
   } catch (err) {
     console.error('[ayuda-lead] email failed', err)
   }

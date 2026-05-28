@@ -8,10 +8,20 @@ if (!adminEmail) throw new Error('Missing env: SITUA_ADMIN_EMAIL')
 
 sgMail.setApiKey(apiKey)
 
-export async function sendEmail(subject: string, html: string): Promise<void> {
+interface SendEmailOptions {
+  subject: string
+  html: string
+  to: string
+  cc?: string[]
+  replyTo?: string
+}
+
+export async function sendEmail({ subject, html, to, cc, replyTo }: SendEmailOptions): Promise<void> {
   await sgMail.send({
-    to: adminEmail!,
+    to,
     from: adminEmail!,
+    ...(cc?.length ? { cc } : {}),
+    ...(replyTo ? { replyTo } : {}),
     subject,
     html,
   })

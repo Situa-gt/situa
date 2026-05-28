@@ -1,6 +1,8 @@
 'use server'
 
 import { z } from 'zod'
+import { headers } from 'next/headers'
+import { createServerClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/sendgrid'
 
 const DeveloperLeadSchema = z.object({
@@ -42,6 +44,27 @@ export async function submitDeveloperLead(input: unknown): Promise<ActionResult>
   }
 
   const d = parsed.data
+  const h = await headers()
+  const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
+  const ua = h.get('user-agent') ?? null
+
+  const supabase = createServerClient()
+  const { error: dbError } = await supabase.from('developer_leads').insert({
+    developer_name: d.developer_name,
+    contact_name: d.contact_name,
+    phone: d.phone,
+    website: d.website ?? null,
+    discount_code: d.discount_code ?? null,
+    message: d.message ?? null,
+    ip_address: ip,
+    user_agent: ua,
+  })
+
+  if (dbError) {
+    console.error('[developer-lead] insert failed', dbError)
+    return { error: 'Error al enviar. Intenta de nuevo.' }
+  }
+
   const rows: [string, string][] = [
     ['Nombre desarrolladora', d.developer_name],
     ['Nombre contacto', d.contact_name],
@@ -63,7 +86,7 @@ export async function submitDeveloperLead(input: unknown): Promise<ActionResult>
   `
 
   try {
-    await sendEmail(`Nueva desarrolladora — ${escHtml(d.developer_name)}`, html)
+    await sendEmail({ subject: `Nueva desarrolladora — ${d.developer_name}`, html, to: process.env.SITUA_ADMIN_EMAIL! })
   } catch (err) {
     console.error('[developer-lead] email failed', err)
   }

@@ -1,3 +1,5 @@
+import Image from 'next/image'
+import Link from 'next/link'
 import {
   getDepartmentOptions,
   getMunicipalityOptions,
@@ -19,9 +21,19 @@ export async function Hero({ initial }: Props) {
   ])
 
   return (
-    <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-6 pb-36 pt-32 sm:pt-40">
+    <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-6 pb-36 pt-16 sm:pt-20">
       <HeroAccent />
       <div className="mb-10 max-w-2xl">
+        <Link href="/" aria-label="Sitúa - Inicio" className="hero-enter mb-6 inline-block">
+          <Image
+            src="/logo_situa_blanco.png"
+            alt="Sitúa"
+            width={187}
+            height={49}
+            priority
+            className="h-[49px] w-auto"
+          />
+        </Link>
         <h1 className="hero-enter text-[clamp(2.5rem,5vw,3.5rem)] font-semibold leading-[1.05] tracking-[-0.02em] text-white">
           Vivienda Nueva en Guatemala
         </h1>

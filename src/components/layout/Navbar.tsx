@@ -19,10 +19,10 @@ export function Navbar() {
           <Image
             src="/logo-situa.svg"
             alt="Sitúa"
-            width={120}
-            height={32}
+            width={144}
+            height={38}
             priority
-            className="h-8 w-auto"
+            className="h-[38px] w-auto"
           />
         </Link>
         {!isHome && (

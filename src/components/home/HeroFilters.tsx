@@ -7,6 +7,7 @@ import { EMPTY_FILTERS, type Filters } from '@/lib/filters/parse'
 import type { Database } from '@/lib/database.types'
 import { CtaButton } from '@/components/ui/cta-button'
 import { pushEvent } from '@/lib/gtm'
+import { trackEvent } from '@/lib/analytics'
 import { ZonaMultiSelect } from './ZonaMultiSelect'
 import { DormitoriosSelect } from './DormitoriosSelect'
 
@@ -85,7 +86,7 @@ export function HeroFilters({
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    pushEvent('search', {
+    const filters = {
       tipo: state.tipo,
       zonas: state.zonas,
       precio_min: state.precio_min,
@@ -93,7 +94,9 @@ export function HeroFilters({
       etapa: state.etapa,
       dormitorios: state.dormitorios,
       q: state.q,
-    })
+    }
+    pushEvent('search', filters)
+    trackEvent({ event_type: 'search', filters })
     const p = new URLSearchParams()
     if (state.q) p.set('q', state.q)
     if (state.tipo) p.set('tipo', state.tipo)

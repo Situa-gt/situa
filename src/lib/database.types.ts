@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          id: string
+          event_type: Database["public"]["Enums"]["analytics_event_type"]
+          project_id: string | null
+          model_id: string | null
+          filters: Json | null
+          session_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_type: Database["public"]["Enums"]["analytics_event_type"]
+          project_id?: string | null
+          model_id?: string | null
+          filters?: Json | null
+          session_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_type?: Database["public"]["Enums"]["analytics_event_type"]
+          project_id?: string | null
+          model_id?: string | null
+          filters?: Json | null
+          session_id?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_events_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "models"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       bubble_migration_log: {
         Row: {
           bubble_id: string
@@ -509,6 +554,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      analytics_event_type: "project_view" | "model_view" | "search"
       currency_code: "USD" | "GTQ"
       lead_channel: "form"
       media_kind: "cover" | "gallery" | "floorplan" | "logo"
@@ -645,6 +691,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      analytics_event_type: ["project_view", "model_view", "search"],
       currency_code: ["USD", "GTQ"],
       lead_channel: ["form"],
       media_kind: ["cover", "gallery", "floorplan", "logo"],

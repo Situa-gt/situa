@@ -23,6 +23,7 @@ import { ModelSpecs } from '@/components/model/ModelSpecs'
 import { ModelFloorplan } from '@/components/model/ModelFloorplan'
 import { ContactSidebar } from '@/components/contact/ContactSidebar'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { TrackView } from '@/components/analytics/TrackView'
 import { breadcrumbsFor, labelForTipo } from '@/lib/breadcrumbs'
 import {
   buildBreadcrumbList,
@@ -238,6 +239,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
       return {
         body: (
           <div className="mx-auto w-full max-w-7xl px-6">
+            <TrackView type="project_view" projectId={detail.project.id} />
             <div className="mt-8">
               <ProjectGallery
                 images={detail.gallery}
@@ -292,6 +294,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
       return {
         body: (
           <div className="mx-auto w-full max-w-7xl px-6">
+            <TrackView type="model_view" projectId={detail.project.id} modelId={detail.model.id} />
             <div className="mt-8">
               <ProjectGallery
                 images={detail.images}

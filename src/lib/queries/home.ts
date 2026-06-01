@@ -284,7 +284,30 @@ export const getHeroProjects = unstable_cache(
 
 async function fetchOptions(table: 'zones' | 'departments' | 'municipalities'): Promise<OptionRow[]> {
   const supabase = createServerClient()
-  const slugColumn = table === 'zones' ? 'url_slug' : 'slug'
+
+  if (table === 'zones') {
+    // Inner join ensures only zones that have at least one project are returned
+    const { data, error } = await supabase
+      .from('zones')
+      .select('name, url_slug, projects!inner(id)')
+      .eq('is_active', true)
+      .eq('projects.is_active', true)
+      .order('name', { ascending: true })
+    if (error) throw error
+    const rows = ((data ?? []) as Array<{ name: string; url_slug: string }>).map((r) => ({
+      name: r.name,
+      slug: r.url_slug,
+    }))
+    const seen = new Set<string>()
+    const unique = rows.filter((r) => {
+      if (seen.has(r.slug)) return false
+      seen.add(r.slug)
+      return true
+    })
+    return unique.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+  }
+
+  const slugColumn = 'slug'
   const { data, error } = await supabase
     .from(table)
     .select(`name, ${slugColumn}`)

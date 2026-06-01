@@ -43,28 +43,31 @@ interface PageProps {
 
 export async function generateStaticParams() {
   const supabase = createServerClient()
-  const [{ data: zones }, { data: projects }] = await Promise.all([
-    supabase.from('zones').select('url_slug').eq('is_active', true),
-    supabase
-      .from('projects')
-      .select('slug, property_type, zones(url_slug)')
-      .eq('is_active', true),
-  ])
+  const { data: projects } = await supabase
+    .from('projects')
+    .select('slug, property_type, zones(url_slug)')
+    .eq('is_active', true)
 
-  const tipoParams = [{ slug: ['apartamentos'] }, { slug: ['casas'] }]
-  const zoneParams = (zones ?? []).map((z) => ({ slug: [z.url_slug] }))
+  const tipoParams = [{ slug: ['apartamentos'] }]
 
   const projectsWithZone = (projects ?? []).filter(
     (p): p is typeof p & { zones: { url_slug: string } } => p.zones !== null,
   )
 
+  // Only generate zone paths for zones that actually have active projects
+  const zonesWithProjects = new Set(projectsWithZone.map((p) => p.zones.url_slug))
+  const zoneParams = Array.from(zonesWithProjects).map((slug) => ({ slug: [slug] }))
+
+  // Only generate /zona/apartamentos paths — casas index pages are removed
   const zoneTipoSet = new Set<string>()
-  const zoneTipoParams = projectsWithZone.flatMap((p) => {
-    const key = `${p.zones.url_slug}/${tipoSlug(p.property_type)}`
-    if (zoneTipoSet.has(key)) return []
-    zoneTipoSet.add(key)
-    return [{ slug: [p.zones.url_slug, tipoSlug(p.property_type)] }]
-  })
+  const zoneTipoParams = projectsWithZone
+    .filter((p) => p.property_type === 'apartamento')
+    .flatMap((p) => {
+      const key = `${p.zones.url_slug}/apartamentos`
+      if (zoneTipoSet.has(key)) return []
+      zoneTipoSet.add(key)
+      return [{ slug: [p.zones.url_slug, 'apartamentos'] }]
+    })
 
   const projectParams = projectsWithZone.map((p) => ({
     slug: [p.zones.url_slug, tipoSlug(p.property_type), p.slug],
@@ -102,6 +105,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const resolved = await resolveSlug(slug)
+
+  if (resolved.kind === 'tipo' && resolved.data.tipo === 'casa') return { title: 'Página no encontrada | Sitúa' }
+  if (resolved.kind === 'zone-tipo' && resolved.data.tipo === 'casa') return { title: 'Página no encontrada | Sitúa' }
 
   switch (resolved.kind) {
     case 'tipo':
@@ -156,6 +162,8 @@ export default async function CatchAllPage({ params }: PageProps) {
   const resolved = await resolveSlug(slug)
 
   if (resolved.kind === 'not-found') notFound()
+  if (resolved.kind === 'tipo' && resolved.data.tipo === 'casa') notFound()
+  if (resolved.kind === 'zone-tipo' && resolved.data.tipo === 'casa') notFound()
 
   const { body, jsonLd } = await renderBody(resolved)
   const breadcrumbs = breadcrumbsFor(resolved)

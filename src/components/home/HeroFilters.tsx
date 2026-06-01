@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { Building2, Calculator, ChevronDown, House, Search } from 'lucide-react'
+import { Calculator, ChevronDown, Search } from 'lucide-react'
 import { EMPTY_FILTERS, type Filters } from '@/lib/filters/parse'
 import type { Database } from '@/lib/database.types'
 import { CtaButton } from '@/components/ui/cta-button'
@@ -12,7 +12,6 @@ import { ZonaMultiSelect } from './ZonaMultiSelect'
 import { DormitoriosSelect } from './DormitoriosSelect'
 
 type Stage = Database['public']['Enums']['project_stage']
-type Tipo = Database['public']['Enums']['property_type']
 
 interface Option {
   slug: string
@@ -32,12 +31,6 @@ const STAGE_LABEL: Record<Stage, string> = {
   construccion: 'Construcción',
   entrega_inmediata: 'Entrega inmediata',
 }
-
-const TIPO_CHIPS: { value: Tipo | null; label: string; icon?: ReactNode }[] = [
-  { value: null, label: 'Todos' },
-  { value: 'apartamento', label: 'Apartamentos', icon: <Building2 className="h-3.5 w-3.5" /> },
-  { value: 'casa', label: 'Casas', icon: <House className="h-3.5 w-3.5" /> },
-]
 
 const SELECT_BASE =
   'h-11 w-full appearance-none rounded-full border border-hairline bg-white pl-4 pr-9 text-sm text-ink transition hover:border-brand-purple focus:border-brand-purple focus:outline-none'
@@ -87,7 +80,6 @@ export function HeroFilters({
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const filters = {
-      tipo: state.tipo,
       zonas: state.zonas,
       precio_min: state.precio_min,
       precio_max: state.precio_max,
@@ -99,7 +91,6 @@ export function HeroFilters({
     trackEvent({ event_type: 'search', filters })
     const p = new URLSearchParams()
     if (state.q) p.set('q', state.q)
-    if (state.tipo) p.set('tipo', state.tipo)
     for (const z of state.zonas) p.append('zona', z)
     if (state.departamento) p.set('departamento', state.departamento)
     if (state.municipio) p.set('municipio', state.municipio)
@@ -121,28 +112,7 @@ export function HeroFilters({
       onSubmit={onSubmit}
       className="w-full rounded-3xl bg-white/95 p-6 shadow-[0_20px_50px_-12px_rgba(20,16,80,0.25)] ring-1 ring-white/40 backdrop-blur"
     >
-      {/* Top bar: tipo chips + calculadora link */}
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap gap-2">
-          {TIPO_CHIPS.map(({ value, label, icon }) => {
-            const active = state.tipo === value
-            return (
-              <button
-                key={label}
-                type="button"
-                onClick={() => set('tipo', value)}
-                className={`flex cursor-pointer items-center gap-1.5 h-9 rounded-full px-5 text-sm font-medium transition ${
-                  active
-                    ? 'bg-brand-purple text-white shadow-sm'
-                    : 'border border-hairline bg-white text-ink hover:border-brand-purple hover:text-brand-purple'
-                }`}
-              >
-                {icon}
-                {label}
-              </button>
-            )
-          })}
-        </div>
+      <div className="mb-5 flex justify-end">
         <a
           href="/calculadora"
           className="flex items-center gap-1.5 text-sm font-medium text-brand-purple transition hover:text-brand-purple/70"

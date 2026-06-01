@@ -7,7 +7,6 @@ import { getZoneOptions } from '@/lib/queries/home'
 const NAV_LINKS = [
   { href: '/calculadora', label: 'Calculadora de cuota' },
   { href: '/apartamentos', label: 'Apartamentos en preventa' },
-  { href: '/casas', label: 'Casas en preventa' },
 ]
 
 const ABOUT_LINKS = [
@@ -205,20 +204,6 @@ export async function Footer() {
                   <li key={z.slug}>
                     <Link href={`/${z.slug}/apartamentos`} className="text-sm text-white/70 transition hover:text-white">
                       Apartamentos en {z.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <p className="mb-5 text-xs font-semibold uppercase tracking-[0.08em] text-white/50">
-                Casas en preventa Guatemala
-              </p>
-              <ul className="flex flex-wrap gap-x-4 gap-y-2">
-                {zones.map((z) => (
-                  <li key={z.slug}>
-                    <Link href={`/${z.slug}/casas`} className="text-sm text-white/70 transition hover:text-white">
-                      Casas en {z.name}
                     </Link>
                   </li>
                 ))}

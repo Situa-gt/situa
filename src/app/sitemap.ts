@@ -100,7 +100,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     tipoLastMod.set(p.property_type, current ? maxDate(current, d) : d)
   }
 
-  for (const tipo of ['apartamento', 'casa'] as const) {
+  for (const tipo of ['apartamento'] as const) {
     entries.push({
       url: `${SITE_URL}/${tipoSlug(tipo)}`,
       lastModified: tipoLastMod.get(tipo) ?? now,
@@ -129,6 +129,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const zoneTipoLastMod = new Map<string, Date>()
   for (const p of projects) {
     if (!p.zones) continue
+    if (p.property_type === 'casa') continue
     const key = `${p.zones.url_slug}/${tipoSlug(p.property_type)}`
     const d = toDate(p.updated_at)
     const current = zoneTipoLastMod.get(key)

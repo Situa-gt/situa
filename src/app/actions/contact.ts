@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/sendgrid'
+import { notifyWebhook } from '@/lib/webhook'
 
 const ContactSchema = z.object({
   project_id: z.string().uuid(),
@@ -106,6 +107,18 @@ export async function submitContactLead(
     console.error('[contact] insert failed', error)
     return { error: 'Error al enviar. Intenta de nuevo.' }
   }
+
+  void notifyWebhook({
+    form: 'contact',
+    full_name: parsed.data.full_name,
+    email: parsed.data.email,
+    phone: parsed.data.phone ?? null,
+    project_id: parsed.data.project_id,
+    project_name: project.name,
+    model_id: parsed.data.model_id ?? null,
+    message: parsed.data.message ?? null,
+    ip: ip,
+  })
 
   const rows: [string, string][] = [
     ['Nombre', parsed.data.full_name],

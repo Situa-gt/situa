@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { headers } from 'next/headers'
 import { createServerClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/sendgrid'
+import { notifyWebhook } from '@/lib/webhook'
 
 const AyudaLeadSchema = z.object({
   name: z.string().trim().min(1, 'Requerido').max(100),
@@ -60,6 +61,15 @@ export async function submitAyudaLead(input: unknown): Promise<ActionResult> {
     console.error('[ayuda-lead] insert failed', dbError)
     return { error: 'Error al enviar. Intenta de nuevo.' }
   }
+
+  void notifyWebhook({
+    form: 'ayuda',
+    name: d.name,
+    email: d.email,
+    phone: d.phone,
+    message: d.message ?? null,
+    ip: ip,
+  })
 
   const rows: [string, string][] = [
     ['Nombre', d.name],

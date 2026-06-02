@@ -35,7 +35,7 @@ async function fetchProjectCards(opts: {
 
   let projectsQuery = supabase
     .from('projects')
-    .select('id, name, slug, property_type, base_currency, stage, short_description, is_featured, featured_priority, featured_until, created_at, zones(name, url_slug)')
+    .select('id, name, slug, property_type, base_currency, exchange_rate, stage, short_description, is_featured, featured_priority, featured_until, created_at, zones(name, url_slug)')
     .eq('is_active', true)
 
   if (opts.bannerOnly) {
@@ -83,17 +83,28 @@ async function fetchProjectCards(opts: {
     }
   }
 
+  const currencyByProject = new Map<string, ProjectRow['base_currency']>()
+  const exchangeRateByProject = new Map<string, number>()
+  for (const p of projects) {
+    currencyByProject.set(p.id, p.base_currency)
+    exchangeRateByProject.set(p.id, p.exchange_rate)
+  }
+
   const minPriceByProject = new Map<string, number>()
   const minPaymentByProject = new Map<string, number>()
   for (const p of prices ?? []) {
+    const currency = currencyByProject.get(p.project_id) ?? 'USD'
+    const rate = exchangeRateByProject.get(p.project_id) ?? 7.8
+    const priceUSD = currency === 'GTQ' ? p.price_from / rate : p.price_from
     const cur = minPriceByProject.get(p.project_id)
-    if (cur === undefined || p.price_from < cur) {
-      minPriceByProject.set(p.project_id, p.price_from)
+    if (cur === undefined || priceUSD < cur) {
+      minPriceByProject.set(p.project_id, priceUSD)
     }
     if (p.monthly_payment_from !== null) {
+      const paymentUSD = currency === 'GTQ' ? p.monthly_payment_from / rate : p.monthly_payment_from
       const curPmt = minPaymentByProject.get(p.project_id)
-      if (curPmt === undefined || p.monthly_payment_from < curPmt) {
-        minPaymentByProject.set(p.project_id, p.monthly_payment_from)
+      if (curPmt === undefined || paymentUSD < curPmt) {
+        minPaymentByProject.set(p.project_id, paymentUSD)
       }
     }
   }
@@ -107,7 +118,7 @@ async function fetchProjectCards(opts: {
       name: p.name,
       slug: p.slug,
       property_type: p.property_type,
-      base_currency: p.base_currency,
+      base_currency: 'USD' as const,
       stage: p.stage,
       is_featured: p.is_featured,
       short_description: p.short_description,
@@ -155,7 +166,7 @@ async function fetchFeaturedModels(): Promise<FeaturedModelCardData[]> {
 
   const { data: models, error } = await supabase
     .from('models')
-    .select('id, name, slug, price_from, monthly_payment_from, bedrooms, project_id, projects(id, name, slug, property_type, base_currency, zones(name, url_slug))')
+    .select('id, name, slug, price_from, monthly_payment_from, bedrooms, project_id, projects(id, name, slug, property_type, base_currency, exchange_rate, zones(name, url_slug))')
     .eq('is_featured', true)
     .eq('is_active', true)
     .order('display_order', { ascending: true })
@@ -190,19 +201,25 @@ async function fetchFeaturedModels(): Promise<FeaturedModelCardData[]> {
   return models.map((m) => {
     const projectRel = m.projects as unknown as {
       name: string; slug: string; property_type: ProjectRow['property_type']
-      base_currency: ProjectRow['base_currency']
+      base_currency: ProjectRow['base_currency']; exchange_rate: number
       zones: { name: string; url_slug: string } | null
     } | null
     const cover = coverByModel.get(m.id) ?? null
+    const baseCurrency = projectRel?.base_currency ?? 'USD'
+    const rate = projectRel?.exchange_rate ?? 7.8
+    const priceUSD = baseCurrency === 'GTQ' ? m.price_from / rate : m.price_from
+    const paymentUSD = m.monthly_payment_from !== null
+      ? (baseCurrency === 'GTQ' ? m.monthly_payment_from / rate : m.monthly_payment_from)
+      : null
     return {
       id: m.id,
       name: m.name,
       slug: m.slug,
-      price_from: m.price_from,
-      monthly_payment_from: m.monthly_payment_from,
+      price_from: priceUSD,
+      monthly_payment_from: paymentUSD,
       bedrooms: m.bedrooms,
       project: projectRel
-        ? { name: projectRel.name, slug: projectRel.slug, property_type: projectRel.property_type, base_currency: projectRel.base_currency }
+        ? { name: projectRel.name, slug: projectRel.slug, property_type: projectRel.property_type, base_currency: 'USD' as const }
         : { name: '', slug: '', property_type: 'apartamento' as const, base_currency: 'USD' as const },
       zone: projectRel?.zones ?? null,
       cover_url: cover?.url ?? null,
@@ -386,7 +403,7 @@ export async function getProjectCardsByIds(ids: string[]): Promise<ProjectCardDa
 
   const { data: projects, error } = await supabase
     .from('projects')
-    .select('id, name, slug, property_type, base_currency, stage, is_featured, short_description, created_at, zones(name, url_slug)')
+    .select('id, name, slug, property_type, base_currency, exchange_rate, stage, is_featured, short_description, created_at, zones(name, url_slug)')
     .in('id', ids)
     .eq('is_active', true)
     .order('created_at', { ascending: false })
@@ -418,17 +435,28 @@ export async function getProjectCardsByIds(ids: string[]): Promise<ProjectCardDa
     }
   }
 
+  const currencyByProject = new Map<string, ProjectRow['base_currency']>()
+  const exchangeRateByProject = new Map<string, number>()
+  for (const p of projects) {
+    currencyByProject.set(p.id, p.base_currency)
+    exchangeRateByProject.set(p.id, p.exchange_rate)
+  }
+
   const minPriceByProject = new Map<string, number>()
   const minPaymentByProject = new Map<string, number>()
   for (const p of prices ?? []) {
+    const currency = currencyByProject.get(p.project_id) ?? 'USD'
+    const rate = exchangeRateByProject.get(p.project_id) ?? 7.8
+    const priceUSD = currency === 'GTQ' ? p.price_from / rate : p.price_from
     const cur = minPriceByProject.get(p.project_id)
-    if (cur === undefined || p.price_from < cur) {
-      minPriceByProject.set(p.project_id, p.price_from)
+    if (cur === undefined || priceUSD < cur) {
+      minPriceByProject.set(p.project_id, priceUSD)
     }
     if (p.monthly_payment_from !== null) {
+      const paymentUSD = currency === 'GTQ' ? p.monthly_payment_from / rate : p.monthly_payment_from
       const curPmt = minPaymentByProject.get(p.project_id)
-      if (curPmt === undefined || p.monthly_payment_from < curPmt) {
-        minPaymentByProject.set(p.project_id, p.monthly_payment_from)
+      if (curPmt === undefined || paymentUSD < curPmt) {
+        minPaymentByProject.set(p.project_id, paymentUSD)
       }
     }
   }
@@ -442,7 +470,7 @@ export async function getProjectCardsByIds(ids: string[]): Promise<ProjectCardDa
       name: p.name,
       slug: p.slug,
       property_type: p.property_type,
-      base_currency: p.base_currency,
+      base_currency: 'USD' as const,
       stage: p.stage,
       is_featured: p.is_featured,
       short_description: p.short_description,

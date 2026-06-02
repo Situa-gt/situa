@@ -20,6 +20,7 @@ export interface ProjectDetailData {
   models: ModelRow[]
   modelImages: Record<string, ProjectGalleryImage>
   price_from: number | null
+  monthly_payment_from: number | null
   department: { name: string } | null
   projectLogo: string | null
   developerLogo: string | null
@@ -136,6 +137,19 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
         )
       : null
 
+  const monthly_payment_from =
+    models && models.length > 0
+      ? models.reduce<number | null>(
+          (min, m) =>
+            m.monthly_payment_from === null
+              ? min
+              : min === null || m.monthly_payment_from < min
+                ? m.monthly_payment_from
+                : min,
+          null,
+        )
+      : null
+
   const muni = (zoneWithDept?.municipalities ?? null) as
     | { departments: { name: string } | null }
     | null
@@ -149,6 +163,7 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
     models: models ?? [],
     modelImages,
     price_from,
+    monthly_payment_from,
     department,
     projectLogo: projectLogoRow?.url ?? null,
     developerLogo: developerLogoRow?.url ?? null,

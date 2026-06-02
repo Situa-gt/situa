@@ -1,10 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowUpRight } from 'lucide-react'
-import {
-  estimateMonthlyPayment,
-  formatPriceValue,
-} from '@/lib/format/price'
+import { formatPriceValue } from '@/lib/format/price'
 import type { ProjectGalleryImage } from '@/lib/queries/project'
 import type { Database } from '@/lib/database.types'
 
@@ -78,7 +75,7 @@ export function ModelCard({ model, currency, basePath, image }: Props) {
           </div>
         </dl>
 
-        <div className="mt-auto grid grid-cols-2 gap-4 pt-6">
+        <div className={`mt-auto grid gap-4 pt-6 ${model.monthly_payment_from !== null ? 'grid-cols-2' : 'grid-cols-1'}`}>
           <div>
             <span className="block text-[11px] uppercase tracking-[0.06em] text-muted-ink">
               Desde
@@ -87,15 +84,17 @@ export function ModelCard({ model, currency, basePath, image }: Props) {
               {formatPriceValue(model.price_from, currency)}
             </span>
           </div>
-          <div>
-            <span className="block text-[11px] uppercase tracking-[0.06em] text-muted-ink">
-              Cuotas desde
-            </span>
-            <span className="mt-0.5 block text-base font-semibold text-ink">
-              {formatPriceValue(estimateMonthlyPayment(model.price_from), currency)}
-              <span className="ml-0.5 text-xs font-normal text-muted-ink">/mes</span>
-            </span>
-          </div>
+          {model.monthly_payment_from !== null && (
+            <div>
+              <span className="block text-[11px] uppercase tracking-[0.06em] text-muted-ink">
+                Cuotas desde
+              </span>
+              <span className="mt-0.5 block text-base font-semibold text-ink">
+                {formatPriceValue(model.monthly_payment_from, currency)}
+                <span className="ml-0.5 text-xs font-normal text-muted-ink">/mes</span>
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </Link>

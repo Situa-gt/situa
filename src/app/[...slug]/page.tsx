@@ -263,6 +263,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                       baseCurrency={detail.project.base_currency}
                       exchangeRate={detail.project.exchange_rate}
                       priceFrom={detail.price_from}
+                      monthlyFrom={detail.monthly_payment_from}
                       models={detail.models}
                     />
                   </div>

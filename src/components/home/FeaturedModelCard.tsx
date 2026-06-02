@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { tipoSlug } from '@/lib/types/property'
-import { formatPriceValue, estimateMonthlyPayment } from '@/lib/format/price'
+import { formatPriceValue } from '@/lib/format/price'
 import type { FeaturedModelCardData } from '@/lib/queries/home'
 
 interface Props {
@@ -14,7 +14,7 @@ export function FeaturedModelCard({ model }: Props) {
     ? `/${zone.url_slug}/${tipoSlug(project.property_type)}/${project.slug}/${model.slug}`
     : `#`
   const modelName = model.name.trim().length === 1 ? `Modelo ${model.name}` : model.name
-  const monthly = model.monthly_payment_from ?? estimateMonthlyPayment(model.price_from)
+  const monthly = model.monthly_payment_from
 
   return (
     <Link
@@ -43,7 +43,7 @@ export function FeaturedModelCard({ model }: Props) {
         <p className="text-xs font-medium text-muted-ink">{project.name}</p>
         <h3 className="mt-1 text-lg font-semibold tracking-tight text-ink">{modelName}</h3>
 
-        <dl className="mt-5 grid grid-cols-3 gap-4 border-t border-hairline pt-5">
+        <dl className={`mt-5 grid gap-4 border-t border-hairline pt-5 ${monthly !== null ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <div>
             <dt className="text-xs font-medium uppercase tracking-[0.06em] text-muted-ink">
               Precio desde
@@ -52,15 +52,17 @@ export function FeaturedModelCard({ model }: Props) {
               {formatPriceValue(model.price_from, project.base_currency)}
             </dd>
           </div>
-          <div>
-            <dt className="text-xs font-medium uppercase tracking-[0.06em] text-muted-ink">
-              Cuota desde
-            </dt>
-            <dd className="mt-1.5 text-xl font-semibold tracking-tight text-ink">
-              {formatPriceValue(monthly, project.base_currency)}
-              <span className="ml-0.5 text-sm font-normal text-muted-ink">/mes</span>
-            </dd>
-          </div>
+          {monthly !== null && (
+            <div>
+              <dt className="text-xs font-medium uppercase tracking-[0.06em] text-muted-ink">
+                Cuota desde
+              </dt>
+              <dd className="mt-1.5 text-xl font-semibold tracking-tight text-ink">
+                {formatPriceValue(monthly, project.base_currency)}
+                <span className="ml-0.5 text-sm font-normal text-muted-ink">/mes</span>
+              </dd>
+            </div>
+          )}
           <div>
             <dt className="text-xs font-medium uppercase tracking-[0.06em] text-muted-ink">
               Dormitorios

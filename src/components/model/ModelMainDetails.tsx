@@ -1,11 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  convertPrice,
-  estimateMonthlyPayment,
-  formatPriceValue,
-} from '@/lib/format/price'
+import { convertPrice, formatPriceValue } from '@/lib/format/price'
 import type { Database } from '@/lib/database.types'
 
 type Currency = Database['public']['Enums']['currency_code']
@@ -29,7 +25,10 @@ export function ModelMainDetails({ model, baseCurrency, exchangeRate }: Props) {
     currency,
     exchangeRate,
   )
-  const monthly = estimateMonthlyPayment(priceConverted)
+  const monthly =
+    model.monthly_payment_from !== null
+      ? convertPrice(model.monthly_payment_from, baseCurrency, currency, exchangeRate)
+      : null
 
   return (
     <div className="border-t border-hairline pt-6">
@@ -66,7 +65,7 @@ export function ModelMainDetails({ model, baseCurrency, exchangeRate }: Props) {
         </div>
       </div>
 
-      <dl className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <dl className={`mt-4 grid grid-cols-1 gap-6 ${monthly !== null ? 'sm:grid-cols-2' : ''}`}>
         <div>
           <dt className="text-xs font-medium uppercase tracking-[0.06em] text-muted-ink">
             Precio desde
@@ -75,15 +74,17 @@ export function ModelMainDetails({ model, baseCurrency, exchangeRate }: Props) {
             {formatPriceValue(priceConverted, currency)}
           </dd>
         </div>
-        <div>
-          <dt className="text-xs font-medium uppercase tracking-[0.06em] text-muted-ink">
-            Cuotas desde
-          </dt>
-          <dd className="mt-2 text-3xl font-semibold tracking-tight text-ink">
-            {formatPriceValue(monthly, currency)}
-            <span className="ml-1 text-sm font-normal text-muted-ink">/mes</span>
-          </dd>
-        </div>
+        {monthly !== null && (
+          <div>
+            <dt className="text-xs font-medium uppercase tracking-[0.06em] text-muted-ink">
+              Cuotas desde
+            </dt>
+            <dd className="mt-2 text-3xl font-semibold tracking-tight text-ink">
+              {formatPriceValue(monthly, currency)}
+              <span className="ml-1 text-sm font-normal text-muted-ink">/mes</span>
+            </dd>
+          </div>
+        )}
       </dl>
     </div>
   )

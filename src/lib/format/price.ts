@@ -28,9 +28,3 @@ export function convertPrice(
   if (baseCurrency === 'USD' && target === 'GTQ') return value * exchangeRate
   return value / exchangeRate
 }
-
-// Rule-of-thumb monthly payment estimate. 1% of price.
-// TODO: replace with real `monthly_payment_from` data when added to the schema.
-export function estimateMonthlyPayment(price: number): number {
-  return price * 0.01
-}

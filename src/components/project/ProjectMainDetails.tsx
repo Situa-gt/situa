@@ -1,11 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  convertPrice,
-  estimateMonthlyPayment,
-  formatPriceValue,
-} from '@/lib/format/price'
+import { convertPrice, formatPriceValue } from '@/lib/format/price'
 import type { Database } from '@/lib/database.types'
 
 type Currency = Database['public']['Enums']['currency_code']
@@ -15,6 +11,7 @@ interface Props {
   baseCurrency: Currency
   exchangeRate: number
   priceFrom: number | null
+  monthlyFrom: number | null
   models: ModelRow[]
 }
 
@@ -33,6 +30,7 @@ export function ProjectMainDetails({
   baseCurrency,
   exchangeRate,
   priceFrom,
+  monthlyFrom,
   models,
 }: Props) {
   const [currency, setCurrency] = useState<Currency>(baseCurrency)
@@ -43,7 +41,9 @@ export function ProjectMainDetails({
       ? convertPrice(priceFrom, baseCurrency, currency, exchangeRate)
       : null
   const monthly =
-    priceConverted !== null ? estimateMonthlyPayment(priceConverted) : null
+    monthlyFrom !== null
+      ? convertPrice(monthlyFrom, baseCurrency, currency, exchangeRate)
+      : null
 
   return (
     <div className="border-t border-hairline pt-8">

@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "migrate": "tsx --env-file=scripts/migrate/.env.migrate scripts/migrate/index.ts",
-    "migrate:verify": "tsx --env-file=scripts/migrate/.env.migrate scripts/migrate/verify.ts"
+    "migrate:verify": "tsx --env-file=scripts/migrate/.env.migrate scripts/migrate/verify.ts",
+    "migrate:refresh-data": "tsx --env-file=scripts/migrate/.env.migrate scripts/migrate/refresh-data.ts",
+    "migrate:refresh-media": "tsx --env-file=scripts/migrate/.env.migrate scripts/migrate/refresh-media.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

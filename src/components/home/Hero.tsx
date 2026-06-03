@@ -42,7 +42,7 @@ export async function Hero({ initial }: Props) {
           style={{ animationDelay: '120ms' }}
         >
           <p className="max-w-lg text-2xl leading-relaxed text-white/90">
-            Busca, compara, cotiza y compra<br className="hidden md:block" />la mejor opción en un solo lugar.
+            Busca, compara, cotiza y compra<br className="hidden md:block" /> la mejor opción en un solo lugar.
           </p>
         </div>
       </div>

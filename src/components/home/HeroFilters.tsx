@@ -87,7 +87,13 @@ export function HeroFilters({
       dormitorios: state.dormitorios,
       q: state.q,
     }
-    pushEvent('search', filters)
+    pushEvent('search', {
+      ...filters,
+      // GA4 event params can't hold arrays — flatten to comma-separated strings
+      zonas: state.zonas.join(',') || undefined,
+      dormitorios: state.dormitorios.join(',') || undefined,
+      search_term: state.q || undefined,
+    })
     trackEvent({ event_type: 'search', filters })
     const p = new URLSearchParams()
     if (state.q) p.set('q', state.q)

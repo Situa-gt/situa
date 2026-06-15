@@ -40,10 +40,11 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com https://www.google-analytics.com https://tagmanager.google.com`,
+      // 'unsafe-eval' is required by Meta Pixel (fbevents.js uses new Function() internally), loaded via GTM
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://tagmanager.google.com https://connect.facebook.net",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://fxgbmjiymthrteqtakbg.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.g.doubleclick.net",
-      "connect-src 'self' https://fxgbmjiymthrteqtakbg.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.g.doubleclick.net",
+      "img-src 'self' data: blob: https://fxgbmjiymthrteqtakbg.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.g.doubleclick.net https://www.facebook.com",
+      "connect-src 'self' https://fxgbmjiymthrteqtakbg.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.g.doubleclick.net https://www.facebook.com https://connect.facebook.net",
       "font-src 'self'",
       "frame-src https://www.openstreetmap.org https://www.googletagmanager.com",
       "frame-ancestors 'none'",

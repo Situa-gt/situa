@@ -22,6 +22,7 @@ import { ModelMainDetails } from '@/components/model/ModelMainDetails'
 import { ModelSpecs } from '@/components/model/ModelSpecs'
 import { ModelFloorplan } from '@/components/model/ModelFloorplan'
 import { ContactSidebar } from '@/components/contact/ContactSidebar'
+import { ContactFloatingCta } from '@/components/contact/ContactFloatingCta'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { TrackView } from '@/components/analytics/TrackView'
 import { breadcrumbsFor, labelForTipo } from '@/lib/breadcrumbs'
@@ -248,26 +249,32 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
         body: (
           <div className="mx-auto w-full max-w-7xl px-6">
             <TrackView type="project_view" projectId={detail.project.id} />
+            <ContactFloatingCta />
             <div className="mt-8">
               <ProjectGallery
                 images={detail.gallery}
                 projectName={detail.project.name}
               />
             </div>
-            <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
-              <div className="flex flex-col gap-12">
-                <div>
-                  <ProjectHeaderInfo detail={detail} zoneName={zone.name} />
-                  <div className="mt-8">
-                    <ProjectMainDetails
-                      baseCurrency={detail.project.base_currency}
-                      exchangeRate={detail.project.exchange_rate}
-                      priceFrom={detail.price_from}
-                      monthlyFrom={detail.monthly_payment_from}
-                      models={detail.models}
-                    />
-                  </div>
+            <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-x-12 lg:gap-y-12">
+              <div className="order-1 lg:col-start-1 lg:row-start-1">
+                <ProjectHeaderInfo detail={detail} zoneName={zone.name} />
+                <div className="mt-8">
+                  <ProjectMainDetails
+                    baseCurrency={detail.project.base_currency}
+                    exchangeRate={detail.project.exchange_rate}
+                    priceFrom={detail.price_from}
+                    monthlyFrom={detail.monthly_payment_from}
+                    models={detail.models}
+                  />
                 </div>
+              </div>
+              <ContactSidebar
+                className="order-2 lg:order-none lg:col-start-2 lg:row-start-1 lg:row-span-2"
+                projectId={detail.project.id}
+                projectName={detail.project.name}
+              />
+              <div className="order-3 flex flex-col gap-12 lg:col-start-1 lg:row-start-2">
                 <ModelsGrid
                   models={detail.models}
                   currency={project.base_currency}
@@ -284,10 +291,6 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                 />
                 <ProjectStatusTimeline current={detail.project.stage} />
               </div>
-              <ContactSidebar
-                projectId={detail.project.id}
-                projectName={detail.project.name}
-              />
             </div>
           </div>
         ),
@@ -304,24 +307,32 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
         body: (
           <div className="mx-auto w-full max-w-7xl px-6">
             <TrackView type="model_view" projectId={detail.project.id} modelId={detail.model.id} />
+            <ContactFloatingCta />
             <div className="mt-8">
               <ProjectGallery
                 images={detail.images}
                 projectName={detail.project.name}
               />
             </div>
-            <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
-              <div className="flex flex-col gap-12">
-                <div>
-                  <ModelHeaderInfo detail={detail} projectHref={projectHref} />
-                  <div className="mt-8">
-                    <ModelMainDetails
-                      model={detail.model}
-                      baseCurrency={detail.project.base_currency}
-                      exchangeRate={detail.project.exchange_rate}
-                    />
-                  </div>
+            <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-x-12 lg:gap-y-12">
+              <div className="order-1 lg:col-start-1 lg:row-start-1">
+                <ModelHeaderInfo detail={detail} projectHref={projectHref} />
+                <div className="mt-8">
+                  <ModelMainDetails
+                    model={detail.model}
+                    baseCurrency={detail.project.base_currency}
+                    exchangeRate={detail.project.exchange_rate}
+                  />
                 </div>
+              </div>
+              <ContactSidebar
+                className="order-2 lg:order-none lg:col-start-2 lg:row-start-1 lg:row-span-2"
+                projectId={detail.project.id}
+                modelId={detail.model.id}
+                projectName={detail.project.name}
+                modelName={detail.model.name}
+              />
+              <div className="order-3 flex flex-col gap-12 lg:col-start-1 lg:row-start-2">
                 <ModelSpecs model={detail.model} />
                 {detail.floorplan && (
                   <ModelFloorplan
@@ -346,12 +357,6 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                 />
                 <ProjectStatusTimeline current={detail.project.stage} />
               </div>
-              <ContactSidebar
-                projectId={detail.project.id}
-                modelId={detail.model.id}
-                projectName={detail.project.name}
-                modelName={detail.model.name}
-              />
             </div>
           </div>
         ),

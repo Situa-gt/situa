@@ -31,6 +31,8 @@ const ContactSchema = z.object({
   utm_source: z.string().max(64).optional(),
   utm_medium: z.string().max(64).optional(),
   utm_campaign: z.string().max(64).optional(),
+  utm_term: z.string().max(64).optional(),
+  utm_content: z.string().max(64).optional(),
 })
 
 export type ContactInput = z.input<typeof ContactSchema>
@@ -117,6 +119,11 @@ export async function submitContactLead(
     project_name: project.name,
     model_id: parsed.data.model_id ?? null,
     message: parsed.data.message ?? null,
+    utm_source: parsed.data.utm_source ?? null,
+    utm_medium: parsed.data.utm_medium ?? null,
+    utm_campaign: parsed.data.utm_campaign ?? null,
+    utm_term: parsed.data.utm_term ?? null,
+    utm_content: parsed.data.utm_content ?? null,
     ip: ip,
   })
 

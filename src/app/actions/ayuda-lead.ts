@@ -16,6 +16,11 @@ const AyudaLeadSchema = z.object({
     .max(0)
     .optional()
     .or(z.literal('').transform(() => undefined)),
+  utm_source: z.string().max(64).optional(),
+  utm_medium: z.string().max(64).optional(),
+  utm_campaign: z.string().max(64).optional(),
+  utm_term: z.string().max(64).optional(),
+  utm_content: z.string().max(64).optional(),
 })
 
 export type AyudaLeadInput = z.input<typeof AyudaLeadSchema>
@@ -55,6 +60,11 @@ export async function submitAyudaLead(input: unknown): Promise<ActionResult> {
     message: d.message ?? null,
     ip_address: ip,
     user_agent: ua,
+    utm_source: d.utm_source ?? null,
+    utm_medium: d.utm_medium ?? null,
+    utm_campaign: d.utm_campaign ?? null,
+    utm_term: d.utm_term ?? null,
+    utm_content: d.utm_content ?? null,
   })
 
   if (dbError) {
@@ -68,6 +78,11 @@ export async function submitAyudaLead(input: unknown): Promise<ActionResult> {
     email: d.email,
     phone: d.phone,
     message: d.message ?? null,
+    utm_source: d.utm_source ?? null,
+    utm_medium: d.utm_medium ?? null,
+    utm_campaign: d.utm_campaign ?? null,
+    utm_term: d.utm_term ?? null,
+    utm_content: d.utm_content ?? null,
     ip: ip,
   })
 

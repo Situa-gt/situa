@@ -21,6 +21,28 @@ const EMPTY = {
   hp_company: '',
 }
 
+const UTM_KEYS = [
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_term',
+  'utm_content',
+] as const
+
+// Marketing links may carry UTMs in the query string (?) or the hash (#).
+// Read both; the query string wins when a key is present in both places.
+function readUtms(): Record<string, string> {
+  if (typeof window === 'undefined') return {}
+  const query = new URLSearchParams(window.location.search)
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+  const utms: Record<string, string> = {}
+  for (const key of UTM_KEYS) {
+    const value = query.get(key) ?? hash.get(key)
+    if (value) utms[key] = value
+  }
+  return utms
+}
+
 export function AyudaModal() {
   const [open, setOpen] = useState(false)
   const [values, setValues] = useState(EMPTY)
@@ -47,7 +69,7 @@ export function AyudaModal() {
     e.preventDefault()
     setServerError(null)
     startTransition(async () => {
-      const result = await submitAyudaLead(values)
+      const result = await submitAyudaLead({ ...values, ...readUtms() })
       if ('error' in result) {
         setServerError(result.error)
       } else {

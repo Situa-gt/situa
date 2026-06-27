@@ -24,6 +24,11 @@ export type Database = {
           ip_address: string | null
           user_agent: string | null
           created_at: string
+          utm_source: string | null
+          utm_medium: string | null
+          utm_campaign: string | null
+          utm_term: string | null
+          utm_content: string | null
         }
         Insert: {
           id?: string
@@ -34,6 +39,11 @@ export type Database = {
           ip_address?: string | null
           user_agent?: string | null
           created_at?: string
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          utm_term?: string | null
+          utm_content?: string | null
         }
         Update: {
           id?: string
@@ -44,6 +54,11 @@ export type Database = {
           ip_address?: string | null
           user_agent?: string | null
           created_at?: string
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          utm_term?: string | null
+          utm_content?: string | null
         }
         Relationships: []
       }
@@ -169,8 +184,10 @@ export type Database = {
           project_id: string
           user_agent: string | null
           utm_campaign: string | null
+          utm_content: string | null
           utm_medium: string | null
           utm_source: string | null
+          utm_term: string | null
         }
         Insert: {
           channel?: Database["public"]["Enums"]["lead_channel"]
@@ -185,8 +202,10 @@ export type Database = {
           project_id: string
           user_agent?: string | null
           utm_campaign?: string | null
+          utm_content?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+          utm_term?: string | null
         }
         Update: {
           channel?: Database["public"]["Enums"]["lead_channel"]
@@ -201,8 +220,10 @@ export type Database = {
           project_id?: string
           user_agent?: string | null
           utm_campaign?: string | null
+          utm_content?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+          utm_term?: string | null
         }
         Relationships: [
           {

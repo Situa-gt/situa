@@ -19,6 +19,28 @@ const ClientSchema = z.object({
 
 type FieldErrors = Partial<Record<'full_name' | 'email' | 'phone' | 'message', string[]>>
 
+const UTM_KEYS = [
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_term',
+  'utm_content',
+] as const
+
+// Marketing links may carry UTMs in the query string (?) or the hash (#).
+// Read both so we don't miss attribution if the format changes; the query
+// string wins when a key is present in both places.
+function readUtms(searchParams: URLSearchParams): Record<string, string> {
+  const hash = typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '') : ''
+  const hashParams = new URLSearchParams(hash)
+  const utms: Record<string, string> = {}
+  for (const key of UTM_KEYS) {
+    const value = searchParams.get(key) ?? hashParams.get(key)
+    if (value) utms[key] = value
+  }
+  return utms
+}
+
 interface ContactFormProps {
   projectId: string
   modelId?: string
@@ -65,9 +87,7 @@ export function ContactForm({ projectId, modelId, projectName, modelName }: Cont
       ...(modelId ? { model_id: modelId } : {}),
       ...parsed.data,
       hp_company: hp,
-      utm_source: searchParams.get('utm_source') ?? undefined,
-      utm_medium: searchParams.get('utm_medium') ?? undefined,
-      utm_campaign: searchParams.get('utm_campaign') ?? undefined,
+      ...readUtms(searchParams),
       project_name: projectName,
       model_name: modelName,
     }

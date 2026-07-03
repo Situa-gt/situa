@@ -164,6 +164,10 @@
   animation: brand-glow-pulse 2.4s ease-in-out infinite;
 }
 
+.text-brand-purple {
+  --amenity-icon-filter: invert(45%) sepia(69%) saturate(2829%) hue-rotate(222deg) brightness(96%) contrast(91%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-brand-glow {
     animation: none;

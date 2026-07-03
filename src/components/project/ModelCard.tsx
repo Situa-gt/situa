@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowUpRight } from 'lucide-react'
+import { FontAwesomeIcon } from '@/components/ui/font-awesome-icon'
 import { formatPriceValue } from '@/lib/format/price'
 import type { ProjectGalleryImage } from '@/lib/queries/project'
 import type { Database } from '@/lib/database.types'
@@ -52,26 +53,46 @@ export function ModelCard({ model, currency, basePath, image }: Props) {
 
         <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 text-sm text-body">
           {model.size_m2 !== null && (
-            <div>
+            <div className="flex items-start gap-2">
+              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple/10 text-brand-purple">
+                <FontAwesomeIcon name="ruler" className="h-3.5 w-3.5 opacity-90 [filter:var(--amenity-icon-filter)]" />
+              </span>
+              <div>
               <dt className="text-xs uppercase tracking-[0.06em] text-muted-ink">Área</dt>
               <dd className="mt-0.5 font-medium text-ink">{model.size_m2} m²</dd>
+              </div>
             </div>
           )}
           {model.bedrooms !== null && (
-            <div>
+            <div className="flex items-start gap-2">
+              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple/10 text-brand-purple">
+                <FontAwesomeIcon name="bed" className="h-3.5 w-3.5 opacity-90 [filter:var(--amenity-icon-filter)]" />
+              </span>
+              <div>
               <dt className="text-xs uppercase tracking-[0.06em] text-muted-ink">Dorm.</dt>
               <dd className="mt-0.5 font-medium text-ink">{model.bedrooms}</dd>
+              </div>
             </div>
           )}
           {model.bathrooms !== null && (
-            <div>
+            <div className="flex items-start gap-2">
+              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple/10 text-brand-purple">
+                <FontAwesomeIcon name="bath" className="h-3.5 w-3.5 opacity-90 [filter:var(--amenity-icon-filter)]" />
+              </span>
+              <div>
               <dt className="text-xs uppercase tracking-[0.06em] text-muted-ink">Baños</dt>
               <dd className="mt-0.5 font-medium text-ink">{model.bathrooms}</dd>
+              </div>
             </div>
           )}
-          <div>
+          <div className="flex items-start gap-2">
+            <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple/10 text-brand-purple">
+              <FontAwesomeIcon name="square-parking" className="h-3.5 w-3.5 opacity-90 [filter:var(--amenity-icon-filter)]" />
+            </span>
+            <div>
             <dt className="text-xs uppercase tracking-[0.06em] text-muted-ink">Parqueo</dt>
             <dd className="mt-0.5 font-medium text-ink">{model.parking_spots}</dd>
+            </div>
           </div>
         </dl>
 

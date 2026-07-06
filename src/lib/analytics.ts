@@ -1,4 +1,10 @@
-type EventType = 'project_view' | 'model_view' | 'search'
+type EventType =
+  | 'project_view'
+  | 'model_view'
+  | 'search'
+  | 'contact_form_start'
+  | 'contact_form_submit'
+  | 'calculator_submit'
 
 interface TrackPayload {
   event_type: EventType
@@ -6,6 +12,14 @@ interface TrackPayload {
   model_id?: string
   filters?: Record<string, unknown>
 }
+
+const UTM_KEYS = [
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_content',
+  'utm_term',
+] as const
 
 function getSessionId(): string {
   const key = 'situa_sid'
@@ -17,14 +31,29 @@ function getSessionId(): string {
   return sid
 }
 
+function getContext() {
+  const url = new URL(window.location.href)
+  const utms: Record<string, string> = {}
+  for (const key of UTM_KEYS) {
+    const value = url.searchParams.get(key)
+    if (value) utms[key] = value
+  }
+
+  return {
+    session_id: getSessionId(),
+    page_path: `${url.pathname}${url.search}`,
+    referrer: document.referrer || undefined,
+    ...utms,
+  }
+}
+
 export function trackEvent(payload: TrackPayload): void {
   if (typeof window === 'undefined') return
   try {
-    const session_id = getSessionId()
     fetch('/api/analytics', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...payload, session_id }),
+      body: JSON.stringify({ ...payload, ...getContext() }),
     }).catch(() => {})
   } catch {
     // never throw for analytics

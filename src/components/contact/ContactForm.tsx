@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { CtaButton } from '@/components/ui/cta-button'
 import { submitContactLead } from '@/app/actions/contact'
 import { pushEvent } from '@/lib/gtm'
+import { trackEvent } from '@/lib/analytics'
 
 const ClientSchema = z.object({
   full_name: z.string().trim().min(2, 'Ingresa tu nombre completo').max(100),
@@ -67,8 +68,13 @@ export function ContactForm({ projectId, modelId, projectName, modelName }: Cont
   const [errors, setErrors] = useState<FieldErrors>({})
   const [isPending, startTransition] = useTransition()
   const [submitted, setSubmitted] = useState(false)
+  const hasTrackedStart = useRef(false)
 
   function update<K extends keyof typeof INITIAL>(key: K, value: string) {
+    if (!hasTrackedStart.current) {
+      hasTrackedStart.current = true
+      trackEvent({ event_type: 'contact_form_start', project_id: projectId, model_id: modelId })
+    }
     setValues((v) => ({ ...v, [key]: value }))
   }
 
@@ -105,6 +111,7 @@ export function ContactForm({ projectId, modelId, projectName, modelName }: Cont
         model_id: modelId,
         model_name: modelName,
       })
+      trackEvent({ event_type: 'contact_form_submit', project_id: projectId, model_id: modelId })
       toast.success('¡Mensaje enviado! Pronto te contactaremos.')
       setValues(INITIAL)
       setHp('')

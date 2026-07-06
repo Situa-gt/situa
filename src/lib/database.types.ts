@@ -109,6 +109,14 @@ export type Database = {
           model_id: string | null
           filters: Json | null
           session_id: string | null
+          page_path: string | null
+          referrer: string | null
+          utm_source: string | null
+          utm_medium: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_term: string | null
+          user_agent: string | null
           created_at: string
         }
         Insert: {
@@ -118,6 +126,14 @@ export type Database = {
           model_id?: string | null
           filters?: Json | null
           session_id?: string | null
+          page_path?: string | null
+          referrer?: string | null
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_term?: string | null
+          user_agent?: string | null
           created_at?: string
         }
         Update: {
@@ -127,6 +143,14 @@ export type Database = {
           model_id?: string | null
           filters?: Json | null
           session_id?: string | null
+          page_path?: string | null
+          referrer?: string | null
+          utm_source?: string | null
+          utm_medium?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_term?: string | null
+          user_agent?: string | null
           created_at?: string
         }
         Relationships: [
@@ -647,7 +671,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      analytics_event_type: "project_view" | "model_view" | "search"
+      analytics_event_type:
+        | "project_view"
+        | "model_view"
+        | "search"
+        | "contact_form_start"
+        | "contact_form_submit"
+        | "calculator_submit"
       currency_code: "USD" | "GTQ"
       lead_channel: "form"
       media_kind: "cover" | "gallery" | "floorplan" | "logo"
@@ -784,7 +814,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      analytics_event_type: ["project_view", "model_view", "search"],
+      analytics_event_type: [
+        "project_view",
+        "model_view",
+        "search",
+        "contact_form_start",
+        "contact_form_submit",
+        "calculator_submit",
+      ],
       currency_code: ["USD", "GTQ"],
       lead_channel: ["form"],
       media_kind: ["cover", "gallery", "floorplan", "logo"],

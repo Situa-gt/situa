@@ -6,6 +6,7 @@ import { tipoSlug } from '@/lib/types/property'
 import { getProjectsForIndex } from '@/lib/queries/index-pages'
 import { getProjectDetail } from '@/lib/queries/project'
 import { getModelDetail } from '@/lib/queries/model'
+import { getSuggestedProjects } from '@/lib/queries/suggestions'
 import { formatPriceFrom } from '@/lib/format/price'
 import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs'
 import { IndexHero } from '@/components/index/IndexHero'
@@ -17,6 +18,7 @@ import { ProjectAmenities } from '@/components/project/ProjectAmenities'
 import { ProjectLocation } from '@/components/project/ProjectLocation'
 import { ProjectStatusTimeline } from '@/components/project/ProjectStatusTimeline'
 import { ModelsGrid } from '@/components/project/ModelsGrid'
+import { SuggestedProjects } from '@/components/project/SuggestedProjects'
 import { ModelHeaderInfo } from '@/components/model/ModelHeader'
 import { ModelMainDetails } from '@/components/model/ModelMainDetails'
 import { ModelSpecs } from '@/components/model/ModelSpecs'
@@ -238,6 +240,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
       const { project, zone } = resolved.data
       const detail = await getProjectDetail(project.id, project.slug)
       if (!detail) notFound()
+      const suggestedProjects = await getSuggestedProjects(project.id, 6)
       const basePath = `/${zone.url_slug}/${tipoSlug(project.property_type)}/${project.slug}`
       const jsonLd: object[] = [
         buildRealEstateListing({ detail, zone, canonicalPath: basePath }),
@@ -290,6 +293,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                   projectName={detail.project.name}
                 />
                 <ProjectStatusTimeline current={detail.project.stage} />
+                <SuggestedProjects sourceProjectId={detail.project.id} projects={suggestedProjects} />
               </div>
             </div>
           </div>

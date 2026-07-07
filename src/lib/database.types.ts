@@ -677,6 +677,8 @@ export type Database = {
         | "search"
         | "contact_form_start"
         | "contact_form_submit"
+        | "suggested_project_impression"
+        | "suggested_project_click"
         | "calculator_submit"
       currency_code: "USD" | "GTQ"
       lead_channel: "form"
@@ -820,6 +822,8 @@ export const Constants = {
         "search",
         "contact_form_start",
         "contact_form_submit",
+        "suggested_project_impression",
+        "suggested_project_click",
         "calculator_submit",
       ],
       currency_code: ["USD", "GTQ"],

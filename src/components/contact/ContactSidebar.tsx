@@ -2,16 +2,25 @@ import { Suspense } from 'react'
 import { cn } from '@/lib/utils'
 import { ContactForm } from './ContactForm'
 import { ContactNudge } from './ContactNudge'
+import type { SuggestedProjectData } from '@/lib/queries/suggestions'
 
 interface Props {
   projectId: string
   modelId?: string
   projectName?: string
   modelName?: string
+  suggestedProjects?: SuggestedProjectData[]
   className?: string
 }
 
-export function ContactSidebar({ projectId, modelId, projectName, modelName, className }: Props) {
+export function ContactSidebar({
+  projectId,
+  modelId,
+  projectName,
+  modelName,
+  suggestedProjects,
+  className,
+}: Props) {
   return (
     <aside
       id="contacto"
@@ -38,6 +47,7 @@ export function ContactSidebar({ projectId, modelId, projectName, modelName, cla
               modelId={modelId}
               projectName={projectName}
               modelName={modelName}
+              suggestedProjects={suggestedProjects}
             />
           </Suspense>
         </div>

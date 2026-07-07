@@ -1,6 +1,8 @@
 'use client'
 
-import { useRef, useState, useTransition } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -10,6 +12,9 @@ import { CtaButton } from '@/components/ui/cta-button'
 import { submitContactLead } from '@/app/actions/contact'
 import { pushEvent } from '@/lib/gtm'
 import { trackEvent } from '@/lib/analytics'
+import { formatPriceFrom } from '@/lib/format/price'
+import { tipoSlug } from '@/lib/types/property'
+import type { SuggestedProjectData } from '@/lib/queries/suggestions'
 
 const ClientSchema = z.object({
   full_name: z.string().trim().min(2, 'Ingresa tu nombre completo').max(100),
@@ -47,6 +52,7 @@ interface ContactFormProps {
   modelId?: string
   projectName?: string
   modelName?: string
+  suggestedProjects?: SuggestedProjectData[]
 }
 
 const EMPTY = { full_name: '', email: '', phone: '', message: '' }
@@ -59,7 +65,96 @@ function buildDefaultMessage(projectName?: string, modelName?: string) {
   return `Tengo interés en conocer más sobre ${projectName}`
 }
 
-export function ContactForm({ projectId, modelId, projectName, modelName }: ContactFormProps) {
+function ContactSuccessSuggestions({
+  sourceProjectId,
+  projects,
+}: {
+  sourceProjectId: string
+  projects: SuggestedProjectData[]
+}) {
+  const compactProjects = projects.slice(0, 3)
+
+  useEffect(() => {
+    for (const [index, project] of compactProjects.entries()) {
+      trackEvent({
+        event_type: 'suggested_project_impression',
+        project_id: sourceProjectId,
+        filters: {
+          placement: 'contact_success',
+          suggested_project_id: project.id,
+          suggested_project_name: project.name,
+          rank: index + 1,
+          reasons: project.recommendation_reasons,
+        },
+      })
+    }
+  }, [compactProjects, sourceProjectId])
+
+  if (compactProjects.length === 0) return null
+
+  return (
+    <div className="mt-5 border-t border-emerald-200/70 pt-5 text-left">
+      <p className="text-sm font-semibold text-ink">También puedes ver</p>
+      <div className="mt-3 grid gap-3">
+        {compactProjects.map((project, index) => {
+          const href = project.zone
+            ? `/${project.zone.url_slug}/${tipoSlug(project.property_type)}/${project.slug}`
+            : '#'
+          const cover = project.cover_url ?? '/placeholder-card.svg'
+          const alt = project.cover_alt ?? `Foto de ${project.name}`
+
+          return (
+            <Link
+              key={project.id}
+              href={href}
+              className="group grid grid-cols-[72px_minmax(0,1fr)] gap-3 rounded-2xl border border-emerald-100 bg-white/85 p-2 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-purple/30 hover:shadow-md"
+              onClick={() => {
+                trackEvent({
+                  event_type: 'suggested_project_click',
+                  project_id: sourceProjectId,
+                  filters: {
+                    placement: 'contact_success',
+                    suggested_project_id: project.id,
+                    suggested_project_name: project.name,
+                    rank: index + 1,
+                    reasons: project.recommendation_reasons,
+                  },
+                })
+              }}
+            >
+              <span className="relative block aspect-square overflow-hidden rounded-xl bg-zinc-100">
+                <Image
+                  src={cover}
+                  alt={alt}
+                  fill
+                  sizes="72px"
+                  className="object-cover transition duration-300 group-hover:scale-105"
+                />
+              </span>
+              <span className="min-w-0 py-1">
+                <span className="block truncate text-sm font-semibold text-ink">
+                  {project.name}
+                </span>
+                {project.zone?.name && (
+                  <span className="mt-0.5 block text-xs text-muted-ink">
+                    {project.zone.name}
+                  </span>
+                )}
+                {project.price_from !== null && (
+                  <span className="mt-1 block text-xs font-medium text-brand-purple">
+                    {formatPriceFrom(project.price_from, project.base_currency)}
+                  </span>
+                )}
+              </span>
+            </Link>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+export function ContactForm({ projectId, modelId, projectName, modelName, suggestedProjects = [] }: ContactFormProps) {
   const searchParams = useSearchParams()
   const defaultMessage = buildDefaultMessage(projectName, modelName)
   const INITIAL = { ...EMPTY, message: defaultMessage }
@@ -121,30 +216,33 @@ export function ContactForm({ projectId, modelId, projectName, modelName }: Cont
 
   if (submitted) {
     return (
-      <div
-        role="status"
-        className="flex flex-col items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-6 py-10 text-center"
-      >
-        <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white">
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-6 w-6"
-          >
-            <path d="M5 12.5l5 5L20 7" />
-          </svg>
-        </span>
-        <h3 className="text-lg font-semibold text-emerald-900">
-          ¡Mensaje enviado!
-        </h3>
-        <p className="text-sm text-emerald-800">
-          Pronto te contactaremos.
-        </p>
+      <div role="status" aria-live="polite">
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-8 text-center">
+          <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white">
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-6 w-6"
+            >
+              <path d="M5 12.5l5 5L20 7" />
+            </svg>
+          </span>
+          <h3 className="mt-3 text-lg font-semibold text-emerald-900">
+            ¡Mensaje enviado!
+          </h3>
+          <p className="mt-1 text-sm text-emerald-800">
+            Pronto te contactaremos.
+          </p>
+        </div>
+        <ContactSuccessSuggestions
+          sourceProjectId={projectId}
+          projects={suggestedProjects}
+        />
       </div>
     )
   }

@@ -276,6 +276,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                 className="order-2 lg:order-none lg:col-start-2 lg:row-start-1 lg:row-span-2"
                 projectId={detail.project.id}
                 projectName={detail.project.name}
+                suggestedProjects={suggestedProjects}
               />
               <div className="order-3 flex flex-col gap-12 lg:col-start-1 lg:row-start-2">
                 <ModelsGrid
@@ -305,6 +306,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
       const { model, project, zone } = resolved.data
       const detail = await getModelDetail(model.id, project.id, model.slug)
       if (!detail) notFound()
+      const suggestedProjects = await getSuggestedProjects(project.id, 6)
       const projectHref = `/${zone.url_slug}/${tipoSlug(project.property_type)}/${project.slug}`
       const canonicalPath = `${projectHref}/${model.slug}`
       return {
@@ -343,6 +345,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                 modelId={detail.model.id}
                 projectName={detail.project.name}
                 modelName={detail.model.name}
+                suggestedProjects={suggestedProjects}
               />
               <div className="order-5 flex flex-col gap-12 lg:col-start-1 lg:row-start-4">
                 <ModelSpecs model={detail.model} />

@@ -164,8 +164,11 @@
   animation: brand-glow-pulse 2.4s ease-in-out infinite;
 }
 
-.text-brand-purple {
-  --amenity-icon-filter: invert(45%) sepia(69%) saturate(2829%) hue-rotate(222deg) brightness(96%) contrast(91%);
+.fa-icon {
+  height: var(--fa-icon-size, 1em);
+  mask: var(--fa-icon-url) center / contain no-repeat;
+  -webkit-mask: var(--fa-icon-url) center / contain no-repeat;
+  width: var(--fa-icon-size, 1em);
 }
 
 @media (prefers-reduced-motion: reduce) {

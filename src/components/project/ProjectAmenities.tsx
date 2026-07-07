@@ -76,7 +76,7 @@ export function ProjectAmenities({ amenities }: Props) {
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple/10 text-brand-purple">
               <FontAwesomeIcon
                 name={iconForAmenity(a)}
-                className="h-3.5 w-3.5 opacity-90 [filter:var(--amenity-icon-filter)]"
+                className="h-3.5 w-3.5 opacity-90"
               />
             </span>
             {a}

@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import type { CSSProperties } from 'react'
 import { cn } from '@/lib/utils'
 
 export const FONT_AWESOME_ICON_NAMES = [
@@ -65,14 +65,15 @@ export function FontAwesomeIcon({
   label,
 }: FontAwesomeIconProps) {
   return (
-    <Image
-      src={`/fontawesome/solid/${name}.svg`}
-      alt={decorative ? '' : (label ?? name)}
-      width={size}
-      height={size}
+    <span
+      role={decorative ? undefined : 'img'}
+      aria-label={decorative ? undefined : (label ?? name)}
       aria-hidden={decorative ? true : undefined}
-      className={cn('inline-block h-[1em] w-[1em] object-contain', className)}
-      unoptimized
+      className={cn('fa-icon inline-block shrink-0 bg-current', className)}
+      style={{
+        '--fa-icon-url': `url("/fontawesome/solid/${name}.svg")`,
+        '--fa-icon-size': `${size}px`,
+      } as CSSProperties}
     />
   )
 }

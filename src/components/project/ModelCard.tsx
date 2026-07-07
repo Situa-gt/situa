@@ -55,7 +55,7 @@ export function ModelCard({ model, currency, basePath, image }: Props) {
           {model.size_m2 !== null && (
             <div className="flex items-start gap-2">
               <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple/10 text-brand-purple">
-                <FontAwesomeIcon name="ruler" className="h-3.5 w-3.5 opacity-90 [filter:var(--amenity-icon-filter)]" />
+                <FontAwesomeIcon name="ruler" className="h-3.5 w-3.5 opacity-90" />
               </span>
               <div>
               <dt className="text-xs uppercase tracking-[0.06em] text-muted-ink">Área</dt>
@@ -66,7 +66,7 @@ export function ModelCard({ model, currency, basePath, image }: Props) {
           {model.bedrooms !== null && (
             <div className="flex items-start gap-2">
               <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple/10 text-brand-purple">
-                <FontAwesomeIcon name="bed" className="h-3.5 w-3.5 opacity-90 [filter:var(--amenity-icon-filter)]" />
+                <FontAwesomeIcon name="bed" className="h-3.5 w-3.5 opacity-90" />
               </span>
               <div>
               <dt className="text-xs uppercase tracking-[0.06em] text-muted-ink">Dorm.</dt>
@@ -77,7 +77,7 @@ export function ModelCard({ model, currency, basePath, image }: Props) {
           {model.bathrooms !== null && (
             <div className="flex items-start gap-2">
               <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple/10 text-brand-purple">
-                <FontAwesomeIcon name="bath" className="h-3.5 w-3.5 opacity-90 [filter:var(--amenity-icon-filter)]" />
+                <FontAwesomeIcon name="bath" className="h-3.5 w-3.5 opacity-90" />
               </span>
               <div>
               <dt className="text-xs uppercase tracking-[0.06em] text-muted-ink">Baños</dt>
@@ -87,7 +87,7 @@ export function ModelCard({ model, currency, basePath, image }: Props) {
           )}
           <div className="flex items-start gap-2">
             <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple/10 text-brand-purple">
-              <FontAwesomeIcon name="square-parking" className="h-3.5 w-3.5 opacity-90 [filter:var(--amenity-icon-filter)]" />
+              <FontAwesomeIcon name="square-parking" className="h-3.5 w-3.5 opacity-90" />
             </span>
             <div>
             <dt className="text-xs uppercase tracking-[0.06em] text-muted-ink">Parqueo</dt>

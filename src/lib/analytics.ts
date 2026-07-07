@@ -4,6 +4,8 @@ type EventType =
   | 'search'
   | 'contact_form_start'
   | 'contact_form_submit'
+  | 'suggested_project_impression'
+  | 'suggested_project_click'
   | 'calculator_submit'
 
 interface TrackPayload {

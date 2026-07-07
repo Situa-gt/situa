@@ -41,6 +41,16 @@ const AnalyticsSchema = z.discriminatedUnion('event_type', [
     model_id: z.string().uuid().optional(),
   }),
   BaseEventSchema.extend({
+    event_type: z.literal('suggested_project_impression'),
+    project_id: z.string().uuid(),
+    filters: z.record(z.string(), z.unknown()).optional(),
+  }),
+  BaseEventSchema.extend({
+    event_type: z.literal('suggested_project_click'),
+    project_id: z.string().uuid(),
+    filters: z.record(z.string(), z.unknown()).optional(),
+  }),
+  BaseEventSchema.extend({
     event_type: z.literal('calculator_submit'),
     filters: z.record(z.string(), z.unknown()).optional(),
   }),

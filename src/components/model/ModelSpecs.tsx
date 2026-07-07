@@ -36,7 +36,7 @@ export function ModelSpecs({ model }: Props) {
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-purple/10 text-brand-purple">
               <FontAwesomeIcon
                 name={s.icon}
-                className="h-5 w-5 opacity-90 [filter:var(--amenity-icon-filter)]"
+                className="h-5 w-5 opacity-90"
               />
             </span>
             <div>

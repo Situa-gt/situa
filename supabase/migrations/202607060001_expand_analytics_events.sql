@@ -1,5 +1,7 @@
 alter type public.analytics_event_type add value if not exists 'contact_form_start';
 alter type public.analytics_event_type add value if not exists 'contact_form_submit';
+alter type public.analytics_event_type add value if not exists 'suggested_project_impression';
+alter type public.analytics_event_type add value if not exists 'suggested_project_click';
 alter type public.analytics_event_type add value if not exists 'calculator_submit';
 
 alter table public.analytics_events

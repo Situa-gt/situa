@@ -5,12 +5,14 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { ProjectCard } from '@/components/project/ProjectCard'
 import type { SuggestedProjectData } from '@/lib/queries/suggestions'
+import { trackEvent } from '@/lib/analytics'
 
 interface Props {
+  sourceProjectId: string
   projects: SuggestedProjectData[]
 }
 
-export function SuggestedProjects({ projects }: Props) {
+export function SuggestedProjects({ sourceProjectId, projects }: Props) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     containScroll: 'trimSnaps',
@@ -40,6 +42,21 @@ export function SuggestedProjects({ projects }: Props) {
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
+
+  useEffect(() => {
+    for (const [index, project] of projects.entries()) {
+      trackEvent({
+        event_type: 'suggested_project_impression',
+        project_id: sourceProjectId,
+        filters: {
+          suggested_project_id: project.id,
+          suggested_project_name: project.name,
+          rank: index + 1,
+          reasons: project.recommendation_reasons,
+        },
+      })
+    }
+  }, [projects, sourceProjectId])
 
   if (projects.length === 0) return null
 
@@ -84,6 +101,18 @@ export function SuggestedProjects({ projects }: Props) {
             <div
               key={project.id}
               className="min-w-0 flex-[0_0_78%] sm:flex-[0_0_310px] lg:flex-[0_0_calc(33.333%_-_0.875rem)]"
+              onClickCapture={() => {
+                trackEvent({
+                  event_type: 'suggested_project_click',
+                  project_id: sourceProjectId,
+                  filters: {
+                    suggested_project_id: project.id,
+                    suggested_project_name: project.name,
+                    rank: index + 1,
+                    reasons: project.recommendation_reasons,
+                  },
+                })
+              }}
             >
               <ProjectCard project={project} priority={index < 3} />
             </div>

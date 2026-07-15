@@ -7,6 +7,7 @@ import { CtaButton } from '@/components/ui/cta-button'
 import { ProjectCard } from '@/components/project/ProjectCard'
 import { formatPriceValue } from '@/lib/format/price'
 import { fetchAllActiveProjects } from '@/app/actions/calculadora'
+import { trackEvent } from '@/lib/analytics'
 import type { ProjectCardData } from '@/lib/queries/home'
 
 type Currency = 'USD' | 'GTQ'
@@ -115,6 +116,17 @@ export function Calculadora() {
   }
 
   function handleSearch() {
+    trackEvent({
+      event_type: 'calculator_submit',
+      filters: {
+        currency,
+        property_price: propertyPrice,
+        down_payment_pct: downPaymentPct,
+        term_years: termYears,
+        interest_rate: rate,
+        monthly_payment: monthlyPayment,
+      },
+    })
     startTransition(async () => {
       try {
         const all = await fetchAllActiveProjects()

@@ -293,7 +293,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                   projectName={detail.project.name}
                 />
                 <ProjectStatusTimeline current={detail.project.stage} />
-                <SuggestedProjects projects={suggestedProjects} />
+                <SuggestedProjects sourceProjectId={detail.project.id} projects={suggestedProjects} />
               </div>
             </div>
           </div>
@@ -321,29 +321,31 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
             <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-x-12 lg:gap-y-12">
               <div className="order-1 lg:col-start-1 lg:row-start-1">
                 <ModelHeaderInfo detail={detail} projectHref={projectHref} />
-                <div className="mt-8">
-                  <ModelMainDetails
-                    model={detail.model}
-                    baseCurrency={detail.project.base_currency}
-                    exchangeRate={detail.project.exchange_rate}
+              </div>
+              <div className="order-2 lg:col-start-1 lg:row-start-2">
+                <ModelMainDetails
+                  model={detail.model}
+                  baseCurrency={detail.project.base_currency}
+                  exchangeRate={detail.project.exchange_rate}
+                />
+              </div>
+              {detail.floorplan && (
+                <div className="order-3 lg:col-start-1 lg:row-start-3">
+                  <ModelFloorplan
+                    floorplan={detail.floorplan}
+                    modelName={detail.model.name}
                   />
                 </div>
-              </div>
+              )}
               <ContactSidebar
-                className="order-2 lg:order-none lg:col-start-2 lg:row-start-1 lg:row-span-2"
+                className="order-4 lg:order-none lg:col-start-2 lg:row-start-1 lg:row-span-4"
                 projectId={detail.project.id}
                 modelId={detail.model.id}
                 projectName={detail.project.name}
                 modelName={detail.model.name}
               />
-              <div className="order-3 flex flex-col gap-12 lg:col-start-1 lg:row-start-2">
+              <div className="order-5 flex flex-col gap-12 lg:col-start-1 lg:row-start-4">
                 <ModelSpecs model={detail.model} />
-                {detail.floorplan && (
-                  <ModelFloorplan
-                    floorplan={detail.floorplan}
-                    modelName={detail.model.name}
-                  />
-                )}
                 <ModelsGrid
                   models={detail.siblings}
                   currency={detail.project.base_currency}

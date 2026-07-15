@@ -5,18 +5,31 @@ import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/sendgrid'
 import { notifyWebhook } from '@/lib/webhook'
+import { normalizePhone } from '@/lib/phone'
+
+const OptionalPhoneSchema = z
+  .string()
+  .trim()
+  .optional()
+  .transform((value, ctx) => {
+    if (!value) return undefined
+    const normalized = normalizePhone(value)
+    if (!normalized.ok) {
+      ctx.addIssue({ code: 'custom', message: normalized.error })
+      return z.NEVER
+    }
+    return normalized.phone
+  })
 
 const ContactSchema = z.object({
   project_id: z.string().uuid(),
   model_id: z.string().uuid().optional(),
   full_name: z.string().trim().min(2, 'Ingresa tu nombre completo').max(100),
-  email: z.string().trim().email('Correo inválido').max(255),
-  phone: z
-    .string()
-    .trim()
-    .max(30, 'Teléfono demasiado largo')
-    .optional()
-    .or(z.literal('').transform(() => undefined)),
+  email: z.string().trim().email('Correo inválido').max(255).transform((email) => email.toLowerCase()),
+  phone: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    OptionalPhoneSchema,
+  ),
   message: z
     .string()
     .trim()

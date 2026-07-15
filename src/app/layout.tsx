@@ -8,6 +8,13 @@ import { Footer } from "@/components/layout/Footer";
 import { RouteTransition } from "@/components/layout/RouteTransition";
 
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+const STORAGE_BUCKET = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET || "project-media"
+
+function publicFaviconUrl(fileName: string) {
+  if (!SUPABASE_URL) return undefined
+  return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/settings/public/favicon/${fileName}`
+}
 
 const dmSans = DM_Sans({
   variable: "--font-sans",
@@ -37,6 +44,10 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     site: "@situagt_",
+  },
+  icons: {
+    icon: publicFaviconUrl("favicon-32.png"),
+    apple: publicFaviconUrl("apple-touch-icon.png"),
   },
 };
 

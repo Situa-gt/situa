@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -9,11 +9,30 @@ import { Label } from '@/components/ui/label'
 import { CtaButton } from '@/components/ui/cta-button'
 import { submitContactLead } from '@/app/actions/contact'
 import { pushEvent } from '@/lib/gtm'
+import { trackEvent } from '@/lib/analytics'
+import { normalizePhone } from '@/lib/phone'
+
+const OptionalPhoneSchema = z
+  .string()
+  .trim()
+  .optional()
+  .transform((value, ctx) => {
+    if (!value) return undefined
+    const normalized = normalizePhone(value)
+    if (!normalized.ok) {
+      ctx.addIssue({ code: 'custom', message: normalized.error })
+      return z.NEVER
+    }
+    return normalized.phone
+  })
 
 const ClientSchema = z.object({
   full_name: z.string().trim().min(2, 'Ingresa tu nombre completo').max(100),
-  email: z.string().trim().email('Correo inválido').max(255),
-  phone: z.string().trim().max(30, 'Teléfono demasiado largo').optional(),
+  email: z.string().trim().email('Correo inválido').max(255).transform((email) => email.toLowerCase()),
+  phone: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    OptionalPhoneSchema,
+  ),
   message: z.string().trim().max(500, 'Máximo 500 caracteres').optional(),
 })
 
@@ -67,9 +86,22 @@ export function ContactForm({ projectId, modelId, projectName, modelName }: Cont
   const [errors, setErrors] = useState<FieldErrors>({})
   const [isPending, startTransition] = useTransition()
   const [submitted, setSubmitted] = useState(false)
+  const hasTrackedStart = useRef(false)
 
   function update<K extends keyof typeof INITIAL>(key: K, value: string) {
+    if (!hasTrackedStart.current) {
+      hasTrackedStart.current = true
+      trackEvent({ event_type: 'contact_form_start', project_id: projectId, model_id: modelId })
+    }
     setValues((v) => ({ ...v, [key]: value }))
+  }
+
+  function normalizePhoneField() {
+    if (!values.phone.trim()) return
+    const normalized = normalizePhone(values.phone)
+    if (normalized.ok) {
+      setValues((v) => ({ ...v, phone: normalized.phone }))
+    }
   }
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -105,6 +137,7 @@ export function ContactForm({ projectId, modelId, projectName, modelName }: Cont
         model_id: modelId,
         model_name: modelName,
       })
+      trackEvent({ event_type: 'contact_form_submit', project_id: projectId, model_id: modelId })
       toast.success('¡Mensaje enviado! Pronto te contactaremos.')
       setValues(INITIAL)
       setHp('')
@@ -192,9 +225,10 @@ export function ContactForm({ projectId, modelId, projectName, modelName }: Cont
           autoComplete="tel"
           value={values.phone}
           onChange={(e) => update('phone', e.target.value)}
+          onBlur={normalizePhoneField}
           aria-invalid={!!errors.phone}
           disabled={isPending}
-          placeholder="Ej. 5555 5555"
+          placeholder="Ej. 5555 5555 o +502 5555 5555"
           className="h-10"
         />
         {errors.phone?.[0] && (

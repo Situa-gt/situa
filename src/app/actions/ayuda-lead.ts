@@ -3,7 +3,7 @@
 import { z } from 'zod'
 import { headers } from 'next/headers'
 import { createServerClient } from '@/lib/supabase/server'
-import { sendEmail } from '@/lib/email/sendgrid'
+import { sendEmail } from '@/lib/email/send-email'
 import { notifyWebhook } from '@/lib/webhook'
 
 const AyudaLeadSchema = z.object({

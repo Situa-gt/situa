@@ -3,7 +3,7 @@
 import { headers } from 'next/headers'
 import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
-import { sendEmail } from '@/lib/email/sendgrid'
+import { sendEmail } from '@/lib/email/send-email'
 import { notifyWebhook } from '@/lib/webhook'
 import { normalizePhone } from '@/lib/phone'
 

@@ -3,7 +3,7 @@
 import { z } from 'zod'
 import { headers } from 'next/headers'
 import { createServerClient } from '@/lib/supabase/server'
-import { sendEmail } from '@/lib/email/sendgrid'
+import { sendEmail } from '@/lib/email/send-email'
 
 const DeveloperLeadSchema = z.object({
   developer_name: z.string().trim().min(1, 'Requerido').max(200),

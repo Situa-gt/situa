@@ -1,0 +1,54 @@
+const apiKey = process.env.BREVO_API_KEY
+const fromEmail = process.env.BREVO_FROM_EMAIL
+const fromName = process.env.BREVO_FROM_NAME || 'Sitúa'
+
+function requireEmailEnv(name: string, value: string | undefined) {
+  if (!value) throw new Error(`Missing env: ${name}`)
+  return value
+}
+
+interface SendEmailOptions {
+  subject: string
+  html: string
+  to: string
+  cc?: string[]
+  replyTo?: string
+}
+
+interface BrevoRecipient {
+  email: string
+}
+
+function recipient(email: string): BrevoRecipient {
+  return { email }
+}
+
+export async function sendEmail({ subject, html, to, cc, replyTo }: SendEmailOptions): Promise<void> {
+  const brevoApiKey = requireEmailEnv('BREVO_API_KEY', apiKey)
+  const brevoFromEmail = requireEmailEnv('BREVO_FROM_EMAIL', fromEmail)
+
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'api-key': brevoApiKey,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      sender: {
+        email: brevoFromEmail,
+        name: fromName,
+      },
+      to: [recipient(to)],
+      ...(cc?.length ? { cc: cc.map(recipient) } : {}),
+      ...(replyTo ? { replyTo: recipient(replyTo) } : {}),
+      subject,
+      htmlContent: html,
+    }),
+  })
+
+  if (!response.ok) {
+    const message = await response.text().catch(() => '')
+    throw new Error(`Brevo email failed: ${response.status} ${message}`)
+  }
+}

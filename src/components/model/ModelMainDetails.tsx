@@ -26,7 +26,7 @@ export function ModelMainDetails({ model, baseCurrency, exchangeRate }: Props) {
     exchangeRate,
   )
   const monthly =
-    model.monthly_payment_from !== null
+    model.monthly_payment_from !== null && model.monthly_payment_from > 0
       ? convertPrice(model.monthly_payment_from, baseCurrency, currency, exchangeRate)
       : null
 

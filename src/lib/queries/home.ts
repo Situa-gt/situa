@@ -1,6 +1,7 @@
 import { unstable_cache } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/database.types'
+import { cheapestModelPricingByProject } from '@/lib/queries/pricing'
 
 type ProjectRow = Database['public']['Tables']['projects']['Row']
 type ZoneRow = Database['public']['Tables']['zones']['Row']
@@ -90,29 +91,16 @@ async function fetchProjectCards(opts: {
     exchangeRateByProject.set(p.id, p.exchange_rate)
   }
 
-  const minPriceByProject = new Map<string, number>()
-  const minPaymentByProject = new Map<string, number>()
-  for (const p of prices ?? []) {
-    const currency = currencyByProject.get(p.project_id) ?? 'USD'
-    const rate = exchangeRateByProject.get(p.project_id) ?? 7.8
-    const priceUSD = currency === 'GTQ' ? p.price_from / rate : p.price_from
-    const cur = minPriceByProject.get(p.project_id)
-    if (cur === undefined || priceUSD < cur) {
-      minPriceByProject.set(p.project_id, priceUSD)
-    }
-    if (p.monthly_payment_from !== null) {
-      const paymentUSD = currency === 'GTQ' ? p.monthly_payment_from / rate : p.monthly_payment_from
-      const curPmt = minPaymentByProject.get(p.project_id)
-      if (curPmt === undefined || paymentUSD < curPmt) {
-        minPaymentByProject.set(p.project_id, paymentUSD)
-      }
-    }
-  }
+  const pricingByProject = cheapestModelPricingByProject(prices ?? [], (projectId, value) => {
+    const currency = currencyByProject.get(projectId) ?? 'USD'
+    const rate = exchangeRateByProject.get(projectId) ?? 7.8
+    return currency === 'GTQ' ? value / rate : value
+  })
 
   return projects.map((p) => {
     const zoneRel = p.zones as Pick<ZoneRow, 'name' | 'url_slug'> | null
     const cover = coverByProject.get(p.id) ?? null
-    const price = minPriceByProject.get(p.id) ?? null
+    const pricing = pricingByProject.get(p.id) ?? null
     return {
       id: p.id,
       name: p.name,
@@ -125,8 +113,8 @@ async function fetchProjectCards(opts: {
       zone: zoneRel ? { name: zoneRel.name, url_slug: zoneRel.url_slug } : null,
       cover_url: cover?.url ?? null,
       cover_alt: cover?.alt ?? null,
-      price_from: price,
-      monthly_payment_from: minPaymentByProject.get(p.id) ?? null,
+      price_from: pricing?.price_from ?? null,
+      monthly_payment_from: pricing?.monthly_payment_from ?? null,
     }
   })
 }
@@ -208,7 +196,7 @@ async function fetchFeaturedModels(): Promise<FeaturedModelCardData[]> {
     const baseCurrency = projectRel?.base_currency ?? 'USD'
     const rate = projectRel?.exchange_rate ?? 7.8
     const priceUSD = baseCurrency === 'GTQ' ? m.price_from / rate : m.price_from
-    const paymentUSD = m.monthly_payment_from !== null
+    const paymentUSD = m.monthly_payment_from !== null && m.monthly_payment_from > 0
       ? (baseCurrency === 'GTQ' ? m.monthly_payment_from / rate : m.monthly_payment_from)
       : null
     return {
@@ -442,29 +430,16 @@ export async function getProjectCardsByIds(ids: string[]): Promise<ProjectCardDa
     exchangeRateByProject.set(p.id, p.exchange_rate)
   }
 
-  const minPriceByProject = new Map<string, number>()
-  const minPaymentByProject = new Map<string, number>()
-  for (const p of prices ?? []) {
-    const currency = currencyByProject.get(p.project_id) ?? 'USD'
-    const rate = exchangeRateByProject.get(p.project_id) ?? 7.8
-    const priceUSD = currency === 'GTQ' ? p.price_from / rate : p.price_from
-    const cur = minPriceByProject.get(p.project_id)
-    if (cur === undefined || priceUSD < cur) {
-      minPriceByProject.set(p.project_id, priceUSD)
-    }
-    if (p.monthly_payment_from !== null) {
-      const paymentUSD = currency === 'GTQ' ? p.monthly_payment_from / rate : p.monthly_payment_from
-      const curPmt = minPaymentByProject.get(p.project_id)
-      if (curPmt === undefined || paymentUSD < curPmt) {
-        minPaymentByProject.set(p.project_id, paymentUSD)
-      }
-    }
-  }
+  const pricingByProject = cheapestModelPricingByProject(prices ?? [], (projectId, value) => {
+    const currency = currencyByProject.get(projectId) ?? 'USD'
+    const rate = exchangeRateByProject.get(projectId) ?? 7.8
+    return currency === 'GTQ' ? value / rate : value
+  })
 
   return projects.map((p) => {
     const zoneRel = p.zones as Pick<ZoneRow, 'name' | 'url_slug'> | null
     const cover = coverByProject.get(p.id) ?? null
-    const price = minPriceByProject.get(p.id) ?? null
+    const pricing = pricingByProject.get(p.id) ?? null
     return {
       id: p.id,
       name: p.name,
@@ -477,8 +452,8 @@ export async function getProjectCardsByIds(ids: string[]): Promise<ProjectCardDa
       zone: zoneRel ? { name: zoneRel.name, url_slug: zoneRel.url_slug } : null,
       cover_url: cover?.url ?? null,
       cover_alt: cover?.alt ?? null,
-      price_from: price,
-      monthly_payment_from: minPaymentByProject.get(p.id) ?? null,
+      price_from: pricing?.price_from ?? null,
+      monthly_payment_from: pricing?.monthly_payment_from ?? null,
     }
   })
 }

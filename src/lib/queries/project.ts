@@ -1,6 +1,7 @@
 import { unstable_cache } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/database.types'
+import { cheapestModelPricing } from '@/lib/queries/pricing'
 
 type ProjectRow = Database['public']['Tables']['projects']['Row']
 type ModelRow = Database['public']['Tables']['models']['Row']
@@ -129,26 +130,7 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
       }
     : null
 
-  const price_from =
-    models && models.length > 0
-      ? models.reduce<number | null>(
-          (min, m) => (min === null || m.price_from < min ? m.price_from : min),
-          null,
-        )
-      : null
-
-  const monthly_payment_from =
-    models && models.length > 0
-      ? models.reduce<number | null>(
-          (min, m) =>
-            m.monthly_payment_from === null
-              ? min
-              : min === null || m.monthly_payment_from < min
-                ? m.monthly_payment_from
-                : min,
-          null,
-        )
-      : null
+  const pricing = cheapestModelPricing(models ?? [])
 
   const muni = (zoneWithDept?.municipalities ?? null) as
     | { departments: { name: string } | null }
@@ -162,8 +144,8 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
     gallery,
     models: models ?? [],
     modelImages,
-    price_from,
-    monthly_payment_from,
+    price_from: pricing?.price_from ?? null,
+    monthly_payment_from: pricing?.monthly_payment_from ?? null,
     department,
     projectLogo: projectLogoRow?.url ?? null,
     developerLogo: developerLogoRow?.url ?? null,

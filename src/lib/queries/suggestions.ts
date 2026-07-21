@@ -2,6 +2,7 @@ import { unstable_cache } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/database.types'
 import type { ProjectCardData } from '@/lib/queries/home'
+import { cheapestModelPricingByProject } from '@/lib/queries/pricing'
 
 type ProjectRow = Database['public']['Tables']['projects']['Row']
 type Stage = Database['public']['Enums']['project_stage']
@@ -85,38 +86,6 @@ function areNearbyZones(currentSlug: string | null, candidateSlug: string | null
   return NEARBY_ZONE_GROUPS.some((group) => group.includes(currentSlug) && group.includes(candidateSlug))
 }
 
-function minimumByProject(
-  prices: ModelPrice[],
-  currencyByProject: Map<string, ProjectRow['base_currency']>,
-  exchangeRateByProject: Map<string, number>,
-): {
-  price: Map<string, number>
-  payment: Map<string, number>
-} {
-  const price = new Map<string, number>()
-  const payment = new Map<string, number>()
-
-  for (const row of prices) {
-    const currency = currencyByProject.get(row.project_id) ?? 'USD'
-    const rate = exchangeRateByProject.get(row.project_id) ?? 7.8
-    const normalizedPrice = normalizePrice(row.price_from, currency, rate)
-    const currentPrice = price.get(row.project_id)
-    if (currentPrice === undefined || normalizedPrice < currentPrice) {
-      price.set(row.project_id, normalizedPrice)
-    }
-
-    if (row.monthly_payment_from !== null) {
-      const normalizedPayment = normalizePrice(row.monthly_payment_from, currency, rate)
-      const currentPayment = payment.get(row.project_id)
-      if (currentPayment === undefined || normalizedPayment < currentPayment) {
-        payment.set(row.project_id, normalizedPayment)
-      }
-    }
-  }
-
-  return { price, payment }
-}
-
 function topReason(reasons: string[]): string[] {
   return reasons.slice(0, 3)
 }
@@ -183,9 +152,14 @@ async function fetchSuggestedProjects(projectId: string, limit: number): Promise
   }
 
   const allPrices = (prices ?? []) as ModelPrice[]
-  const minimums = minimumByProject(allPrices, currencyByProject, exchangeRateByProject)
-  const currentPrice = minimums.price.get(currentRow.id) ?? null
-  const currentPayment = minimums.payment.get(currentRow.id) ?? null
+  const pricingByProject = cheapestModelPricingByProject(allPrices, (projectId, value) => {
+    const currency = currencyByProject.get(projectId) ?? 'USD'
+    const rate = exchangeRateByProject.get(projectId) ?? 7.8
+    return normalizePrice(value, currency, rate)
+  })
+  const currentPricing = pricingByProject.get(currentRow.id) ?? null
+  const currentPrice = currentPricing?.price_from ?? null
+  const currentPayment = currentPricing?.monthly_payment_from ?? null
 
   const coverByProject = new Map<string, { url: string; alt: string | null }>()
   for (const cover of (covers ?? []) as MediaCover[]) {
@@ -206,8 +180,9 @@ async function fetchSuggestedProjects(projectId: string, limit: number): Promise
   const scored = candidateRows
     .map((candidate) => {
       const cover = coverByProject.get(candidate.id) ?? null
-      const candidatePrice = minimums.price.get(candidate.id) ?? null
-      const candidatePayment = minimums.payment.get(candidate.id) ?? null
+      const candidatePricing = pricingByProject.get(candidate.id) ?? null
+      const candidatePrice = candidatePricing?.price_from ?? null
+      const candidatePayment = candidatePricing?.monthly_payment_from ?? null
       const reasons: string[] = []
       let score = 0
 

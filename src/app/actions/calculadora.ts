@@ -3,6 +3,7 @@
 import { createServerClient } from '@/lib/supabase/server'
 import type { ProjectCardData } from '@/lib/queries/home'
 import type { Database } from '@/lib/database.types'
+import { cheapestModelPricingByProject } from '@/lib/queries/pricing'
 
 type ZoneRow = Database['public']['Tables']['zones']['Row']
 
@@ -47,25 +48,12 @@ export async function fetchAllActiveProjects(): Promise<ProjectCardData[]> {
     }
   }
 
-  const minPriceByProject = new Map<string, number>()
-  const minPaymentByProject = new Map<string, number>()
-  for (const p of prices ?? []) {
-    const cur = minPriceByProject.get(p.project_id)
-    if (cur === undefined || p.price_from < cur) {
-      minPriceByProject.set(p.project_id, p.price_from)
-    }
-    if (p.monthly_payment_from !== null) {
-      const curPmt = minPaymentByProject.get(p.project_id)
-      if (curPmt === undefined || p.monthly_payment_from < curPmt) {
-        minPaymentByProject.set(p.project_id, p.monthly_payment_from)
-      }
-    }
-  }
+  const pricingByProject = cheapestModelPricingByProject(prices ?? [])
 
   return projects.map((p) => {
     const zoneRel = p.zones as Pick<ZoneRow, 'name' | 'url_slug'> | null
     const cover = coverByProject.get(p.id) ?? null
-    const price = minPriceByProject.get(p.id) ?? null
+    const pricing = pricingByProject.get(p.id) ?? null
     return {
       id: p.id,
       name: p.name,
@@ -78,8 +66,8 @@ export async function fetchAllActiveProjects(): Promise<ProjectCardData[]> {
       zone: zoneRel ? { name: zoneRel.name, url_slug: zoneRel.url_slug } : null,
       cover_url: cover?.url ?? null,
       cover_alt: cover?.alt ?? null,
-      price_from: price,
-      monthly_payment_from: minPaymentByProject.get(p.id) ?? null,
+      price_from: pricing?.price_from ?? null,
+      monthly_payment_from: pricing?.monthly_payment_from ?? null,
     }
   })
 }

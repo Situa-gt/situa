@@ -19,6 +19,7 @@ interface Props {
 export function ModelCard({ model, currency, basePath, image }: Props) {
   const href = `${basePath}/${model.slug}`
   const modelName = model.name.trim().length === 1 ? `Modelo ${model.name}` : model.name
+  const monthly = model.monthly_payment_from !== null && model.monthly_payment_from > 0 ? model.monthly_payment_from : null
 
   return (
     <Link
@@ -96,7 +97,7 @@ export function ModelCard({ model, currency, basePath, image }: Props) {
           </div>
         </dl>
 
-        <div className={`mt-auto grid gap-4 pt-6 ${model.monthly_payment_from !== null ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        <div className={`mt-auto grid gap-4 pt-6 ${monthly !== null ? 'grid-cols-2' : 'grid-cols-1'}`}>
           <div>
             <span className="block text-[11px] uppercase tracking-[0.06em] text-muted-ink">
               Desde
@@ -105,13 +106,13 @@ export function ModelCard({ model, currency, basePath, image }: Props) {
               {formatPriceValue(model.price_from, currency)}
             </span>
           </div>
-          {model.monthly_payment_from !== null && (
+          {monthly !== null && (
             <div>
               <span className="block text-[11px] uppercase tracking-[0.06em] text-muted-ink">
                 Cuotas desde
               </span>
               <span className="mt-0.5 block text-base font-semibold text-ink">
-                {formatPriceValue(model.monthly_payment_from, currency)}
+                {formatPriceValue(monthly, currency)}
                 <span className="ml-0.5 text-xs font-normal text-muted-ink">/mes</span>
               </span>
             </div>

@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/send-email'
+import { getLeadBccEmails } from '@/lib/site-settings'
 import { notifyWebhook } from '@/lib/webhook'
 import { normalizePhone } from '@/lib/phone'
 
@@ -72,10 +73,6 @@ function infoRow(label: string, value: string): string {
 
 function uniqueEmails(emails: Array<string | null | undefined>) {
   return [...new Set(emails.map((email) => email?.trim().toLowerCase()).filter((email): email is string => Boolean(email)))]
-}
-
-function emailList(value: string | undefined) {
-  return uniqueEmails(value?.split(/[,\n;]/) ?? [])
 }
 
 export async function submitContactLead(
@@ -194,7 +191,7 @@ export async function submitContactLead(
   `
 
   const adminEmail = process.env.SITUA_ADMIN_EMAIL!
-  const situaBccEmails = emailList(process.env.SITUA_BCC_EMAILS || adminEmail)
+  const situaBccEmails = await getLeadBccEmails(adminEmail)
   const dev = project.developers
   const devEmails = uniqueEmails([
     dev?.contact_email,

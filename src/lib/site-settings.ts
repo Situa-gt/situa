@@ -18,6 +18,10 @@ function normalizeLeadBccSettings(value: unknown) {
   return uniqueEmails(rawEmails.map((email) => String(email)))
 }
 
+function isMissingSettingsTable(error: { code?: string } | null) {
+  return error?.code === '42P01' || error?.code === 'PGRST205'
+}
+
 export async function getLeadBccEmails(fallbackEmail: string) {
   try {
     const supabase = createServiceClient()
@@ -28,7 +32,7 @@ export async function getLeadBccEmails(fallbackEmail: string) {
       .maybeSingle()
 
     if (error) {
-      if (error.code !== '42P01') console.error('[settings] lead email settings failed', error)
+      if (!isMissingSettingsTable(error)) console.error('[settings] lead email settings failed', error)
       return emailList(process.env.SITUA_BCC_EMAILS || fallbackEmail)
     }
 

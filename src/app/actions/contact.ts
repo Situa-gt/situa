@@ -70,6 +70,10 @@ function infoRow(label: string, value: string): string {
     </tr>`
 }
 
+function uniqueEmails(emails: Array<string | null | undefined>) {
+  return [...new Set(emails.map((email) => email?.trim().toLowerCase()).filter((email): email is string => Boolean(email)))]
+}
+
 export async function submitContactLead(
   input: unknown,
 ): Promise<ActionResult> {
@@ -187,24 +191,17 @@ export async function submitContactLead(
 
   const adminEmail = process.env.SITUA_ADMIN_EMAIL!
   const dev = project.developers
-  const devEmails: string[] = [
-    ...(dev?.contact_email ? [dev.contact_email] : []),
+  const devEmails = uniqueEmails([
+    dev?.contact_email,
     ...((dev?.notification_emails as string[] | null) ?? []),
-  ]
-
-  // Primary recipient: developer (if available), else admin
-  // Admin is always CC'd when developer receives the email
-  const to = devEmails[0] ?? adminEmail
-  const cc = devEmails[0]
-    ? [...new Set([adminEmail, ...devEmails.slice(1)])]
-    : undefined
+  ]).filter((email) => email !== adminEmail.trim().toLowerCase())
 
   try {
     await sendEmail({
       subject: `Nueva consulta — ${project.name}`,
       html,
-      to,
-      cc,
+      to: adminEmail,
+      cc: devEmails.length ? devEmails : undefined,
       replyTo: parsed.data.email,
     })
   } catch (err) {

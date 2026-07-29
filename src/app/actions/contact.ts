@@ -74,6 +74,10 @@ function uniqueEmails(emails: Array<string | null | undefined>) {
   return [...new Set(emails.map((email) => email?.trim().toLowerCase()).filter((email): email is string => Boolean(email)))]
 }
 
+function emailList(value: string | undefined) {
+  return uniqueEmails(value?.split(/[,\n;]/) ?? [])
+}
+
 export async function submitContactLead(
   input: unknown,
 ): Promise<ActionResult> {
@@ -190,18 +194,24 @@ export async function submitContactLead(
   `
 
   const adminEmail = process.env.SITUA_ADMIN_EMAIL!
+  const situaBccEmails = emailList(process.env.SITUA_BCC_EMAILS || adminEmail)
   const dev = project.developers
   const devEmails = uniqueEmails([
     dev?.contact_email,
     ...((dev?.notification_emails as string[] | null) ?? []),
-  ]).filter((email) => email !== adminEmail.trim().toLowerCase())
+  ]).filter((email) => !situaBccEmails.includes(email))
+
+  const to = devEmails[0] ?? adminEmail
+  const cc = devEmails.slice(1)
+  const bcc = devEmails.length ? situaBccEmails : undefined
 
   try {
     await sendEmail({
       subject: `Nueva consulta — ${project.name}`,
       html,
-      to: adminEmail,
-      cc: devEmails.length ? devEmails : undefined,
+      to,
+      cc: cc.length ? cc : undefined,
+      bcc,
       replyTo: parsed.data.email,
     })
   } catch (err) {

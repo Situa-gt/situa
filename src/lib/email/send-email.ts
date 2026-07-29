@@ -12,6 +12,7 @@ interface SendEmailOptions {
   html: string
   to: string
   cc?: string[]
+  bcc?: string[]
   replyTo?: string
 }
 
@@ -23,7 +24,7 @@ function recipient(email: string): BrevoRecipient {
   return { email }
 }
 
-export async function sendEmail({ subject, html, to, cc, replyTo }: SendEmailOptions): Promise<void> {
+export async function sendEmail({ subject, html, to, cc, bcc, replyTo }: SendEmailOptions): Promise<void> {
   const brevoApiKey = requireEmailEnv('BREVO_API_KEY', apiKey)
   const brevoFromEmail = requireEmailEnv('BREVO_FROM_EMAIL', fromEmail)
 
@@ -41,6 +42,7 @@ export async function sendEmail({ subject, html, to, cc, replyTo }: SendEmailOpt
       },
       to: [recipient(to)],
       ...(cc?.length ? { cc: cc.map(recipient) } : {}),
+      ...(bcc?.length ? { bcc: bcc.map(recipient) } : {}),
       ...(replyTo ? { replyTo: recipient(replyTo) } : {}),
       subject,
       htmlContent: html,

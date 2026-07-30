@@ -15,6 +15,8 @@ const ABOUT_LINKS = [
   { href: '/terminos-y-condiciones', label: 'Términos y condiciones' },
 ]
 
+const ADMIN_LOGIN_URL = 'https://situaadmin.vercel.app/login'
+
 const SOCIAL_LINK_CLASS =
   'inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/30 text-white transition hover:border-white hover:bg-white hover:text-brand-purple'
 
@@ -147,6 +149,16 @@ export async function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <a
+                  href={ADMIN_LOGIN_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-white/80 transition hover:text-white"
+                >
+                  Acceso administrador
+                </a>
+              </li>
             </ul>
 
             <h3 className="mt-8 text-sm font-semibold tracking-tight text-white">

@@ -156,7 +156,7 @@ export async function Footer() {
                   rel="noopener noreferrer"
                   className="text-sm text-white/80 transition hover:text-white"
                 >
-                  Acceso administrador
+                  Iniciar sesión
                 </a>
               </li>
             </ul>

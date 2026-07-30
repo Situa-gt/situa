@@ -26,6 +26,7 @@ import { ModelFloorplan } from '@/components/model/ModelFloorplan'
 import { ContactSidebar } from '@/components/contact/ContactSidebar'
 import { ContactFloatingCta } from '@/components/contact/ContactFloatingCta'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { ModelReadableSummary, ProjectReadableSummary } from '@/components/seo/ReadablePropertySummary'
 import { TrackView } from '@/components/analytics/TrackView'
 import { breadcrumbsFor, labelForTipo } from '@/lib/breadcrumbs'
 import {
@@ -34,14 +35,46 @@ import {
   buildRealEstateListing,
   buildPlace,
   buildOrganizationDeveloper,
+  buildProjectFaq,
+  buildProjectOfferCatalog,
   buildProductWithOffer,
 } from '@/lib/seo/jsonld'
+import { SITE_URL } from '@/lib/seo/site'
 
 export const dynamicParams = true
 export const revalidate = 3600
 
 interface PageProps {
   params: Promise<{ slug: string[] }>
+}
+
+function absoluteUrl(url: string | null | undefined) {
+  if (!url) return undefined
+  if (/^https?:\/\//i.test(url)) return url
+  return `${SITE_URL}${url.startsWith('/') ? url : `/${url}`}`
+}
+
+function projectSeoDescription({
+  projectName,
+  zoneName,
+  description,
+  priceFrom,
+  currency,
+}: {
+  projectName: string
+  zoneName: string
+  description?: string | null
+  priceFrom?: number | null
+  currency?: string
+}) {
+  const base =
+    description && description.trim().length >= 90
+      ? description.trim()
+      : `${projectName} en ${zoneName}, Guatemala. Consulta modelos, precios, cuotas, amenidades, estado del proyecto y contacto directo con la desarrolladora.`
+  const price = priceFrom !== null && priceFrom !== undefined && currency
+    ? ` Precio desde ${currency} ${priceFrom.toLocaleString('es-GT')}.`
+    : ''
+  return `${base}${price}`.slice(0, 300)
 }
 
 export async function generateStaticParams() {
@@ -135,24 +168,100 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       }
     case 'project': {
       const { project, zone } = resolved.data
+      const detail = await getProjectDetail(project.id, project.slug)
+      const image = absoluteUrl(detail?.cover?.url_md ?? detail?.cover?.url)
+      const title = `${project.name} en ${zone.name} | Sitúa`
+      const description = projectSeoDescription({
+        projectName: project.name,
+        zoneName: zone.name,
+        description: detail?.project.short_description ?? project.short_description,
+        priceFrom: detail?.price_from,
+        currency: detail?.project.base_currency,
+      })
       return {
-        title: `${project.name} | ${zone.name} | Sitúa`,
-        description:
-          project.short_description ??
-          `${project.name} – ${labelForTipo(project.property_type).slice(0, -1)} en preventa en ${zone.name}, Guatemala. Contacta al desarrollador directamente.`,
+        title,
+        description,
         alternates: {
           canonical: `/${zone.url_slug}/${tipoSlug(project.property_type)}/${project.slug}`,
         },
+        openGraph: {
+          title,
+          description,
+          type: 'website',
+          ...(image
+            ? {
+                images: [
+                  {
+                    url: image,
+                    width: detail?.cover?.width ?? 1200,
+                    height: detail?.cover?.height ?? 630,
+                    alt: detail?.cover?.alt ?? `Imagen principal de ${project.name}`,
+                  },
+                ],
+              }
+            : {}),
+        },
+        twitter: image
+          ? {
+              card: 'summary_large_image',
+              title,
+              description,
+              images: [image],
+            }
+          : undefined,
       }
     }
     case 'model': {
       const { model, project, zone } = resolved.data
+      const detail = await getModelDetail(model.id, project.id, model.slug)
+      const image = absoluteUrl(
+        detail?.cover?.url_md ??
+          detail?.cover?.url ??
+          detail?.floorplan?.url_md ??
+          detail?.floorplan?.url,
+      )
+      const title = `${model.name} en ${project.name} | ${formatPriceFrom(model.price_from, project.base_currency)} | Sitúa`
+      const description = projectSeoDescription({
+        projectName: `${model.name} de ${project.name}`,
+        zoneName: zone.name,
+        description: detail?.model.description ?? detail?.project.short_description ?? project.short_description,
+        priceFrom: detail?.model.price_from ?? model.price_from,
+        currency: detail?.project.base_currency ?? project.base_currency,
+      })
       return {
-        title: `${model.name} en ${project.name} | ${formatPriceFrom(model.price_from, project.base_currency)} | Sitúa`,
-        description: model.description ?? project.short_description ?? undefined,
+        title,
+        description,
         alternates: {
           canonical: `/${zone.url_slug}/${tipoSlug(project.property_type)}/${project.slug}/${model.slug}`,
         },
+        openGraph: {
+          title,
+          description,
+          type: 'website',
+          ...(image
+            ? {
+                images: [
+                  {
+                    url: image,
+                    width: detail?.cover?.width ?? detail?.floorplan?.width ?? 1200,
+                    height: detail?.cover?.height ?? detail?.floorplan?.height ?? 630,
+                    alt:
+                      detail?.cover?.alt ??
+                      detail?.floorplan?.alt ??
+                      `${model.name} en ${project.name}`,
+                  },
+                ],
+              }
+            : {}),
+        },
+        twitter: image
+          ? {
+              card: 'summary_large_image',
+              title,
+              description,
+              images: [image],
+            }
+          : undefined,
       }
     }
     case 'not-found':
@@ -245,9 +354,12 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
       const jsonLd: object[] = [
         buildRealEstateListing({ detail, zone, canonicalPath: basePath }),
         buildPlace({ detail, zone, canonicalPath: basePath }),
+        buildProjectFaq({ detail, zone, canonicalPath: basePath }),
       ]
       const developerNode = buildOrganizationDeveloper(detail)
       if (developerNode) jsonLd.push(developerNode)
+      const offerCatalogNode = buildProjectOfferCatalog({ detail, zone, canonicalPath: basePath })
+      if (offerCatalogNode) jsonLd.push(offerCatalogNode)
       return {
         body: (
           <div className="mx-auto w-full max-w-7xl px-6">
@@ -279,6 +391,17 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                 suggestedProjects={suggestedProjects}
               />
               <div className="order-3 flex flex-col gap-12 lg:col-start-1 lg:row-start-2">
+                <ProjectReadableSummary
+                  projectName={detail.project.name}
+                  zoneName={zone.name}
+                  developerName={detail.developer?.name}
+                  stage={detail.project.stage}
+                  currency={detail.project.base_currency}
+                  priceFrom={detail.price_from}
+                  monthlyFrom={detail.monthly_payment_from}
+                  modelCount={detail.models.length}
+                  amenities={detail.project.amenities}
+                />
                 <ModelsGrid
                   models={detail.models}
                   currency={project.base_currency}
@@ -348,6 +471,19 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                 suggestedProjects={suggestedProjects}
               />
               <div className="order-5 flex flex-col gap-12 lg:col-start-1 lg:row-start-4">
+                <ModelReadableSummary
+                  modelName={detail.model.name}
+                  projectName={detail.project.name}
+                  zoneName={detail.zone?.name ?? zone.name}
+                  stage={detail.project.stage}
+                  currency={detail.project.base_currency}
+                  priceFrom={detail.model.price_from}
+                  monthlyFrom={detail.model.monthly_payment_from}
+                  sizeM2={detail.model.size_m2}
+                  bedrooms={detail.model.bedrooms}
+                  bathrooms={detail.model.bathrooms}
+                  parkingSpots={detail.model.parking_spots}
+                />
                 <ModelSpecs model={detail.model} />
                 <ModelsGrid
                   models={detail.siblings}

@@ -4,6 +4,7 @@ import type { ProjectDetailData } from '@/lib/queries/project'
 import type { ModelDetailData, ModelImage } from '@/lib/queries/model'
 import type { ProjectCardData } from '@/lib/queries/home'
 import { tipoSlug } from '@/lib/types/property'
+import { stageLabel } from '@/lib/format/stage'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION_ES, SITE_LOGO_PATH } from '@/lib/seo/site'
 
 type ProjectStage = Database['public']['Enums']['project_stage']
@@ -69,6 +70,45 @@ function stageToAvailability(stage: ProjectStage): string {
     : 'https://schema.org/PreOrder'
 }
 
+function amenityFeature(amenities: string[] | null) {
+  return (amenities ?? []).map((amenity) => ({
+    '@type': 'LocationFeatureSpecification',
+    name: amenity,
+    value: true,
+  }))
+}
+
+function modelAdditionalProperties(model: Database['public']['Tables']['models']['Row']) {
+  const properties: Array<Record<string, unknown>> = []
+  if (model.size_m2 !== null) {
+    properties.push({
+      '@type': 'PropertyValue',
+      name: 'Área',
+      value: model.size_m2,
+      unitText: 'm²',
+    })
+  }
+  if (model.bedrooms !== null) {
+    properties.push({ '@type': 'PropertyValue', name: 'Dormitorios', value: model.bedrooms })
+  }
+  if (model.bathrooms !== null) {
+    properties.push({ '@type': 'PropertyValue', name: 'Baños', value: model.bathrooms })
+  }
+  properties.push({
+    '@type': 'PropertyValue',
+    name: 'Parqueos',
+    value: model.parking_spots,
+  })
+  if (model.monthly_payment_from !== null && model.monthly_payment_from > 0) {
+    properties.push({
+      '@type': 'PropertyValue',
+      name: 'Cuota desde',
+      value: model.monthly_payment_from,
+    })
+  }
+  return properties
+}
+
 interface ProjectJsonLdInput {
   detail: ProjectDetailData
   zone: { name: string; url_slug: string }
@@ -83,6 +123,7 @@ export function buildRealEstateListing({ detail, canonicalPath }: ProjectJsonLdI
     url: abs(canonicalPath),
     name: project.name,
     inLanguage: 'es-GT',
+    mainEntityOfPage: abs(canonicalPath),
     datePosted: project.created_at,
     dateModified: project.updated_at,
   }
@@ -102,6 +143,8 @@ export function buildRealEstateListing({ detail, canonicalPath }: ProjectJsonLdI
   if (detail.developer) {
     node.provider = { '@id': `${SITE_URL}/#developer-${detail.developer.id}` }
   }
+  const features = amenityFeature(project.amenities)
+  if (features.length > 0) node.amenityFeature = features
   return node
 }
 
@@ -142,6 +185,71 @@ export function buildOrganizationDeveloper(detail: ProjectDetailData) {
   return node
 }
 
+export function buildProjectOfferCatalog({ detail, canonicalPath }: ProjectJsonLdInput) {
+  const { project, models } = detail
+  if (models.length === 0) return null
+
+  return {
+    '@type': 'OfferCatalog',
+    '@id': `${SITE_URL}${canonicalPath}#models`,
+    name: `Modelos disponibles de ${project.name}`,
+    url: abs(canonicalPath),
+    itemListElement: models.map((model, index) => ({
+      '@type': 'Offer',
+      position: index + 1,
+      name: model.name,
+      price: model.price_from,
+      priceCurrency: project.base_currency,
+      availability: stageToAvailability(project.stage),
+      itemOffered: {
+        '@type': 'Apartment',
+        name: `${model.name} en ${project.name}`,
+        additionalProperty: modelAdditionalProperties(model),
+      },
+    })),
+  }
+}
+
+export function buildProjectFaq({ detail, zone, canonicalPath }: ProjectJsonLdInput) {
+  const { project, price_from, monthly_payment_from } = detail
+  const questions = [
+    {
+      name: `¿Dónde se ubica ${project.name}?`,
+      text: `${project.name} se ubica en ${zone.name}, Guatemala.`,
+    },
+    {
+      name: `¿En qué etapa está ${project.name}?`,
+      text: `${project.name} se encuentra en etapa ${stageLabel(project.stage).toLowerCase()}.`,
+    },
+  ]
+
+  if (price_from !== null) {
+    questions.push({
+      name: `¿Cuál es el precio desde de ${project.name}?`,
+      text: `${project.name} tiene precios desde ${project.base_currency} ${price_from.toLocaleString('es-GT')}.`,
+    })
+  }
+  if (monthly_payment_from !== null && monthly_payment_from > 0) {
+    questions.push({
+      name: `¿Cuál es la cuota desde de ${project.name}?`,
+      text: `${project.name} tiene cuotas desde ${project.base_currency} ${monthly_payment_from.toLocaleString('es-GT')} al mes.`,
+    })
+  }
+
+  return {
+    '@type': 'FAQPage',
+    '@id': `${SITE_URL}${canonicalPath}#faq`,
+    mainEntity: questions.map((q) => ({
+      '@type': 'Question',
+      name: q.name,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: q.text,
+      },
+    })),
+  }
+}
+
 interface ModelJsonLdInput {
   detail: ModelDetailData
   canonicalPath: string
@@ -172,6 +280,7 @@ export function buildProductWithOffer({ detail, canonicalPath }: ModelJsonLdInpu
     url: abs(canonicalPath),
     inLanguage: 'es-GT',
     brand: project.name,
+    mainEntityOfPage: abs(canonicalPath),
   }
   if (model.description) node.description = model.description
   else if (project.short_description) node.description = project.short_description
@@ -186,6 +295,9 @@ export function buildProductWithOffer({ detail, canonicalPath }: ModelJsonLdInpu
     availability: stageToAvailability(project.stage),
     url: abs(canonicalPath),
   }
+
+  const additionalProperty = modelAdditionalProperties(model)
+  if (additionalProperty.length > 0) node.additionalProperty = additionalProperty
 
   return node
 }

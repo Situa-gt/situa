@@ -355,9 +355,14 @@ export interface DeveloperLogoData {
   developerName: string
   url: string
   alt: string | null
+  href?: string | null
 }
 
-async function fetchDeveloperLogos(): Promise<DeveloperLogoData[]> {
+function isMissingBrandTickerTable(error: { code?: string } | null) {
+  return error?.code === '42P01' || error?.code === 'PGRST205'
+}
+
+async function fetchLegacyDeveloperLogos(): Promise<DeveloperLogoData[]> {
   const supabase = createServerClient()
   const { data, error } = await supabase
     .from('project_media')
@@ -379,10 +384,34 @@ async function fetchDeveloperLogos(): Promise<DeveloperLogoData[]> {
     }))
 }
 
+async function fetchDeveloperLogos(): Promise<DeveloperLogoData[]> {
+  const supabase = createServerClient()
+  const brandQuery = (supabase as any)
+    .from('brand_ticker_logos')
+    .select('id, name, alt, url, href')
+    .eq('is_active', true)
+    .order('display_order', { ascending: true })
+    .order('created_at', { ascending: true })
+
+  const { data: brandLogos, error: brandError } = await brandQuery
+  if (!brandError && brandLogos?.length) {
+    return brandLogos.map((logo: { id: string; name: string; alt: string | null; url: string; href: string | null }) => ({
+      developerId: logo.id,
+      developerName: logo.name,
+      url: logo.url,
+      alt: logo.alt,
+      href: logo.href,
+    }))
+  }
+  if (brandError && !isMissingBrandTickerTable(brandError)) throw brandError
+
+  return fetchLegacyDeveloperLogos()
+}
+
 export const getDeveloperLogos = unstable_cache(
   fetchDeveloperLogos,
   ['home', 'developer-logos'],
-  { tags: ['projects:active'], revalidate: 3600 },
+  { tags: ['brand-ticker-logos', 'projects:active'], revalidate: 3600 },
 )
 
 export async function getProjectCardsByIds(ids: string[]): Promise<ProjectCardData[]> {

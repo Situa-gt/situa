@@ -25,13 +25,25 @@ export async function DeveloperTicker() {
                 key={`${dup}-${i}`}
                 className="relative h-16 w-40 shrink-0"
               >
-                <Image
-                  src={logo.url}
-                  alt={logo.alt ?? `Logo de ${logo.developerName}`}
-                  fill
-                  sizes="160px"
-                  className="object-contain"
-                />
+                {logo.href ? (
+                  <a href={logo.href} className="block h-full w-full" target="_blank" rel="noreferrer">
+                    <Image
+                      src={logo.url}
+                      alt={logo.alt ?? `Logo de ${logo.developerName}`}
+                      fill
+                      sizes="160px"
+                      className="object-contain"
+                    />
+                  </a>
+                ) : (
+                  <Image
+                    src={logo.url}
+                    alt={logo.alt ?? `Logo de ${logo.developerName}`}
+                    fill
+                    sizes="160px"
+                    className="object-contain"
+                  />
+                )}
               </div>
             ))}
           </div>

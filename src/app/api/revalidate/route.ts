@@ -10,7 +10,7 @@ type ModelRow = Database['public']['Tables']['models']['Row']
 type ZoneRow = Database['public']['Tables']['zones']['Row']
 type MediaRow = Database['public']['Tables']['project_media']['Row']
 
-type AllowedTable = 'projects' | 'models' | 'zones' | 'developers' | 'project_media'
+type AllowedTable = 'projects' | 'models' | 'zones' | 'developers' | 'project_media' | 'brand_ticker_logos'
 
 const ALLOWED_TABLES = new Set<AllowedTable>([
   'projects',
@@ -18,6 +18,7 @@ const ALLOWED_TABLES = new Set<AllowedTable>([
   'zones',
   'developers',
   'project_media',
+  'brand_ticker_logos',
 ])
 
 interface WebhookPayload {
@@ -76,6 +77,10 @@ function deriveTags(table: AllowedTable, row: Record<string, unknown>): string[]
       tags.add('projects:active')
       tags.add('models:active')
       if (mm.project_id) tags.add(`project-id:${mm.project_id}`)
+      break
+    }
+    case 'brand_ticker_logos': {
+      tags.add('brand-ticker-logos')
       break
     }
   }

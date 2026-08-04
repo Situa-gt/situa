@@ -358,6 +358,7 @@ export type Database = {
           created_at: string
           description: string | null
           display_order: number
+          has_balcony: boolean
           has_service_room: boolean
           id: string
           is_active: boolean
@@ -379,6 +380,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          has_balcony?: boolean
           has_service_room?: boolean
           id?: string
           is_active?: boolean
@@ -400,6 +402,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          has_balcony?: boolean
           has_service_room?: boolean
           id?: string
           is_active?: boolean

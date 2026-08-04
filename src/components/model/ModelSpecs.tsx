@@ -22,8 +22,10 @@ export function ModelSpecs({ model }: Props) {
   if (model.bathrooms !== null)
     specs.push({ label: 'Baños', value: String(model.bathrooms), icon: 'bath' })
   specs.push({ label: 'Parqueo', value: String(model.parking_spots), icon: 'square-parking' })
+  if (model.has_balcony)
+    specs.push({ label: 'Balcón', value: '', icon: 'building' })
   if (model.has_service_room)
-    specs.push({ label: 'Cuarto de servicio', value: '', icon: 'people-roof' })
+    specs.push({ label: 'Cuarto de Servicio', value: '', icon: 'people-roof' })
 
   return (
     <section className="border-t border-hairline pt-8">

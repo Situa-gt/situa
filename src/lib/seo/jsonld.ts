@@ -99,6 +99,20 @@ function modelAdditionalProperties(model: Database['public']['Tables']['models']
     name: 'Parqueos',
     value: model.parking_spots,
   })
+  if (model.has_balcony) {
+    properties.push({
+      '@type': 'PropertyValue',
+      name: 'Balcón',
+      value: true,
+    })
+  }
+  if (model.has_service_room) {
+    properties.push({
+      '@type': 'PropertyValue',
+      name: 'Cuarto de Servicio',
+      value: true,
+    })
+  }
   if (model.monthly_payment_from !== null && model.monthly_payment_from > 0) {
     properties.push({
       '@type': 'PropertyValue',

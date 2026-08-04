@@ -136,21 +136,6 @@
   }
 }
 
-@keyframes ticker-scroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-
-.ticker-track {
-  animation: ticker-scroll 40s linear infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ticker-track {
-    animation: none;
-  }
-}
-
 @keyframes brand-glow-pulse {
   0%, 100% {
     box-shadow: 0 0 0 0 rgba(253, 125, 41, 0.55), 0 0 0 0 rgba(253, 125, 41, 0.35);

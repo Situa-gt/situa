@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import { DeveloperTickerCarousel } from './DeveloperTickerCarousel'
 import { getDeveloperLogos } from '@/lib/queries/home'
 
 // Repeat the array until we have at least `min` items for a seamless loop
@@ -17,38 +17,7 @@ export async function DeveloperTicker() {
 
   return (
     <section className="overflow-hidden pb-12 pt-24">
-      <div className="ticker-track flex w-max gap-12">
-        {[0, 1].map((dup) => (
-          <div key={dup} aria-hidden={dup === 1} className="flex shrink-0 items-center gap-12">
-            {items.map((logo, i) => (
-              <div
-                key={`${dup}-${i}`}
-                className="relative h-16 w-40 shrink-0"
-              >
-                {logo.href ? (
-                  <a href={logo.href} className="block h-full w-full" target="_blank" rel="noreferrer">
-                    <Image
-                      src={logo.url}
-                      alt={logo.alt ?? `Logo de ${logo.developerName}`}
-                      fill
-                      sizes="160px"
-                      className="object-contain"
-                    />
-                  </a>
-                ) : (
-                  <Image
-                    src={logo.url}
-                    alt={logo.alt ?? `Logo de ${logo.developerName}`}
-                    fill
-                    sizes="160px"
-                    className="object-contain"
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
+      <DeveloperTickerCarousel logos={items} />
     </section>
   )
 }

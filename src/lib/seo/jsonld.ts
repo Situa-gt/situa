@@ -170,6 +170,7 @@ export function buildPlace({ detail, zone, canonicalPath }: ProjectJsonLdInput) 
     addressLocality: zone.name,
     addressCountry: 'GT',
   }
+  if (project.address_text) address.streetAddress = project.address_text
   if (department?.name) address.addressRegion = department.name
 
   const place: Record<string, unknown> = {

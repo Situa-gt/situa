@@ -414,6 +414,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                   latitude={detail.project.latitude}
                   longitude={detail.project.longitude}
                   googleMapsUrl={detail.project.google_maps_url}
+                  addressText={detail.project.address_text}
                   zoneName={zone.name}
                   projectName={detail.project.name}
                 />
@@ -498,6 +499,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                   latitude={detail.project.latitude}
                   longitude={detail.project.longitude}
                   googleMapsUrl={detail.project.google_maps_url}
+                  addressText={detail.project.address_text}
                   zoneName={detail.zone?.name ?? zone.name}
                   projectName={detail.project.name}
                 />

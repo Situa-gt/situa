@@ -24,6 +24,7 @@ export interface ModelDetailData {
     | 'exchange_rate'
     | 'stage'
     | 'amenities'
+    | 'address_text'
     | 'latitude'
     | 'longitude'
     | 'google_maps_url'
@@ -62,7 +63,7 @@ async function fetchModelDetail(
     supabase
       .from('projects')
       .select(
-        'id, name, slug, short_description, base_currency, exchange_rate, stage, amenities, latitude, longitude, google_maps_url, developers(id, name), zones(name, url_slug)',
+        '*, developers(id, name), zones(name, url_slug)',
       )
       .eq('id', projectId)
       .eq('is_active', true)
@@ -135,6 +136,7 @@ async function fetchModelDetail(
     exchange_rate: project.exchange_rate,
     stage: project.stage,
     amenities: project.amenities,
+    address_text: project.address_text,
     latitude: project.latitude,
     longitude: project.longitude,
     google_maps_url: project.google_maps_url,

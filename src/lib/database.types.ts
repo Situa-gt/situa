@@ -603,6 +603,7 @@ export type Database = {
       }
       projects: {
         Row: {
+          address_text: string | null
           amenities: string[] | null
           base_currency: Database["public"]["Enums"]["currency_code"]
           created_at: string
@@ -628,6 +629,7 @@ export type Database = {
           zone_id: string
         }
         Insert: {
+          address_text?: string | null
           amenities?: string[] | null
           base_currency?: Database["public"]["Enums"]["currency_code"]
           created_at?: string
@@ -653,6 +655,7 @@ export type Database = {
           zone_id: string
         }
         Update: {
+          address_text?: string | null
           amenities?: string[] | null
           base_currency?: Database["public"]["Enums"]["currency_code"]
           created_at?: string

@@ -2,6 +2,7 @@ import { unstable_cache } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/database.types'
 import { cheapestModelPricing } from '@/lib/queries/pricing'
+import type { ProjectAmenityItem } from '@/components/project/ProjectAmenities'
 
 type ProjectRow = Database['public']['Tables']['projects']['Row']
 type ModelRow = Database['public']['Tables']['models']['Row']
@@ -25,6 +26,7 @@ export interface ProjectDetailData {
   department: { name: string } | null
   projectLogo: string | null
   developerLogo: string | null
+  amenities: ProjectAmenityItem[]
 }
 
 async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData | null> {
@@ -45,6 +47,7 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
     { data: models, error: modelsErr },
     { data: zoneWithDept, error: zoneErr },
     { data: projectLogoRow },
+    projectAmenitiesResult,
   ] = await Promise.all([
     supabase
       .from('developers')
@@ -76,11 +79,22 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
       .eq('project_id', projectId)
       .eq('kind', 'logo')
       .maybeSingle(),
+    supabase
+      .from('project_amenities')
+      .select('display_order, amenities(name, icon)')
+      .eq('project_id', projectId)
+      .order('display_order', { ascending: true }),
   ])
   if (devErr) throw devErr
   if (mediaErr) throw mediaErr
   if (modelsErr) throw modelsErr
   if (zoneErr) throw zoneErr
+  const projectAmenities: ProjectAmenityItem[] = projectAmenitiesResult.error
+    ? []
+    : (projectAmenitiesResult.data ?? []).map((item) => {
+        const amenity = Array.isArray(item.amenities) ? item.amenities[0] : item.amenities
+        return amenity ? { name: amenity.name, icon: amenity.icon } : null
+      }).filter(Boolean) as ProjectAmenityItem[]
 
   // Developer logo is stored in project_media with developer_id set (fetched after developer is resolved)
   const developerLogoRow = developer
@@ -149,6 +163,9 @@ async function fetchProjectDetail(projectId: string): Promise<ProjectDetailData 
     department,
     projectLogo: projectLogoRow?.url ?? null,
     developerLogo: developerLogoRow?.url ?? null,
+    amenities: projectAmenities.length > 0
+      ? projectAmenities
+      : (project.amenities ?? []).map((name) => ({ name })),
   }
 }
 

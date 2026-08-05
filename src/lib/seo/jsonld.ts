@@ -70,10 +70,10 @@ function stageToAvailability(stage: ProjectStage): string {
     : 'https://schema.org/PreOrder'
 }
 
-function amenityFeature(amenities: string[] | null) {
+function amenityFeature(amenities: Array<string | { name: string }> | null) {
   return (amenities ?? []).map((amenity) => ({
     '@type': 'LocationFeatureSpecification',
-    name: amenity,
+    name: typeof amenity === 'string' ? amenity : amenity.name,
     value: true,
   }))
 }
@@ -157,7 +157,7 @@ export function buildRealEstateListing({ detail, canonicalPath }: ProjectJsonLdI
   if (detail.developer) {
     node.provider = { '@id': `${SITE_URL}/#developer-${detail.developer.id}` }
   }
-  const features = amenityFeature(project.amenities)
+  const features = amenityFeature(detail.amenities.length > 0 ? detail.amenities : project.amenities)
   if (features.length > 0) node.amenityFeature = features
   return node
 }

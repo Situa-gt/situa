@@ -349,6 +349,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
       const { project, zone } = resolved.data
       const detail = await getProjectDetail(project.id, project.slug)
       if (!detail) notFound()
+      const amenityNames = detail.amenities.map((amenity) => amenity.name)
       const suggestedProjects = await getSuggestedProjects(project.id, 6)
       const basePath = `/${zone.url_slug}/${tipoSlug(project.property_type)}/${project.slug}`
       const jsonLd: object[] = [
@@ -400,7 +401,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                   priceFrom={detail.price_from}
                   monthlyFrom={detail.monthly_payment_from}
                   modelCount={detail.models.length}
-                  amenities={detail.project.amenities}
+                  amenities={amenityNames}
                 />
                 <ModelsGrid
                   models={detail.models}
@@ -408,7 +409,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                   basePath={basePath}
                   images={detail.modelImages}
                 />
-                <ProjectAmenities amenities={detail.project.amenities} />
+                <ProjectAmenities amenities={detail.amenities} />
                 <ProjectLocation
                   latitude={detail.project.latitude}
                   longitude={detail.project.longitude}
@@ -492,7 +493,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                   title={`Otros modelos de ${detail.project.name}`}
                   images={detail.siblingImages}
                 />
-                <ProjectAmenities amenities={detail.project.amenities} />
+                <ProjectAmenities amenities={detail.amenities} />
                 <ProjectLocation
                   latitude={detail.project.latitude}
                   longitude={detail.project.longitude}

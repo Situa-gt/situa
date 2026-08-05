@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      amenities: {
+        Row: {
+          created_at: string
+          display_order: number
+          icon: string
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          icon?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          icon?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ayuda_leads: {
         Row: {
           id: string
@@ -525,6 +558,42 @@ export type Database = {
           },
           {
             foreignKeyName: "project_media_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_amenities: {
+        Row: {
+          amenity_id: string
+          created_at: string
+          display_order: number
+          project_id: string
+        }
+        Insert: {
+          amenity_id: string
+          created_at?: string
+          display_order?: number
+          project_id: string
+        }
+        Update: {
+          amenity_id?: string
+          created_at?: string
+          display_order?: number
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_amenities_amenity_id_fkey"
+            columns: ["amenity_id"]
+            isOneToOne: false
+            referencedRelation: "amenities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_amenities_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"

@@ -1,7 +1,12 @@
 import { FontAwesomeIcon, type FontAwesomeIconName } from '@/components/ui/font-awesome-icon'
 
+export type ProjectAmenityItem = {
+  name: string
+  icon?: FontAwesomeIconName | string | null
+}
+
 interface Props {
-  amenities: string[] | null
+  amenities: Array<string | ProjectAmenityItem> | null
 }
 
 function normalizeAmenity(value: string): string {
@@ -60,8 +65,65 @@ function iconForAmenity(amenity: string): FontAwesomeIconName {
   return 'check'
 }
 
+function safeIcon(value: string | null | undefined, fallbackName: string): FontAwesomeIconName {
+  const knownIcons: FontAwesomeIconName[] = [
+    'arrow-up-right',
+    'bath',
+    'bed',
+    'building',
+    'buildings',
+    'car',
+    'check',
+    'chevron-left',
+    'chevron-right',
+    'child',
+    'children',
+    'dumbbell',
+    'elevator',
+    'floppy-disk',
+    'gamepad',
+    'grip-vertical',
+    'helmet-safety',
+    'house',
+    'eye',
+    'image',
+    'key',
+    'layer-group',
+    'location-dot',
+    'map-location-dot',
+    'megaphone',
+    'paw',
+    'people-roof',
+    'person-swimming',
+    'plus',
+    'ruler',
+    'rotate-right',
+    'shield-check',
+    'square-parking',
+    'star',
+    'tag',
+    'trash',
+    'trees',
+    'upload',
+    'utensils',
+    'warehouse',
+    'water-ladder',
+    'wifi',
+    'xmark',
+  ]
+  return knownIcons.includes(value as FontAwesomeIconName)
+    ? (value as FontAwesomeIconName)
+    : iconForAmenity(fallbackName)
+}
+
 export function ProjectAmenities({ amenities }: Props) {
-  const list = amenities ?? []
+  const list = (amenities ?? [])
+    .map((amenity) =>
+      typeof amenity === 'string'
+        ? { name: amenity, icon: iconForAmenity(amenity) }
+        : { name: amenity.name, icon: safeIcon(amenity.icon, amenity.name) },
+    )
+    .filter((amenity) => amenity.name.trim())
   if (list.length === 0) return null
 
   return (
@@ -71,15 +133,15 @@ export function ProjectAmenities({ amenities }: Props) {
       </h2>
 
       <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {list.map((a) => (
-          <li key={a} className="flex items-center gap-3 text-sm text-body">
+        {list.map((amenity) => (
+          <li key={amenity.name} className="flex items-center gap-3 text-sm text-body">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple/10 text-brand-purple">
               <FontAwesomeIcon
-                name={iconForAmenity(a)}
+                name={amenity.icon}
                 className="h-3.5 w-3.5 opacity-90"
               />
             </span>
-            {a}
+            {amenity.name}
           </li>
         ))}
       </ul>

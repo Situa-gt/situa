@@ -1,6 +1,7 @@
 import { unstable_cache } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/database.types'
+import type { ProjectAmenityItem } from '@/components/project/ProjectAmenities'
 
 type ModelRow = Database['public']['Tables']['models']['Row']
 type ProjectRow = Database['public']['Tables']['projects']['Row']
@@ -36,6 +37,7 @@ export interface ModelDetailData {
   siblings: ModelRow[]
   siblingImages: Record<string, ModelImage>
   zone: { name: string; url_slug: string } | null
+  amenities: ProjectAmenityItem[]
 }
 
 async function fetchModelDetail(
@@ -49,6 +51,7 @@ async function fetchModelDetail(
     { data: project, error: projectErr },
     { data: media, error: mediaErr },
     { data: siblings, error: siblingsErr },
+    projectAmenitiesResult,
   ] = await Promise.all([
     supabase
       .from('models')
@@ -79,6 +82,11 @@ async function fetchModelDetail(
       .neq('id', modelId)
       .order('display_order', { ascending: true })
       .order('price_from', { ascending: true }),
+    supabase
+      .from('project_amenities')
+      .select('display_order, amenities(name, icon)')
+      .eq('project_id', projectId)
+      .order('display_order', { ascending: true }),
   ])
 
   if (modelErr) throw modelErr
@@ -93,6 +101,12 @@ async function fetchModelDetail(
   }
   const developer = projectRaw.developers ?? null
   const zoneRel = projectRaw.zones ?? null
+  const projectAmenities: ProjectAmenityItem[] = projectAmenitiesResult.error
+    ? []
+    : (projectAmenitiesResult.data ?? []).map((item) => {
+        const amenity = Array.isArray(item.amenities) ? item.amenities[0] : item.amenities
+        return amenity ? { name: amenity.name, icon: amenity.icon } : null
+      }).filter(Boolean) as ProjectAmenityItem[]
 
   const [{ data: projectLogoRow }, developerLogoData] = await Promise.all([
     supabase
@@ -168,6 +182,9 @@ async function fetchModelDetail(
     siblings: siblings ?? [],
     siblingImages,
     zone: zoneRel ?? null,
+    amenities: projectAmenities.length > 0
+      ? projectAmenities
+      : (project.amenities ?? []).map((name) => ({ name })),
   }
 }
 

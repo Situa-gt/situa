@@ -8,9 +8,11 @@ import type { ProjectCardData } from '@/lib/queries/home'
 
 interface Props {
   projects: ProjectCardData[]
+  title?: string
+  subtitle?: string
 }
 
-export function ProjectSlider({ projects }: Props) {
+export function ProjectSlider({ projects, title = 'Proyectos disponibles', subtitle }: Props) {
   const reduceMotion =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -40,16 +42,21 @@ export function ProjectSlider({ projects }: Props) {
   if (projects.length === 0) return null
 
   return (
-    <section className="mx-auto w-full max-w-7xl overflow-visible px-6 pt-20">
-      <h2 className="mb-10 text-3xl font-semibold tracking-[-0.015em] text-ink sm:text-[2rem]">
-        Proyectos disponibles
-      </h2>
+    <section className="relative z-0 mx-auto w-full max-w-7xl px-6 py-12">
+      <div className="mb-7 flex items-end justify-between gap-6">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-[-0.015em] text-ink sm:text-[1.85rem]">
+            {title}
+          </h2>
+          {subtitle && <p className="mt-1 text-sm text-muted-ink sm:text-base">{subtitle}</p>}
+        </div>
+      </div>
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex pb-8 overflow-visible">
+        <div className="flex pb-8">
           {projects.map((p) => (
             <div
               key={p.id}
-              className="min-w-0 mr-6 flex-[0_0_calc(100%_-_1.5rem)] sm:flex-[0_0_calc(50%_-_1.5rem)] lg:flex-[0_0_calc(33.333%_-_1.5rem)]"
+              className="min-w-0 mr-6 flex-[0_0_82%] sm:flex-[0_0_42%] lg:flex-[0_0_29%] xl:flex-[0_0_24%]"
             >
               <ProjectCard project={p} />
             </div>

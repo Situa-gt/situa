@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { Hero } from '@/components/home/Hero'
-import { HeroBackground } from '@/components/home/HeroBackground'
 import { HomeBelowFold } from '@/components/home/HomeBelowFold'
 import { SearchResults } from '@/components/home/SearchResults'
 import { JsonLd } from '@/components/seo/JsonLd'
@@ -38,9 +37,7 @@ export default async function Home({ searchParams }: PageProps) {
   return (
     <main className="flex flex-1 flex-col">
       <JsonLd data={[buildOrganizationSitua(), buildWebSite()]} />
-      <HeroBackground>
-        <Hero initial={filters} />
-      </HeroBackground>
+      <Hero initial={filters} />
       {filtered ? <SearchResults filters={filters} /> : <HomeBelowFold />}
     </main>
   )

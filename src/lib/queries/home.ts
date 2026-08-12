@@ -309,7 +309,12 @@ async function fetchOptions(table: 'zones' | 'departments' | 'municipalities'): 
       seen.add(r.slug)
       return true
     })
-    return unique.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+    return unique.sort((a, b) => {
+      const aNumber = Number(a.name.match(/\d+/)?.[0] ?? Number.POSITIVE_INFINITY)
+      const bNumber = Number(b.name.match(/\d+/)?.[0] ?? Number.POSITIVE_INFINITY)
+      if (aNumber !== bNumber) return aNumber - bNumber
+      return a.name.localeCompare(b.name, undefined, { numeric: true })
+    })
   }
 
   const slugColumn = 'slug'

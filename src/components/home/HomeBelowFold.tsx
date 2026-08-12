@@ -8,7 +8,7 @@ import { FeaturedModels } from './FeaturedModels'
 
 export async function HomeBelowFold() {
   return (
-    <>
+    <div className="relative z-0 bg-white">
 {/*       <Reveal>
         <BannerSliderSection />
       </Reveal> */}
@@ -27,6 +27,6 @@ export async function HomeBelowFold() {
       <Reveal>
         <DeveloperTicker />
       </Reveal>
-    </>
+    </div>
   )
 }

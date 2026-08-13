@@ -118,7 +118,7 @@ export async function Hero({ initial }: Props) {
           compact
         />
         {heroProject ? (
-          <div className="mt-0 rounded-b-[2rem] border-t border-white/55 bg-white/80 px-6 py-3 shadow-[0_22px_42px_-34px_rgba(20,16,80,0.5)] backdrop-blur-md">
+          <div className="mt-0 border-t border-white/55 bg-white/80 px-6 py-3 shadow-[0_22px_42px_-34px_rgba(20,16,80,0.5)] backdrop-blur-md">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-ink sm:text-sm">
               Proyecto destacado: <span className="text-ink">{heroProject.name}</span>
             </p>

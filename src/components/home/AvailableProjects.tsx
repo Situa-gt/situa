@@ -1,5 +1,5 @@
 import { getSliderProjects } from '@/lib/queries/home'
-import { ProjectSlider } from './ProjectSlider'
+import { ProjectGridSection } from './ProjectGridSection'
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
@@ -11,11 +11,11 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 export async function AvailableProjects() {
-  const projects = shuffle(await getSliderProjects())
+  const projects = shuffle(await getSliderProjects()).slice(0, 12)
   if (projects.length === 0) return null
 
   return (
-    <ProjectSlider
+    <ProjectGridSection
       projects={projects}
       title="Explora proyectos disponibles"
       subtitle="Apartamentos y casas en Guatemala, listos para comparar por zona y etapa."

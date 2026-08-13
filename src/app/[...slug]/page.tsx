@@ -147,9 +147,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   switch (resolved.kind) {
     case 'tipo':
+      const typeLabel = labelForTipo(resolved.data.tipo)
       return {
-        title: `${labelForTipo(resolved.data.tipo)} en preventa Guatemala | Sitúa`,
-        description: `Explora todos los ${labelForTipo(resolved.data.tipo).toLowerCase()} en preventa y construcción en Guatemala. Compara proyectos, precios y modelos disponibles.`,
+        title: resolved.data.tipo === 'apartamento' ? 'Apartamentos de vivienda nueva | Sitúa' : `${typeLabel} en Guatemala | Sitúa`,
+        description: `Explora todos los ${typeLabel.toLowerCase()} de vivienda nueva en Guatemala. Compara proyectos, precios y modelos disponibles.`,
         alternates: { canonical: `/${tipoSlug(resolved.data.tipo)}` },
       }
     case 'zone':

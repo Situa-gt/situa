@@ -209,7 +209,7 @@ export async function Footer() {
           <nav aria-label="Explorar proyectos" className="mt-12 border-t border-white/15 pt-8 space-y-6">
             <div>
               <p className="mb-5 text-xs font-semibold uppercase tracking-[0.08em] text-white/50">
-                Apartamentos en preventa Guatemala
+                Apartamentos de vivienda nueva
               </p>
               <ul className="flex flex-wrap gap-x-4 gap-y-2">
                 {zones.map((z) => (

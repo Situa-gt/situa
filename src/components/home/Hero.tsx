@@ -8,6 +8,7 @@ import {
   getZoneOptions,
 } from '@/lib/queries/home'
 import type { Filters } from '@/lib/filters/parse'
+import { tipoSlug } from '@/lib/types/property'
 import { HeroFilters } from './HeroFilters'
 import { HeroAccent } from './HeroAccent'
 
@@ -35,6 +36,9 @@ export async function Hero({ initial }: Props) {
     heroCandidates.length > 0
       ? heroCandidates[Math.floor(Math.random() * heroCandidates.length)]
       : null
+  const heroHref = heroProject?.zone
+    ? `/${heroProject.zone.url_slug}/${tipoSlug(heroProject.property_type)}/${heroProject.slug}`
+    : null
 
   return (
     <section className="relative isolate z-20 border-b border-hairline bg-[#f7f7fb]">
@@ -72,6 +76,13 @@ export async function Hero({ initial }: Props) {
         className="absolute inset-x-0 bottom-0 -z-10 h-1/2 bg-gradient-to-b from-transparent to-white"
       />
       <HeroAccent />
+      {heroProject && heroHref ? (
+        <Link
+          href={heroHref}
+          aria-label={`Ver proyecto destacado ${heroProject.name}`}
+          className="absolute inset-0 z-0 cursor-pointer"
+        />
+      ) : null}
 
       <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-6">
         <div aria-hidden />

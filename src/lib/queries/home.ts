@@ -126,7 +126,7 @@ export const getSliderProjects = unstable_cache(
 )
 
 export const getFeaturedProjects = unstable_cache(
-  async () => fetchProjectCards({ featuredOnly: true, limit: 12 }),
+  async () => fetchProjectCards({ featuredOnly: true, limit: 100 }),
   ['home', 'featured'],
   { tags: ['projects:featured', 'projects:active'], revalidate: 3600 },
 )

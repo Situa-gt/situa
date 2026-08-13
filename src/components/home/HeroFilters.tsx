@@ -24,7 +24,6 @@ interface Props {
   departmentOptions: Option[]
   municipalityOptions: Option[]
   compact?: boolean
-  featuredProjectName?: string | null
 }
 
 const STAGE_LABEL: Record<Stage, string> = {
@@ -45,7 +44,6 @@ export function HeroFilters({
   departmentOptions,
   municipalityOptions,
   compact = false,
-  featuredProjectName = null,
 }: Props) {
   const router = useRouter()
   const [state, setState] = useState<Filters>(initial)
@@ -161,21 +159,14 @@ export function HeroFilters({
           </div>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-hairline px-6 py-3">
-          <div className="flex flex-col gap-1.5">
-            <button
-              type="button"
-              onClick={() => setExpanded((v) => !v)}
-              className="inline-flex items-center gap-1 text-sm font-semibold text-brand-purple transition hover:text-brand-purple/75"
-            >
-              {expanded ? 'Ocultar filtros' : 'Más filtros'}
-              <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-            </button>
-            {featuredProjectName ? (
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-ink">
-                Proyecto destacado: <span className="text-ink">{featuredProjectName}</span>
-              </p>
-            ) : null}
-          </div>
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="inline-flex items-center gap-1 text-sm font-semibold text-brand-purple transition hover:text-brand-purple/75"
+          >
+            {expanded ? 'Ocultar filtros' : 'Más filtros'}
+            <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+          </button>
           <button
             type="button"
             onClick={onClear}

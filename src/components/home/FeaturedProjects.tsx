@@ -1,5 +1,5 @@
 import { getFeaturedProjects } from '@/lib/queries/home'
-import { ProjectSlider } from './ProjectSlider'
+import { ProjectGridSection } from './ProjectGridSection'
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
@@ -15,7 +15,7 @@ export async function FeaturedProjects() {
   if (projects.length === 0) return null
 
   return (
-    <ProjectSlider
+    <ProjectGridSection
       projects={projects}
       title="Proyectos destacados"
       subtitle="Opciones activas con buena visibilidad dentro de Sitúa."

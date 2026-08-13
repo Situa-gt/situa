@@ -3,10 +3,10 @@ import Link from 'next/link'
 import { Building2, Calculator, HomeIcon, MapPinned, Search, Sparkles } from 'lucide-react'
 import {
   getDepartmentOptions,
+  getHeroProjects,
   getMunicipalityOptions,
   getZoneOptions,
 } from '@/lib/queries/home'
-import { getHomeHeroSettings } from '@/lib/site-settings'
 import type { Filters } from '@/lib/filters/parse'
 import { HeroFilters } from './HeroFilters'
 import { HeroAccent } from './HeroAccent'
@@ -24,25 +24,41 @@ const quickLinks = [
 ]
 
 export async function Hero({ initial }: Props) {
-  const [zoneOptions, departmentOptions, municipalityOptions, homeHeroSettings] = await Promise.all([
+  const [zoneOptions, departmentOptions, municipalityOptions, heroProjects] = await Promise.all([
     getZoneOptions(),
     getDepartmentOptions(),
     getMunicipalityOptions(),
-    getHomeHeroSettings(),
+    getHeroProjects(),
   ])
-  const heroImageUrl = homeHeroSettings.image_url ?? '/aerea_ciudad_gt.png'
+  const heroCandidates = heroProjects.filter((project) => project.cover_url)
+  const heroProject =
+    heroCandidates.length > 0
+      ? heroCandidates[Math.floor(Math.random() * heroCandidates.length)]
+      : null
 
   return (
     <section className="relative isolate z-20 border-b border-hairline bg-[#f7f7fb]">
-      <Image
-        src={heroImageUrl}
-        alt={homeHeroSettings.image_alt ?? ''}
-        fill
-        sizes="100vw"
-        priority
-        className="absolute inset-0 -z-30 object-cover"
-        aria-hidden
-      />
+      {heroProject?.cover_url ? (
+        <Image
+          src={heroProject.cover_url}
+          alt=""
+          fill
+          sizes="100vw"
+          priority
+          className="absolute inset-0 -z-30 object-cover"
+          aria-hidden
+        />
+      ) : (
+        <Image
+          src="/aerea_ciudad_gt.png"
+          alt=""
+          fill
+          sizes="100vw"
+          priority
+          className="absolute inset-0 -z-30 object-cover"
+          aria-hidden
+        />
+      )}
       <div
         aria-hidden
         className="absolute inset-0 -z-20"
@@ -58,16 +74,7 @@ export async function Hero({ initial }: Props) {
       <HeroAccent />
 
       <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-6">
-        <Link href="/" aria-label="Sitúa - Inicio" className="inline-flex shrink-0 items-center">
-          <Image
-            src="/logo_situa_blanco.png"
-            alt="Sitúa"
-            width={150}
-            height={40}
-            priority
-            className="h-[38px] w-auto"
-          />
-        </Link>
+        <div aria-hidden />
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Secciones principales">
           {quickLinks.map(({ label, href, icon: Icon }) => (
             <Link
@@ -84,23 +91,32 @@ export async function Hero({ initial }: Props) {
           <Link href="/calculadora" className="text-sm font-semibold text-white/90 transition hover:text-white">
             Calculadora
           </Link>
-          <a
-            href="https://situaadmin.vercel.app/login"
-            className="rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-ink shadow-sm transition hover:bg-white"
-          >
-            Iniciar sesión
-          </a>
         </div>
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-8 pt-6 sm:px-6 md:pb-12 md:pt-10">
         <div className="mb-8 max-w-2xl text-white">
+          <Link href="/" aria-label="Sitúa - Inicio" className="mb-7 inline-flex">
+            <Image
+              src="/logo_situa_blanco.png"
+              alt="Sitúa"
+              width={320}
+              height={86}
+              priority
+              className="h-[64px] w-auto sm:h-[78px]"
+            />
+          </Link>
           <h1 className="text-[clamp(2.35rem,5vw,4.5rem)] font-semibold leading-[1.02] tracking-[-0.02em]">
             Vivienda Nueva en Guatemala
           </h1>
           <p className="mt-4 max-w-xl rounded-2xl border border-white/25 bg-white/12 px-5 py-4 text-lg leading-relaxed text-white/90 backdrop-blur-sm sm:text-2xl">
             Busca, compara, cotiza y compra la mejor opción en un solo lugar.
           </p>
+          {heroProject ? (
+            <p className="mt-4 text-sm font-semibold uppercase tracking-[0.08em] text-white/70">
+              Proyecto destacado: {heroProject.name}
+            </p>
+          ) : null}
         </div>
 
         <HeroFilters

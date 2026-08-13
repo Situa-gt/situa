@@ -84,9 +84,9 @@ export async function Hero({ initial }: Props) {
         />
       ) : null}
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-6">
+      <div className="pointer-events-none relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-6">
         <div aria-hidden />
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Secciones principales">
+        <nav className="pointer-events-auto hidden items-center gap-1 lg:flex" aria-label="Secciones principales">
           {quickLinks.map(({ label, href, icon: Icon }) => (
             <Link
               key={label}
@@ -101,9 +101,9 @@ export async function Hero({ initial }: Props) {
         <div aria-hidden />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-8 pt-6 sm:px-6 md:pb-12 md:pt-10">
+      <div className="pointer-events-none relative z-10 mx-auto w-full max-w-7xl px-5 pb-8 pt-6 sm:px-6 md:pb-12 md:pt-10">
         <div className="mb-8 max-w-2xl text-white">
-          <Link href="/" aria-label="Sitúa - Inicio" className="mb-7 inline-flex">
+          <Link href="/" aria-label="Sitúa - Inicio" className="pointer-events-auto mb-7 inline-flex">
             <Image
               src="/logo_situa_blanco.png"
               alt="Sitúa"
@@ -121,13 +121,15 @@ export async function Hero({ initial }: Props) {
           </p>
         </div>
 
-        <HeroFilters
-          initial={initial}
-          zoneOptions={zoneOptions}
-          departmentOptions={departmentOptions}
-          municipalityOptions={municipalityOptions}
-          compact
-        />
+        <div className="pointer-events-auto">
+          <HeroFilters
+            initial={initial}
+            zoneOptions={zoneOptions}
+            departmentOptions={departmentOptions}
+            municipalityOptions={municipalityOptions}
+            compact
+          />
+        </div>
         {heroProject ? (
           <div className="px-6 pt-8">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-ink sm:text-sm">

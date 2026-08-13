@@ -24,6 +24,7 @@ interface Props {
   departmentOptions: Option[]
   municipalityOptions: Option[]
   compact?: boolean
+  featuredProjectName?: string | null
 }
 
 const STAGE_LABEL: Record<Stage, string> = {
@@ -44,6 +45,7 @@ export function HeroFilters({
   departmentOptions,
   municipalityOptions,
   compact = false,
+  featuredProjectName = null,
 }: Props) {
   const router = useRouter()
   const [state, setState] = useState<Filters>(initial)
@@ -148,7 +150,6 @@ export function HeroFilters({
           </label>
 
           <div className="flex items-center gap-3 px-4 py-4">
-            <LinkButton href="/calculadora" />
             <button
               type="submit"
               aria-label="Buscar proyectos"
@@ -160,14 +161,21 @@ export function HeroFilters({
           </div>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-hairline px-6 py-3">
-          <button
-            type="button"
-            onClick={() => setExpanded((v) => !v)}
-            className="inline-flex items-center gap-1 text-sm font-semibold text-brand-purple transition hover:text-brand-purple/75"
-          >
-            {expanded ? 'Ocultar filtros' : 'Más filtros'}
-            <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-          </button>
+          <div className="flex flex-col gap-1.5">
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="inline-flex items-center gap-1 text-sm font-semibold text-brand-purple transition hover:text-brand-purple/75"
+            >
+              {expanded ? 'Ocultar filtros' : 'Más filtros'}
+              <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+            </button>
+            {featuredProjectName ? (
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-ink">
+                Proyecto destacado: <span className="text-ink">{featuredProjectName}</span>
+              </p>
+            ) : null}
+          </div>
           <button
             type="button"
             onClick={onClear}
@@ -364,18 +372,6 @@ export function HeroFilters({
         <CtaButton type="submit">Buscar</CtaButton>
       </div>
     </form>
-  )
-}
-
-function LinkButton({ href }: { href: string }) {
-  return (
-    <a
-      href={href}
-      aria-label="Abrir calculadora"
-      className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-full bg-violet-50 text-brand-purple transition hover:bg-violet-100 sm:inline-flex"
-    >
-      <Calculator className="h-5 w-5" />
-    </a>
   )
 }
 

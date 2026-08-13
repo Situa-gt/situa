@@ -87,11 +87,7 @@ export async function Hero({ initial }: Props) {
             </Link>
           ))}
         </nav>
-        <div className="hidden items-center gap-3 sm:flex">
-          <Link href="/calculadora" className="text-sm font-semibold text-white/90 transition hover:text-white">
-            Calculadora
-          </Link>
-        </div>
+        <div aria-hidden />
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-8 pt-6 sm:px-6 md:pb-12 md:pt-10">
@@ -112,11 +108,6 @@ export async function Hero({ initial }: Props) {
           <p className="mt-4 max-w-xl rounded-2xl border border-white/25 bg-white/12 px-5 py-4 text-lg leading-relaxed text-white/90 backdrop-blur-sm sm:text-2xl">
             Busca, compara, cotiza y compra la mejor opción en un solo lugar.
           </p>
-          {heroProject ? (
-            <p className="mt-4 text-sm font-semibold uppercase tracking-[0.08em] text-white/70">
-              Proyecto destacado: {heroProject.name}
-            </p>
-          ) : null}
         </div>
 
         <HeroFilters
@@ -124,6 +115,7 @@ export async function Hero({ initial }: Props) {
           zoneOptions={zoneOptions}
           departmentOptions={departmentOptions}
           municipalityOptions={municipalityOptions}
+          featuredProjectName={heroProject?.name ?? null}
           compact
         />
       </div>

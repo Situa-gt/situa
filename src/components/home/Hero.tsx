@@ -4,9 +4,9 @@ import { Building2, Calculator, HomeIcon, MapPinned, Search, Sparkles } from 'lu
 import {
   getDepartmentOptions,
   getMunicipalityOptions,
-  getHeroProjects,
   getZoneOptions,
 } from '@/lib/queries/home'
+import { getHomeHeroSettings } from '@/lib/site-settings'
 import type { Filters } from '@/lib/filters/parse'
 import { HeroFilters } from './HeroFilters'
 import { HeroAccent } from './HeroAccent'
@@ -24,27 +24,25 @@ const quickLinks = [
 ]
 
 export async function Hero({ initial }: Props) {
-  const [zoneOptions, departmentOptions, municipalityOptions, heroProjects] = await Promise.all([
+  const [zoneOptions, departmentOptions, municipalityOptions, homeHeroSettings] = await Promise.all([
     getZoneOptions(),
     getDepartmentOptions(),
     getMunicipalityOptions(),
-    getHeroProjects(),
+    getHomeHeroSettings(),
   ])
-  const heroProject = heroProjects.find((project) => project.cover_url) ?? heroProjects[0] ?? null
+  const heroImageUrl = homeHeroSettings.image_url ?? '/aerea_ciudad_gt.png'
 
   return (
     <section className="relative isolate z-20 border-b border-hairline bg-[#f7f7fb]">
-      {heroProject?.cover_url ? (
-        <Image
-          src={heroProject.cover_url}
-          alt=""
-          fill
-          sizes="100vw"
-          priority
-          className="absolute inset-0 -z-30 object-cover"
-          aria-hidden
-        />
-      ) : null}
+      <Image
+        src={heroImageUrl}
+        alt={homeHeroSettings.image_alt ?? ''}
+        fill
+        sizes="100vw"
+        priority
+        className="absolute inset-0 -z-30 object-cover"
+        aria-hidden
+      />
       <div
         aria-hidden
         className="absolute inset-0 -z-20"

@@ -20,6 +20,7 @@ type AllowedTable =
   | 'developers'
   | 'project_media'
   | 'brand_ticker_logos'
+  | 'app_settings'
   | 'amenities'
   | 'project_amenities'
 
@@ -30,6 +31,7 @@ const ALLOWED_TABLES = new Set<AllowedTable>([
   'developers',
   'project_media',
   'brand_ticker_logos',
+  'app_settings',
   'amenities',
   'project_amenities',
 ])
@@ -142,6 +144,11 @@ async function deriveTags(table: AllowedTable, row: Record<string, unknown>): Pr
     }
     case 'brand_ticker_logos': {
       tags.add('brand-ticker-logos')
+      break
+    }
+    case 'app_settings': {
+      tags.add('app-settings')
+      if (row.key === 'home_hero_settings') tags.add('home:hero')
       break
     }
     case 'amenities': {

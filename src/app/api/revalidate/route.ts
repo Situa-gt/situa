@@ -23,6 +23,7 @@ type AllowedTable =
   | 'app_settings'
   | 'amenities'
   | 'project_amenities'
+  | 'blog_posts'
 
 const ALLOWED_TABLES = new Set<AllowedTable>([
   'projects',
@@ -34,6 +35,7 @@ const ALLOWED_TABLES = new Set<AllowedTable>([
   'app_settings',
   'amenities',
   'project_amenities',
+  'blog_posts',
 ])
 
 interface WebhookPayload {
@@ -166,6 +168,11 @@ async function deriveTags(table: AllowedTable, row: Record<string, unknown>): Pr
       tags.add('models:active')
       if (pa.project_id) tags.add(`project-id:${pa.project_id}`)
       if (pa.amenity_id) await addProjectIdsByAmenity(tags, pa.amenity_id)
+      break
+    }
+    case 'blog_posts': {
+      tags.add('blog_posts')
+      if (typeof row.slug === 'string') tags.add(`blog:${row.slug}`)
       break
     }
   }

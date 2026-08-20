@@ -1,0 +1,2 @@
+ALTER TABLE developers DROP COLUMN IF EXISTS logo_url;
+ALTER TABLE projects DROP COLUMN IF EXISTS logo_url;;

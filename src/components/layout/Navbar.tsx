@@ -30,6 +30,9 @@ export function Navbar() {
           <Link href="/calculadora" className="text-sm font-medium text-white/80 transition hover:text-white">
             Calculadora
           </Link>
+          <Link href="/blog" className="text-sm font-medium text-white/80 transition hover:text-white">
+            Blog
+          </Link>
         </div>
       </nav>
     </header>

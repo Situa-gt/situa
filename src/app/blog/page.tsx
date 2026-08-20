@@ -12,8 +12,29 @@ export const metadata: Metadata = {
 export default async function BlogPage() {
   const posts = await getPublishedBlogPosts()
   return <main className="bg-[#f7f6f2] text-zinc-950">
-    <section className="bg-brand-purple px-6 py-16 text-white lg:py-24">
-      <div className="mx-auto max-w-7xl"><p className="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-white/70">Ideas para decidir mejor</p><h1 className="max-w-3xl text-4xl font-semibold tracking-tight lg:text-6xl">Blog inmobiliario Sitúa</h1><p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/80">Guías claras para explorar vivienda nueva, comparar proyectos e invertir con más información en Guatemala.</p></div>
+    <section className="relative isolate overflow-hidden border-b border-hairline px-6 py-16 text-white lg:py-24">
+      <Image
+        src="/blog/blog-hero-guatemala.png"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        aria-hidden
+        className="absolute inset-0 -z-30 object-cover object-[66%_center]"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-20"
+        style={{ background: 'linear-gradient(110deg, rgba(107,102,235,0.94) 0%, rgba(107,102,235,0.82) 46%, rgba(107,102,235,0.48) 72%, rgba(253,125,41,0.16) 100%)' }}
+      />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-28 bg-gradient-to-b from-transparent to-[#f7f6f2]/35" />
+      <div className="mx-auto max-w-7xl">
+        <div className="max-w-3xl">
+          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-white/75">Ideas para decidir mejor</p>
+          <h1 className="text-4xl font-semibold tracking-tight drop-shadow-sm lg:text-6xl">Blog inmobiliario Sitúa</h1>
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/90">Guías claras para explorar vivienda nueva, comparar proyectos e invertir con más información en Guatemala.</p>
+        </div>
+      </div>
     </section>
     <section className="mx-auto max-w-7xl px-6 py-16 lg:py-24">
       {posts.length ? <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">{posts.map((post) => <article key={post.id} className="group overflow-hidden rounded-3xl bg-white shadow-[0_16px_50px_-35px_rgba(20,20,20,.35)]">

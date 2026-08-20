@@ -62,13 +62,12 @@ export async function Footer() {
 
   return (
     <footer className="relative mt-auto overflow-hidden bg-brand-purple text-white">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         <Image
           src="/footer_bg.png"
           alt=""
-          aria-hidden
           fill
-          className="object-cover object-right-top opacity-60 select-none"
+          className="select-none object-cover object-[72%_center] opacity-35 mix-blend-multiply sm:object-right"
           sizes="100vw"
         />
       </div>

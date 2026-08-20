@@ -47,6 +47,54 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          id: string
+          title: string
+          slug: string
+          excerpt: string
+          content: string
+          cover_url: string | null
+          cover_alt: string | null
+          seo_title: string | null
+          seo_description: string | null
+          is_published: boolean
+          published_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          slug: string
+          excerpt?: string
+          content?: string
+          cover_url?: string | null
+          cover_alt?: string | null
+          seo_title?: string | null
+          seo_description?: string | null
+          is_published?: boolean
+          published_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          slug?: string
+          excerpt?: string
+          content?: string
+          cover_url?: string | null
+          cover_alt?: string | null
+          seo_title?: string | null
+          seo_description?: string | null
+          is_published?: boolean
+          published_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ayuda_leads: {
         Row: {
           id: string

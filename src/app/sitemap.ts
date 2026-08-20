@@ -3,11 +3,13 @@ import { unstable_cache } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import { tipoSlug, type PropertyType } from '@/lib/types/property'
 import { SITE_URL } from '@/lib/seo/site'
+import { getPublishedBlogPosts } from '@/lib/queries/blog'
 
 const STATIC_ROUTES: ReadonlyArray<{ path: string; changeFrequency: 'daily' | 'monthly'; priority: number }> = [
   { path: '/', changeFrequency: 'daily', priority: 1.0 },
   { path: '/calculadora', changeFrequency: 'monthly', priority: 0.6 },
   { path: '/quienes-somos', changeFrequency: 'monthly', priority: 0.3 },
+  { path: '/blog', changeFrequency: 'daily', priority: 0.6 },
   { path: '/politica-de-privacidad', changeFrequency: 'monthly', priority: 0.3 },
   { path: '/terminos-y-condiciones', changeFrequency: 'monthly', priority: 0.3 },
 ]
@@ -79,7 +81,7 @@ function maxDate(a: Date, b: Date): Date {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { zones, projects, models } = await getCachedSitemapData()
+  const [{ zones, projects, models }, blogPosts] = await Promise.all([getCachedSitemapData(), getPublishedBlogPosts()])
 
   const now = new Date()
   const entries: MetadataRoute.Sitemap = []
@@ -163,6 +165,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.8,
     })
+  }
+
+  for (const post of blogPosts) {
+    entries.push({ url: `${SITE_URL}/blog/${post.slug}`, lastModified: toDate(post.updated_at), changeFrequency: 'monthly', priority: 0.6 })
   }
 
   return entries

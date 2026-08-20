@@ -7,6 +7,7 @@ import { getZoneOptions } from '@/lib/queries/home'
 const NAV_LINKS = [
   { href: '/calculadora', label: 'Calculadora de cuota' },
   { href: '/apartamentos', label: 'Apartamentos en preventa' },
+  { href: '/blog', label: 'Blog inmobiliario' },
 ]
 
 const ABOUT_LINKS = [

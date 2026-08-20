@@ -16,11 +16,36 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPublishedBlogPost((await params).slug)
   if (!post) return {}
   const canonical = `/blog/${post.slug}`
+  const title = post.seo_title || `${post.title} | Sitúa`
+  const description = post.seo_description || post.excerpt
+  const image = post.cover_url
+    ? post.cover_url.startsWith('http') ? post.cover_url : `${SITE_URL}${post.cover_url}`
+    : `${SITE_URL}/og-default.jpg`
   return {
-    title: post.seo_title || `${post.title} | Sitúa`,
-    description: post.seo_description || post.excerpt,
+    title,
+    description,
     alternates: { canonical },
-    openGraph: { type: 'article', title: post.title, description: post.excerpt, url: canonical, images: post.cover_url ? [{ url: post.cover_url, alt: post.cover_alt || post.title }] : [] },
+    authors: [{ name: 'Sitúa', url: SITE_URL }],
+    robots: { index: true, follow: true },
+    openGraph: {
+      type: 'article',
+      siteName: 'Sitúa',
+      locale: 'es_GT',
+      title,
+      description,
+      url: canonical,
+      publishedTime: post.published_at || undefined,
+      modifiedTime: post.updated_at,
+      authors: [SITE_URL],
+      images: [{ url: image, width: 1200, height: 630, alt: post.cover_alt || post.title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      site: '@situagt_',
+      title,
+      description,
+      images: [{ url: image, alt: post.cover_alt || post.title }],
+    },
   }
 }
 
@@ -33,7 +58,7 @@ export default async function BlogPostPage({ params }: Props) {
     image: post.cover_url ? [post.cover_url.startsWith('http') ? post.cover_url : `${SITE_URL}${post.cover_url}`] : undefined,
     datePublished: post.published_at, dateModified: post.updated_at,
     author: { '@type': 'Organization', name: 'Sitúa' }, publisher: { '@type': 'Organization', name: 'Sitúa', url: SITE_URL },
-    mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
+    mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`, url: `${SITE_URL}/blog/${post.slug}`, inLanguage: 'es-GT',
   }
   return <main className="bg-[#f7f6f2] text-zinc-950">
     <JsonLd data={articleJsonLd} />

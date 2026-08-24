@@ -150,7 +150,6 @@ async function deriveTags(table: AllowedTable, row: Record<string, unknown>): Pr
     }
     case 'app_settings': {
       tags.add('app-settings')
-      if (row.key === 'home_hero_settings') tags.add('home:hero')
       break
     }
     case 'amenities': {

@@ -16,7 +16,7 @@ export async function DeveloperTicker() {
   const items = fillTicker(logos, 12)
 
   return (
-    <section className="overflow-hidden pb-12 pt-24">
+    <section className="overflow-hidden pb-10 pt-12 sm:pb-12 sm:pt-24">
       <DeveloperTickerCarousel logos={items} />
     </section>
   )

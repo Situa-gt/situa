@@ -39,11 +39,11 @@ export function FeaturedModelCard({ model }: Props) {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-6">
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
         <p className="text-xs font-medium text-muted-ink">{project.name}</p>
         <h3 className="mt-1 text-lg font-semibold tracking-tight text-ink">{modelName}</h3>
 
-        <dl className={`mt-5 grid gap-4 border-t border-hairline pt-5 ${monthly !== null ? 'grid-cols-3' : 'grid-cols-2'}`}>
+        <dl className={`mt-5 grid gap-x-4 gap-y-5 border-t border-hairline pt-5 ${monthly !== null ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'}`}>
           <div>
             <dt className="text-xs font-medium uppercase tracking-[0.06em] text-muted-ink">
               Precio desde
@@ -63,7 +63,7 @@ export function FeaturedModelCard({ model }: Props) {
               </dd>
             </div>
           )}
-          <div>
+          <div className={monthly !== null ? 'col-span-2 sm:col-span-1' : undefined}>
             <dt className="text-xs font-medium uppercase tracking-[0.06em] text-muted-ink">
               Dormitorios
             </dt>

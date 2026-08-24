@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { Building2, Calculator, HomeIcon, MapPinned, Search, Sparkles } from 'lucide-react'
+import { Building2, Calculator, MapPinned, Search, Sparkles } from 'lucide-react'
 import {
   getDepartmentOptions,
   getHeroProjects,
@@ -19,7 +19,6 @@ interface Props {
 const quickLinks = [
   { label: 'Todos', href: '/', icon: Sparkles },
   { label: 'Apartamentos', href: '/apartamentos', icon: Building2 },
-  { label: 'Casas', href: '/casas', icon: HomeIcon },
   { label: 'Zonas', href: '/zona-15', icon: MapPinned },
   { label: 'Calculadora', href: '/calculadora', icon: Calculator },
 ]

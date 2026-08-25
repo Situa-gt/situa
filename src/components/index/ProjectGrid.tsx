@@ -4,11 +4,13 @@ import type { ProjectCardData } from '@/lib/queries/home'
 interface Props {
   projects: ProjectCardData[]
   emptyMessage?: string
+  title?: string
 }
 
 export function ProjectGrid({
   projects,
   emptyMessage = 'No encontramos proyectos en esta búsqueda.',
+  title,
 }: Props) {
   if (projects.length === 0) {
     return (
@@ -22,6 +24,11 @@ export function ProjectGrid({
 
   return (
     <section className="mx-auto w-full max-w-7xl overflow-visible px-6 py-10">
+      {title ? (
+        <h2 className="mb-3 text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
+          {title}
+        </h2>
+      ) : null}
       <p className="mb-6 text-sm text-zinc-500">
         {projects.length} {projects.length === 1 ? 'proyecto' : 'proyectos'}
       </p>

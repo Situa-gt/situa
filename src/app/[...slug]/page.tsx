@@ -11,6 +11,7 @@ import { formatPriceFrom } from '@/lib/format/price'
 import { Breadcrumbs } from '@/components/breadcrumbs/Breadcrumbs'
 import { IndexHero } from '@/components/index/IndexHero'
 import { ProjectGrid } from '@/components/index/ProjectGrid'
+import { IndexSeoContent } from '@/components/index/IndexSeoContent'
 import { ProjectHeaderInfo } from '@/components/project/ProjectHeader'
 import { ProjectGallery } from '@/components/project/ProjectGallery'
 import { ProjectMainDetails } from '@/components/project/ProjectMainDetails'
@@ -148,25 +149,39 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   switch (resolved.kind) {
     case 'tipo':
       const typeLabel = labelForTipo(resolved.data.tipo)
+      const typeProjects = await getProjectsForIndex({ tipo: resolved.data.tipo })
+      const typeProjectCount = typeProjects.length
       return {
-        title: resolved.data.tipo === 'apartamento' ? 'Apartamentos de vivienda nueva | Sitúa' : `${typeLabel} en Guatemala | Sitúa`,
-        description: `Explora todos los ${typeLabel.toLowerCase()} de vivienda nueva en Guatemala. Compara proyectos, precios y modelos disponibles.`,
+        title:
+          resolved.data.tipo === 'apartamento'
+            ? 'Apartamentos en Venta en Guatemala | Sitúa'
+            : `${typeLabel} en venta en Guatemala | Sitúa`,
+        description: `Compara ${typeProjectCount} ${typeProjectCount === 1 ? 'proyecto' : 'proyectos'} de ${typeLabel.toLowerCase()} en venta en Guatemala. Revisa precios, cuotas, modelos y zonas en Sitúa.`,
         alternates: { canonical: `/${tipoSlug(resolved.data.tipo)}` },
       }
-    case 'zone':
+    case 'zone': {
+      const zoneProjects = await getProjectsForIndex({ zoneId: resolved.data.zone.id })
+      const zoneProjectCount = zoneProjects.length
       return {
-        title: `Proyectos en ${resolved.data.zone.name} | Preventa Guatemala | Sitúa`,
-        description: `Proyectos de apartamentos y casas en ${resolved.data.zone.name}, Guatemala. Preventa y construcción. Compara modelos, precios y amenidades.`,
+        title: `Proyectos Inmobiliarios en ${resolved.data.zone.name}, Guatemala | Sitúa`,
+        description: `Explora ${zoneProjectCount} ${zoneProjectCount === 1 ? 'proyecto inmobiliario' : 'proyectos inmobiliarios'} en ${resolved.data.zone.name}, Guatemala. Compara precios, modelos, cuotas y etapas de entrega.`,
         alternates: { canonical: `/${resolved.data.zone.url_slug}` },
       }
-    case 'zone-tipo':
+    }
+    case 'zone-tipo': {
+      const zoneTypeProjects = await getProjectsForIndex({
+        tipo: resolved.data.tipo,
+        zoneId: resolved.data.zone.id,
+      })
+      const zoneTypeProjectCount = zoneTypeProjects.length
       return {
-        title: `${labelForTipo(resolved.data.tipo)} en ${resolved.data.zone.name} | Sitúa`,
-        description: `${labelForTipo(resolved.data.tipo)} en ${resolved.data.zone.name}, Guatemala. Proyectos en preventa, construcción y entrega inmediata. Contacta directamente al desarrollador.`,
+        title: `${labelForTipo(resolved.data.tipo)} en Venta en ${resolved.data.zone.name}, Guatemala | Sitúa`,
+        description: `Compara ${zoneTypeProjectCount} ${zoneTypeProjectCount === 1 ? 'proyecto' : 'proyectos'} de ${labelForTipo(resolved.data.tipo).toLowerCase()} en venta en ${resolved.data.zone.name}. Consulta precios, cuotas, modelos y disponibilidad.`,
         alternates: {
           canonical: `/${resolved.data.zone.url_slug}/${tipoSlug(resolved.data.tipo)}`,
         },
       }
+    }
     case 'project': {
       const { project, zone } = resolved.data
       const detail = await getProjectDetail(project.id, project.slug)
@@ -300,14 +315,16 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
   switch (resolved.kind) {
     case 'tipo': {
       const projects = await getProjectsForIndex({ tipo: resolved.data.tipo })
+      const typeLabel = labelForTipo(resolved.data.tipo)
       return {
         body: (
           <>
             <IndexHero
-              title={`${labelForTipo(resolved.data.tipo)} en Guatemala`}
-              subtitle="Proyectos en preventa, construcción y entrega inmediata."
+              title={`${typeLabel} en venta en Guatemala`}
+              subtitle={`Compara ${projects.length} ${projects.length === 1 ? 'proyecto' : 'proyectos'} de vivienda nueva por zona, precio, cuota y etapa de entrega.`}
             />
-            <ProjectGrid projects={projects} />
+            <ProjectGrid projects={projects} title={`Proyectos de ${typeLabel.toLowerCase()} en Guatemala`} />
+            <IndexSeoContent projects={projects} propertyLabel={typeLabel} />
           </>
         ),
         jsonLd: [buildItemList(projects)],
@@ -320,9 +337,10 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
           <>
             <IndexHero
               title={`Proyectos en ${resolved.data.zone.name}`}
-              subtitle={`Proyectos en preventa y construcción en ${resolved.data.zone.name}. Contacta directamente al desarrollador.`}
+              subtitle={`Compara ${projects.length} ${projects.length === 1 ? 'proyecto inmobiliario' : 'proyectos inmobiliarios'} en ${resolved.data.zone.name} por precio, cuota y etapa de entrega.`}
             />
-            <ProjectGrid projects={projects} />
+            <ProjectGrid projects={projects} title={`Proyectos inmobiliarios en ${resolved.data.zone.name}`} />
+            <IndexSeoContent projects={projects} zoneName={resolved.data.zone.name} />
           </>
         ),
         jsonLd: [buildItemList(projects)],
@@ -333,14 +351,20 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
         tipo: resolved.data.tipo,
         zoneId: resolved.data.zone.id,
       })
+      const typeLabel = labelForTipo(resolved.data.tipo)
       return {
         body: (
           <>
             <IndexHero
-              title={`${labelForTipo(resolved.data.tipo)} en ${resolved.data.zone.name}`}
-              subtitle={`${labelForTipo(resolved.data.tipo)} en ${resolved.data.zone.name}, Guatemala. Proyectos en preventa y construcción.`}
+              title={`${typeLabel} en venta en ${resolved.data.zone.name}, Guatemala`}
+              subtitle={`Compara ${projects.length} ${projects.length === 1 ? 'proyecto' : 'proyectos'} con precios, cuotas, modelos y etapas de entrega actualizadas.`}
             />
-            <ProjectGrid projects={projects} />
+            <ProjectGrid projects={projects} title={`Proyectos de ${typeLabel.toLowerCase()} en ${resolved.data.zone.name}`} />
+            <IndexSeoContent
+              projects={projects}
+              propertyLabel={typeLabel}
+              zoneName={resolved.data.zone.name}
+            />
           </>
         ),
         jsonLd: [buildItemList(projects)],

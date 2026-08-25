@@ -25,9 +25,9 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://situa.gt"),
-  title: "Sitúa | Proyectos en preventa en Guatemala",
+  title: "Sitúa | Apartamentos en venta y vivienda nueva en Guatemala",
   description:
-    "Explora más de 50 proyectos de apartamentos y casas en preventa y construcción en Guatemala. Compara precios, modelos y zonas. Plataforma verificada por ADIG.",
+    "Encuentra apartamentos en venta y proyectos de vivienda nueva en Guatemala. Compara precios, cuotas, modelos y zonas en Sitúa.",
   openGraph: {
     siteName: "Sitúa",
     locale: "es_GT",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
         url: "/og-default.jpg",
         width: 1200,
         height: 630,
-        alt: "Sitúa – Proyectos en preventa en Guatemala",
+        alt: "Sitúa – Apartamentos en venta y vivienda nueva en Guatemala",
       },
     ],
   },

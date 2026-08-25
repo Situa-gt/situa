@@ -113,7 +113,7 @@ export async function Hero({ initial }: Props) {
             />
           </Link>
           <h1 className="text-[clamp(2.35rem,5vw,4.5rem)] font-semibold leading-[1.02] tracking-[-0.02em]">
-            Vivienda Nueva en Guatemala
+            Apartamentos en venta y vivienda nueva en Guatemala
           </h1>
           <p className="mt-4 max-w-xl rounded-2xl border border-white/25 bg-white/12 px-5 py-4 text-lg leading-relaxed text-white/90 backdrop-blur-sm sm:text-2xl">
             Busca, compara, cotiza y compra la mejor opción en un solo lugar.

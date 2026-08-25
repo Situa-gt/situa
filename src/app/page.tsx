@@ -16,14 +16,14 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const filters = parseFilters(await searchParams)
   const filtered = hasAnyFilter(filters)
   return {
-    title: 'Proyectos en preventa Guatemala | Apartamentos y Casas | Sitúa',
+    title: 'Apartamentos en Venta y Vivienda Nueva en Guatemala | Sitúa',
     description:
-      'Explora más de 50 proyectos de apartamentos y casas en preventa y construcción en Guatemala. Compara precios, modelos y zonas. Plataforma verificada por ADIG.',
+      'Encuentra apartamentos en venta y proyectos de vivienda nueva en Guatemala. Compara zonas, precios, cuotas, modelos y etapas de entrega en Sitúa.',
     alternates: { canonical: '/' },
     openGraph: {
-      title: 'Proyectos en preventa Guatemala | Sitúa',
+      title: 'Apartamentos en Venta y Vivienda Nueva en Guatemala | Sitúa',
       description:
-        'Explora más de 50 proyectos de apartamentos y casas en preventa en Guatemala. Compara precios, modelos y zonas.',
+        'Compara apartamentos en venta, precios, cuotas, modelos y zonas de Guatemala.',
     },
     robots: filtered ? { index: false, follow: true } : undefined,
   }

@@ -2,10 +2,12 @@ import Link from 'next/link'
 import type { ProjectCardData } from '@/lib/queries/home'
 import { stageLabel } from '@/lib/format/stage'
 import { tipoSlug } from '@/lib/types/property'
+import type { PropertyType } from '@/lib/types/property'
 
 interface Props {
   projects: ProjectCardData[]
   propertyLabel?: string
+  propertyType?: PropertyType
   zoneName?: string
 }
 
@@ -22,7 +24,12 @@ function formatUsd(value: number) {
   }).format(value)
 }
 
-export function IndexSeoContent({ projects, propertyLabel = 'Proyectos', zoneName }: Props) {
+export function IndexSeoContent({
+  projects,
+  propertyLabel = 'Proyectos',
+  propertyType,
+  zoneName,
+}: Props) {
   if (projects.length === 0) return null
 
   const stages = Array.from(
@@ -51,6 +58,7 @@ export function IndexSeoContent({ projects, propertyLabel = 'Proyectos', zoneNam
   const subject = zoneName
     ? `${propertyLabel.toLowerCase()} en venta en ${zoneName}`
     : `${propertyLabel.toLowerCase()} en venta en Guatemala`
+  const propertyTypeLabel = propertyType === 'casa' ? 'Casas' : 'Apartamentos'
 
   return (
     <section className="mx-auto w-full max-w-7xl px-6 pb-6 pt-8">
@@ -91,9 +99,11 @@ export function IndexSeoContent({ projects, propertyLabel = 'Proyectos', zoneNam
           </div>
         </div>
 
-        {!zoneName && zones.length > 0 ? (
+        {!zoneName && propertyType && zones.length > 0 ? (
           <div className="mt-10">
-            <h2 className="text-xl font-semibold text-zinc-900">Apartamentos en venta por zona</h2>
+            <h2 className="text-xl font-semibold text-zinc-900">
+              {propertyTypeLabel} en venta por zona
+            </h2>
             <p className="mt-3 max-w-3xl leading-7 text-zinc-600">
               Explora el inventario disponible en las zonas con proyectos activos y compara las
               alternativas de cada ubicación.
@@ -102,10 +112,10 @@ export function IndexSeoContent({ projects, propertyLabel = 'Proyectos', zoneNam
               {zones.map((zone) => (
                 <li key={zone.url_slug}>
                   <Link
-                    href={`/${zone.url_slug}/${tipoSlug('apartamento')}`}
+                    href={`/${zone.url_slug}/${tipoSlug(propertyType)}`}
                     className="inline-flex rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-800 transition hover:border-violet-400 hover:text-violet-700"
                   >
-                    Apartamentos en {zone.name}
+                    {propertyTypeLabel} en {zone.name}
                   </Link>
                 </li>
               ))}

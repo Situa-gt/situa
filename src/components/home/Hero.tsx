@@ -1,12 +1,13 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { Building2, Calculator, MapPinned, Search, Sparkles } from 'lucide-react'
+import { Building2, Calculator, House, MapPinned, Search, Sparkles } from 'lucide-react'
 import {
   getDepartmentOptions,
   getHeroProjects,
   getMunicipalityOptions,
   getZoneOptions,
 } from '@/lib/queries/home'
+import { hasActiveProjectsForIndex } from '@/lib/queries/index-pages'
 import type { Filters } from '@/lib/filters/parse'
 import { tipoSlug } from '@/lib/types/property'
 import { HeroFilters } from './HeroFilters'
@@ -16,20 +17,30 @@ interface Props {
   initial: Filters
 }
 
-const quickLinks = [
+const quickLinkOptions = [
   { label: 'Todos', href: '/', icon: Sparkles },
-  { label: 'Apartamentos', href: '/apartamentos', icon: Building2 },
+  { label: 'Apartamentos', href: '/apartamentos', icon: Building2, propertyType: 'apartamento' },
+  { label: 'Casas', href: '/casas', icon: House, propertyType: 'casa' },
   { label: 'Zonas', href: '/zona-15', icon: MapPinned },
   { label: 'Calculadora', href: '/calculadora', icon: Calculator },
-]
+] as const
 
 export async function Hero({ initial }: Props) {
-  const [zoneOptions, departmentOptions, municipalityOptions, heroProjects] = await Promise.all([
+  const [zoneOptions, hasApartments, hasHouses, departmentOptions, municipalityOptions, heroProjects] = await Promise.all([
     getZoneOptions(),
+    hasActiveProjectsForIndex('apartamento'),
+    hasActiveProjectsForIndex('casa'),
     getDepartmentOptions(),
     getMunicipalityOptions(),
     getHeroProjects(),
   ])
+  const availablePropertyTypes = new Set([
+    ...(hasApartments ? ['apartamento'] : []),
+    ...(hasHouses ? ['casa'] : []),
+  ])
+  const quickLinks = quickLinkOptions.filter(
+    (link) => !('propertyType' in link) || availablePropertyTypes.has(link.propertyType),
+  )
   const heroCandidates = heroProjects.filter((project) => project.cover_url)
   const heroProject =
     heroCandidates.length > 0

@@ -7,6 +7,9 @@ import { cheapestModelPricingByProject } from '@/lib/queries/pricing'
 type PropertyType = Database['public']['Enums']['property_type']
 type ZoneRow = Database['public']['Tables']['zones']['Row']
 
+// Keep thin house index pages out of search results until inventory is substantial.
+export const HOUSE_INDEX_MIN_ACTIVE_PROJECTS = 3
+
 interface IndexScope {
   tipo?: PropertyType
   zoneId?: string
@@ -87,6 +90,26 @@ export function getProjectsForIndex(scope: IndexScope): Promise<ProjectCardData[
   if (scope.zoneId) tags.push(`zone-id:${scope.zoneId}`)
   return unstable_cache(() => fetchIndexProjects(scope), keyParts, {
     tags,
+    revalidate: 3600,
+  })()
+}
+
+async function fetchHasActiveProjects(tipo: PropertyType): Promise<boolean> {
+  const supabase = createServerClient()
+  const { data, error } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('is_active', true)
+    .eq('property_type', tipo)
+    .limit(1)
+
+  if (error) throw error
+  return (data?.length ?? 0) > 0
+}
+
+export function hasActiveProjectsForIndex(tipo: PropertyType): Promise<boolean> {
+  return unstable_cache(() => fetchHasActiveProjects(tipo), ['index-projects-exist', tipo], {
+    tags: ['projects:active', `tipo:${tipo}`],
     revalidate: 3600,
   })()
 }

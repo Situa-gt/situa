@@ -58,7 +58,10 @@ function TiktokIcon({ className }: IconProps) {
 }
 
 export async function Footer() {
-  const zones = await getZoneOptions()
+  const [apartmentZones, houseZones] = await Promise.all([
+    getZoneOptions('apartamento'),
+    getZoneOptions('casa'),
+  ])
 
   return (
     <footer className="relative mt-auto overflow-hidden bg-brand-purple text-white">
@@ -205,22 +208,46 @@ export async function Footer() {
           </div>
         </div>
 
-        {zones.length > 0 && (
+        {(apartmentZones.length > 0 || houseZones.length > 0) && (
           <nav aria-label="Explorar proyectos" className="mt-12 border-t border-white/15 pt-8 space-y-6">
-            <div>
-              <p className="mb-5 text-xs font-semibold uppercase tracking-[0.08em] text-white/50">
-                Apartamentos de vivienda nueva
-              </p>
-              <ul className="flex flex-wrap gap-x-4 gap-y-2">
-                {zones.map((z) => (
-                  <li key={z.slug}>
-                    <Link href={`/${z.slug}/apartamentos`} className="text-sm text-white/70 transition hover:text-white">
-                      Apartamentos en {z.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {apartmentZones.length > 0 && (
+              <div>
+                <p className="mb-5 text-xs font-semibold uppercase tracking-[0.08em] text-white/50">
+                  Apartamentos de vivienda nueva
+                </p>
+                <ul className="flex flex-wrap gap-x-4 gap-y-2">
+                  {apartmentZones.map((z) => (
+                    <li key={z.slug}>
+                      <Link
+                        href={`/${z.slug}/apartamentos`}
+                        className="text-sm text-white/70 transition hover:text-white"
+                      >
+                        Apartamentos en {z.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {houseZones.length > 0 && (
+              <div>
+                <p className="mb-5 text-xs font-semibold uppercase tracking-[0.08em] text-white/50">
+                  Casas de vivienda nueva
+                </p>
+                <ul className="flex flex-wrap gap-x-4 gap-y-2">
+                  {houseZones.map((z) => (
+                    <li key={z.slug}>
+                      <Link
+                        href={`/${z.slug}/casas`}
+                        className="text-sm text-white/70 transition hover:text-white"
+                      >
+                        Casas en {z.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </nav>
         )}
 

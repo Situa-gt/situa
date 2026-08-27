@@ -7,6 +7,7 @@ import {
   getMunicipalityOptions,
   getZoneOptions,
 } from '@/lib/queries/home'
+import { hasActiveProjectsForIndex } from '@/lib/queries/index-pages'
 import type { Filters } from '@/lib/filters/parse'
 import { tipoSlug } from '@/lib/types/property'
 import { HeroFilters } from './HeroFilters'
@@ -25,17 +26,17 @@ const quickLinkOptions = [
 ] as const
 
 export async function Hero({ initial }: Props) {
-  const [zoneOptions, apartmentZoneOptions, houseZoneOptions, departmentOptions, municipalityOptions, heroProjects] = await Promise.all([
+  const [zoneOptions, hasApartments, hasHouses, departmentOptions, municipalityOptions, heroProjects] = await Promise.all([
     getZoneOptions(),
-    getZoneOptions('apartamento'),
-    getZoneOptions('casa'),
+    hasActiveProjectsForIndex('apartamento'),
+    hasActiveProjectsForIndex('casa'),
     getDepartmentOptions(),
     getMunicipalityOptions(),
     getHeroProjects(),
   ])
   const availablePropertyTypes = new Set([
-    ...(apartmentZoneOptions.length > 0 ? ['apartamento'] : []),
-    ...(houseZoneOptions.length > 0 ? ['casa'] : []),
+    ...(hasApartments ? ['apartamento'] : []),
+    ...(hasHouses ? ['casa'] : []),
   ])
   const quickLinks = quickLinkOptions.filter(
     (link) => !('propertyType' in link) || availablePropertyTypes.has(link.propertyType),

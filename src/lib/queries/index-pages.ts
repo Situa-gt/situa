@@ -93,3 +93,23 @@ export function getProjectsForIndex(scope: IndexScope): Promise<ProjectCardData[
     revalidate: 3600,
   })()
 }
+
+async function fetchHasActiveProjects(tipo: PropertyType): Promise<boolean> {
+  const supabase = createServerClient()
+  const { data, error } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('is_active', true)
+    .eq('property_type', tipo)
+    .limit(1)
+
+  if (error) throw error
+  return (data?.length ?? 0) > 0
+}
+
+export function hasActiveProjectsForIndex(tipo: PropertyType): Promise<boolean> {
+  return unstable_cache(() => fetchHasActiveProjects(tipo), ['index-projects-exist', tipo], {
+    tags: ['projects:active', `tipo:${tipo}`],
+    revalidate: 3600,
+  })()
+}

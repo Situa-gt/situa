@@ -88,7 +88,8 @@ export async function generateStaticParams() {
     .select('slug, property_type, zones(url_slug)')
     .eq('is_active', true)
 
-  const tipoParams = [{ slug: ['apartamentos'] }, { slug: ['casas'] }]
+  const activeTipos = new Set((projects ?? []).map((project) => tipoSlug(project.property_type)))
+  const tipoParams = Array.from(activeTipos).map((tipo) => ({ slug: [tipo] }))
 
   const projectsWithZone = (projects ?? []).filter(
     (p): p is typeof p & { zones: { url_slug: string } } => p.zones !== null,
@@ -149,6 +150,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     case 'tipo':
       const typeLabel = labelForTipo(resolved.data.tipo)
       const typeProjects = await getProjectsForIndex({ tipo: resolved.data.tipo })
+      if (typeProjects.length === 0) notFound()
       const typeProjectCount = typeProjects.length
       const houseIndexIsThin =
         resolved.data.tipo === 'casa' && typeProjectCount < HOUSE_INDEX_MIN_ACTIVE_PROJECTS
@@ -175,6 +177,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         tipo: resolved.data.tipo,
         zoneId: resolved.data.zone.id,
       })
+      if (zoneTypeProjects.length === 0) notFound()
       const zoneTypeProjectCount = zoneTypeProjects.length
       const activeHouseCount =
         resolved.data.tipo === 'casa'
@@ -322,6 +325,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
   switch (resolved.kind) {
     case 'tipo': {
       const projects = await getProjectsForIndex({ tipo: resolved.data.tipo })
+      if (projects.length === 0) notFound()
       const typeLabel = labelForTipo(resolved.data.tipo)
       return {
         body: (
@@ -362,6 +366,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
         tipo: resolved.data.tipo,
         zoneId: resolved.data.zone.id,
       })
+      if (projects.length === 0) notFound()
       const typeLabel = labelForTipo(resolved.data.tipo)
       return {
         body: (

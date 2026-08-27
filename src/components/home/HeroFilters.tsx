@@ -21,7 +21,7 @@ interface Option {
 interface Props {
   initial: Filters
   zoneOptions: Option[]
-  departmentOptions: Option[]
+  departmentOptions?: Option[]
   municipalityOptions: Option[]
   compact?: boolean
 }
@@ -38,10 +38,12 @@ const INPUT_BASE =
 
 const EYEBROW = 'text-[11px] font-medium uppercase tracking-[0.06em] text-muted-ink'
 
+const hasGeographicChoice = (options: Option[]) => options.length >= 2
+
 export function HeroFilters({
   initial,
   zoneOptions,
-  departmentOptions,
+  departmentOptions = [],
   municipalityOptions,
   compact = false,
 }: Props) {
@@ -189,12 +191,14 @@ export function HeroFilters({
                   onChange={(v) => set('dormitorios', v)}
                 />
               </label>
-              <SelectField
-                label="Municipio"
-                value={state.municipio ?? ''}
-                onChange={(v) => set('municipio', v || null)}
-                options={[{ slug: '', name: 'Todos' }, ...municipalityOptions]}
-              />
+              {hasGeographicChoice(municipalityOptions) ? (
+                <SelectField
+                  label="Municipio"
+                  value={state.municipio ?? ''}
+                  onChange={(v) => set('municipio', v || null)}
+                  options={[{ slug: '', name: 'Todos' }, ...municipalityOptions]}
+                />
+              ) : null}
               <SelectField
                 label="Etapa"
                 value={state.etapa ?? ''}
@@ -321,19 +325,23 @@ export function HeroFilters({
       >
         <div className={expanded ? 'overflow-visible' : 'overflow-hidden'}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <SelectField
-              label="Departamento"
-              value={state.departamento ?? ''}
-              onChange={(v) => set('departamento', v || null)}
-              options={[{ slug: '', name: 'Todos' }, ...departmentOptions]}
-            />
+            {hasGeographicChoice(departmentOptions) ? (
+              <SelectField
+                label="Departamento"
+                value={state.departamento ?? ''}
+                onChange={(v) => set('departamento', v || null)}
+                options={[{ slug: '', name: 'Todos' }, ...departmentOptions]}
+              />
+            ) : null}
 
-            <SelectField
-              label="Municipio"
-              value={state.municipio ?? ''}
-              onChange={(v) => set('municipio', v || null)}
-              options={[{ slug: '', name: 'Todos' }, ...municipalityOptions]}
-            />
+            {hasGeographicChoice(municipalityOptions) ? (
+              <SelectField
+                label="Municipio"
+                value={state.municipio ?? ''}
+                onChange={(v) => set('municipio', v || null)}
+                options={[{ slug: '', name: 'Todos' }, ...municipalityOptions]}
+              />
+            ) : null}
 
             <SelectField
               label="Etapa"

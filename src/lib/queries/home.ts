@@ -324,11 +324,18 @@ async function fetchOptions(
   }
 
   const slugColumn = 'slug'
-  const { data, error } = await supabase
+  const inventoryJoin = table === 'departments'
+    ? 'municipalities!inner(zones!inner(projects!inner(id)))'
+    : 'zones!inner(projects!inner(id))'
+  let query = supabase
     .from(table)
-    .select(`name, ${slugColumn}`)
+    .select(`name, ${slugColumn}, ${inventoryJoin}`)
     .eq('is_active', true)
     .order('name', { ascending: true })
+  query = table === 'departments'
+    ? query.eq('municipalities.zones.projects.is_active', true)
+    : query.eq('zones.projects.is_active', true)
+  const { data, error } = await query
   if (error) throw error
   type Row = { name: string } & Record<string, string>
   const rows = (data as Row[] ?? []).map((r) => ({ name: r.name, slug: r[slugColumn] }))

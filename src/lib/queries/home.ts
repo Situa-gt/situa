@@ -289,7 +289,7 @@ export const getHeroProjects = unstable_cache(
 )
 
 async function fetchOptions(
-  table: 'zones' | 'departments' | 'municipalities',
+  table: 'zones' | 'municipalities',
   propertyType?: PropertyType,
 ): Promise<OptionRow[]> {
   const supabase = createServerClient()
@@ -323,23 +323,16 @@ async function fetchOptions(
     })
   }
 
-  const slugColumn = 'slug'
-  const inventoryJoin = table === 'departments'
-    ? 'municipalities!inner(zones!inner(projects!inner(id)))'
-    : 'zones!inner(projects!inner(id))'
   let query = supabase
     .from(table)
-    .select(`name, ${slugColumn}, ${inventoryJoin}`)
+    .select('name, slug, zones!inner(projects!inner(id))')
     .eq('is_active', true)
     .order('name', { ascending: true })
-  query = table === 'departments'
-    ? query.eq('municipalities.zones.projects.is_active', true)
-    : query.eq('zones.projects.is_active', true)
+  query = query.eq('zones.projects.is_active', true)
   const { data, error } = await query
   if (error) throw error
-  type Row = { name: string } & Record<string, string>
-  const rows = (data as Row[] ?? []).map((r) => ({ name: r.name, slug: r[slugColumn] }))
-  // Deduplicate by slug — same name can appear in multiple departments
+  const rows = (data ?? []).map((r) => ({ name: r.name, slug: r.slug }))
+  // Deduplicate by slug — same name can appear more than once in the joined inventory
   const seen = new Set<string>()
   const unique = rows.filter((r) => {
     if (seen.has(r.slug)) return false
@@ -354,13 +347,6 @@ export const getZoneOptions = unstable_cache(
   async (propertyType?: PropertyType) => fetchOptions('zones', propertyType),
   ['home', 'zone-options'],
   { tags: ['zones:list'], revalidate: 3600 },
-)
-
-export const getDepartmentOptions = unstable_cache(
-  async () => fetchOptions('departments'),
-  // Bump this version when the returned data changes: Vercel Data Cache survives deployments.
-  ['home', 'department-options', 'inventory-v2'],
-  { tags: ['departments:list'], revalidate: 3600 },
 )
 
 export const getMunicipalityOptions = unstable_cache(

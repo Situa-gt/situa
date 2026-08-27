@@ -2,10 +2,9 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Calculator, ChevronDown, Search } from 'lucide-react'
+import { ChevronDown, Search } from 'lucide-react'
 import { EMPTY_FILTERS, type Filters } from '@/lib/filters/parse'
 import type { Database } from '@/lib/database.types'
-import { CtaButton } from '@/components/ui/cta-button'
 import { pushEvent } from '@/lib/gtm'
 import { trackEvent } from '@/lib/analytics'
 import { ZonaMultiSelect } from './ZonaMultiSelect'
@@ -21,9 +20,7 @@ interface Option {
 interface Props {
   initial: Filters
   zoneOptions: Option[]
-  departmentOptions?: Option[]
   municipalityOptions: Option[]
-  compact?: boolean
 }
 
 const STAGE_LABEL: Record<Stage, string> = {
@@ -33,9 +30,6 @@ const STAGE_LABEL: Record<Stage, string> = {
   entrega_inmediata: 'Entrega inmediata',
 }
 
-const INPUT_BASE =
-  'h-11 w-full rounded-full border border-hairline bg-white px-4 text-sm text-ink transition placeholder:text-muted-ink hover:border-brand-purple focus:border-brand-purple focus:outline-none'
-
 const EYEBROW = 'text-[11px] font-medium uppercase tracking-[0.06em] text-muted-ink'
 
 const hasGeographicChoice = (options: Option[]) => options.length >= 2
@@ -43,9 +37,7 @@ const hasGeographicChoice = (options: Option[]) => options.length >= 2
 export function HeroFilters({
   initial,
   zoneOptions,
-  departmentOptions = [],
   municipalityOptions,
-  compact = false,
 }: Props) {
   const router = useRouter()
   const [state, setState] = useState<Filters>(initial)
@@ -90,8 +82,7 @@ export function HeroFilters({
     router.push('/')
   }
 
-  if (compact) {
-    return (
+  return (
       <form
         onSubmit={onSubmit}
         className="relative z-[500] rounded-[2rem] border border-white/70 bg-white/95 shadow-[0_24px_70px_-34px_rgba(20,16,80,0.55)] backdrop-blur-xl"
@@ -215,162 +206,6 @@ export function HeroFilters({
           </div>
         </div>
       </form>
-    )
-  }
-
-  return (
-    <form
-      onSubmit={onSubmit}
-      className="w-full rounded-3xl bg-white/95 p-6 shadow-[0_20px_50px_-12px_rgba(20,16,80,0.25)] ring-1 ring-white/40 backdrop-blur"
-    >
-      <div className="mb-5 flex justify-end">
-        <a
-          href="/calculadora"
-          className="flex items-center gap-1.5 text-sm font-medium text-brand-purple transition hover:text-brand-purple/70"
-        >
-          <Calculator className="h-4 w-4 shrink-0" />
-          Buscar por cuota mensual
-        </a>
-      </div>
-
-      <div className="mb-5 border-t border-hairline" />
-
-      {/* Project name search */}
-      <label className="mb-4 flex flex-col gap-1.5">
-        <span className={EYEBROW}>Nombre del proyecto</span>
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-ink" />
-          <input
-            type="text"
-            placeholder="Buscar por nombre de proyecto..."
-            className={`${INPUT_BASE} pl-10`}
-            value={state.q ?? ''}
-            onChange={(e) => set('q', e.target.value.trim() || null)}
-          />
-        </div>
-      </label>
-
-      {/* Primary row: Zona · Dormitorios · Precio */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <label className="flex flex-col gap-1.5">
-          <span className={EYEBROW}>Zonas</span>
-          <ZonaMultiSelect
-            options={zoneOptions}
-            value={state.zonas}
-            onChange={(v) => set('zonas', v)}
-          />
-        </label>
-
-        <label className="flex flex-col gap-1.5">
-          <span className={EYEBROW}>Dormitorios</span>
-          <DormitoriosSelect
-            value={state.dormitorios}
-            onChange={(v) => set('dormitorios', v)}
-          />
-        </label>
-
-        <label className="flex flex-col gap-1.5">
-          <span className={EYEBROW}>Precio (USD)</span>
-          <div className="flex items-center gap-2">
-            <div className="relative w-full">
-              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 select-none text-sm text-muted-ink">$</span>
-              <input
-                type="number"
-                min={0}
-                inputMode="numeric"
-                placeholder="Mín"
-                className={`${INPUT_BASE} pl-7 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
-                value={state.precio_min ?? ''}
-                onChange={(e) =>
-                  set('precio_min', e.target.value === '' ? null : Number(e.target.value))
-                }
-              />
-            </div>
-            <span className="shrink-0 text-sm text-muted-ink">–</span>
-            <div className="relative w-full">
-              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 select-none text-sm text-muted-ink">$</span>
-              <input
-                type="number"
-                min={0}
-                inputMode="numeric"
-                placeholder="Máx"
-                className={`${INPUT_BASE} pl-7 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
-                value={state.precio_max ?? ''}
-                onChange={(e) =>
-                  set('precio_max', e.target.value === '' ? null : Number(e.target.value))
-                }
-              />
-            </div>
-          </div>
-        </label>
-      </div>
-
-      {/* Más filtros toggle */}
-      <button
-        type="button"
-        onClick={() => setExpanded((v) => !v)}
-        className="mt-4 flex cursor-pointer items-center gap-1 text-sm font-medium text-brand-purple transition hover:text-brand-purple/70"
-      >
-        {expanded ? 'Menos filtros' : 'Más filtros'}
-        <ChevronDown
-          className={`h-4 w-4 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}
-        />
-      </button>
-
-      {/* Expandable secondary row */}
-      <div
-        className={`grid transition-all duration-300 ease-in-out ${
-          expanded ? 'mt-4 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-        }`}
-      >
-        <div className={expanded ? 'overflow-visible' : 'overflow-hidden'}>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {hasGeographicChoice(departmentOptions) ? (
-              <SelectField
-                label="Departamento"
-                value={state.departamento ?? ''}
-                onChange={(v) => set('departamento', v || null)}
-                options={[{ slug: '', name: 'Todos' }, ...departmentOptions]}
-              />
-            ) : null}
-
-            {hasGeographicChoice(municipalityOptions) ? (
-              <SelectField
-                label="Municipio"
-                value={state.municipio ?? ''}
-                onChange={(v) => set('municipio', v || null)}
-                options={[{ slug: '', name: 'Todos' }, ...municipalityOptions]}
-              />
-            ) : null}
-
-            <SelectField
-              label="Etapa"
-              value={state.etapa ?? ''}
-              onChange={(v) => set('etapa', (v || null) as Stage | null)}
-              options={[
-                { slug: '', name: 'Todas' },
-                ...(Object.keys(STAGE_LABEL) as Stage[]).map((s) => ({
-                  slug: s,
-                  name: STAGE_LABEL[s],
-                })),
-              ]}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="mt-5 flex items-center justify-end gap-5">
-        <button
-          type="button"
-          onClick={onClear}
-          className="cursor-pointer text-sm font-medium text-muted-ink transition hover:text-ink"
-        >
-          Limpiar filtros
-        </button>
-        <CtaButton type="submit">Buscar</CtaButton>
-      </div>
-    </form>
   )
 }
 

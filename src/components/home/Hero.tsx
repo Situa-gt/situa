@@ -2,7 +2,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Building2, Calculator, House, MapPinned, Search, Sparkles } from 'lucide-react'
 import {
-  getDepartmentOptions,
   getHeroProjects,
   getMunicipalityOptions,
   getZoneOptions,
@@ -26,11 +25,10 @@ const quickLinkOptions = [
 ] as const
 
 export async function Hero({ initial }: Props) {
-  const [zoneOptions, hasApartments, hasHouses, departmentOptions, municipalityOptions, heroProjects] = await Promise.all([
+  const [zoneOptions, hasApartments, hasHouses, municipalityOptions, heroProjects] = await Promise.all([
     getZoneOptions(),
     hasActiveProjectsForIndex('apartamento'),
     hasActiveProjectsForIndex('casa'),
-    getDepartmentOptions(),
     getMunicipalityOptions(),
     getHeroProjects(),
   ])
@@ -135,7 +133,6 @@ export async function Hero({ initial }: Props) {
           <HeroFilters
             initial={initial}
             zoneOptions={zoneOptions}
-            departmentOptions={departmentOptions}
             municipalityOptions={municipalityOptions}
             compact
           />

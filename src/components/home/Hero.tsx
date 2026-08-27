@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { Building2, Calculator, MapPinned, Search, Sparkles } from 'lucide-react'
+import { Building2, Calculator, House, MapPinned, Search, Sparkles } from 'lucide-react'
 import {
   getDepartmentOptions,
   getHeroProjects,
@@ -16,20 +16,30 @@ interface Props {
   initial: Filters
 }
 
-const quickLinks = [
+const quickLinkOptions = [
   { label: 'Todos', href: '/', icon: Sparkles },
-  { label: 'Apartamentos', href: '/apartamentos', icon: Building2 },
+  { label: 'Apartamentos', href: '/apartamentos', icon: Building2, propertyType: 'apartamento' },
+  { label: 'Casas', href: '/casas', icon: House, propertyType: 'casa' },
   { label: 'Zonas', href: '/zona-15', icon: MapPinned },
   { label: 'Calculadora', href: '/calculadora', icon: Calculator },
-]
+] as const
 
 export async function Hero({ initial }: Props) {
-  const [zoneOptions, departmentOptions, municipalityOptions, heroProjects] = await Promise.all([
+  const [zoneOptions, apartmentZoneOptions, houseZoneOptions, departmentOptions, municipalityOptions, heroProjects] = await Promise.all([
     getZoneOptions(),
+    getZoneOptions('apartamento'),
+    getZoneOptions('casa'),
     getDepartmentOptions(),
     getMunicipalityOptions(),
     getHeroProjects(),
   ])
+  const availablePropertyTypes = new Set([
+    ...(apartmentZoneOptions.length > 0 ? ['apartamento'] : []),
+    ...(houseZoneOptions.length > 0 ? ['casa'] : []),
+  ])
+  const quickLinks = quickLinkOptions.filter(
+    (link) => !('propertyType' in link) || availablePropertyTypes.has(link.propertyType),
+  )
   const heroCandidates = heroProjects.filter((project) => project.cover_url)
   const heroProject =
     heroCandidates.length > 0

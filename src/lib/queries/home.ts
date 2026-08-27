@@ -358,13 +358,15 @@ export const getZoneOptions = unstable_cache(
 
 export const getDepartmentOptions = unstable_cache(
   async () => fetchOptions('departments'),
-  ['home', 'department-options'],
+  // Bump this version when the returned data changes: Vercel Data Cache survives deployments.
+  ['home', 'department-options', 'inventory-v2'],
   { tags: ['departments:list'], revalidate: 3600 },
 )
 
 export const getMunicipalityOptions = unstable_cache(
   async () => fetchOptions('municipalities'),
-  ['home', 'municipality-options'],
+  // Bump this version when the returned data changes: Vercel Data Cache survives deployments.
+  ['home', 'municipality-options', 'inventory-v2'],
   { tags: ['municipalities:list'], revalidate: 3600 },
 )
 

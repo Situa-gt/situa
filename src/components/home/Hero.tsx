@@ -134,7 +134,6 @@ export async function Hero({ initial }: Props) {
             initial={initial}
             zoneOptions={zoneOptions}
             municipalityOptions={municipalityOptions}
-            compact
           />
         </div>
         {heroProject ? (

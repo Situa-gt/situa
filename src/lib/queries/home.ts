@@ -2,6 +2,7 @@ import { unstable_cache } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/database.types'
 import { cheapestModelPricingByProject } from '@/lib/queries/pricing'
+import type { PropertyType } from '@/lib/types/property'
 
 type ProjectRow = Database['public']['Tables']['projects']['Row']
 type ZoneRow = Database['public']['Tables']['zones']['Row']
@@ -287,17 +288,22 @@ export const getHeroProjects = unstable_cache(
   { tags: ['projects:hero', 'projects:active'], revalidate: 3600 },
 )
 
-async function fetchOptions(table: 'zones' | 'departments' | 'municipalities'): Promise<OptionRow[]> {
+async function fetchOptions(
+  table: 'zones' | 'departments' | 'municipalities',
+  propertyType?: PropertyType,
+): Promise<OptionRow[]> {
   const supabase = createServerClient()
 
   if (table === 'zones') {
     // Inner join ensures only zones that have at least one project are returned
-    const { data, error } = await supabase
+    let query = supabase
       .from('zones')
-      .select('name, url_slug, projects!inner(id)')
+      .select('name, url_slug, projects!inner(id, property_type)')
       .eq('is_active', true)
       .eq('projects.is_active', true)
       .order('name', { ascending: true })
+    if (propertyType) query = query.eq('projects.property_type', propertyType)
+    const { data, error } = await query
     if (error) throw error
     const rows = ((data ?? []) as Array<{ name: string; url_slug: string }>).map((r) => ({
       name: r.name,
@@ -338,7 +344,7 @@ async function fetchOptions(table: 'zones' | 'departments' | 'municipalities'): 
 }
 
 export const getZoneOptions = unstable_cache(
-  async () => fetchOptions('zones'),
+  async (propertyType?: PropertyType) => fetchOptions('zones', propertyType),
   ['home', 'zone-options'],
   { tags: ['zones:list'], revalidate: 3600 },
 )

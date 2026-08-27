@@ -3,7 +3,10 @@ import { notFound } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { resolveSlug, type Resolved } from '@/lib/resolve-slug'
 import { tipoSlug } from '@/lib/types/property'
-import { getProjectsForIndex } from '@/lib/queries/index-pages'
+import {
+  getProjectsForIndex,
+  HOUSE_INDEX_MIN_ACTIVE_PROJECTS,
+} from '@/lib/queries/index-pages'
 import { getProjectDetail } from '@/lib/queries/project'
 import { getModelDetail } from '@/lib/queries/model'
 import { getSuggestedProjects } from '@/lib/queries/suggestions'
@@ -85,7 +88,7 @@ export async function generateStaticParams() {
     .select('slug, property_type, zones(url_slug)')
     .eq('is_active', true)
 
-  const tipoParams = [{ slug: ['apartamentos'] }]
+  const tipoParams = [{ slug: ['apartamentos'] }, { slug: ['casas'] }]
 
   const projectsWithZone = (projects ?? []).filter(
     (p): p is typeof p & { zones: { url_slug: string } } => p.zones !== null,
@@ -95,15 +98,14 @@ export async function generateStaticParams() {
   const zonesWithProjects = new Set(projectsWithZone.map((p) => p.zones.url_slug))
   const zoneParams = Array.from(zonesWithProjects).map((slug) => ({ slug: [slug] }))
 
-  // Only generate /zona/apartamentos paths — casas index pages are removed
+  // Only generate type paths for zones that actually have active inventory of that type.
   const zoneTipoSet = new Set<string>()
   const zoneTipoParams = projectsWithZone
-    .filter((p) => p.property_type === 'apartamento')
     .flatMap((p) => {
-      const key = `${p.zones.url_slug}/apartamentos`
+      const key = `${p.zones.url_slug}/${tipoSlug(p.property_type)}`
       if (zoneTipoSet.has(key)) return []
       zoneTipoSet.add(key)
-      return [{ slug: [p.zones.url_slug, 'apartamentos'] }]
+      return [{ slug: [p.zones.url_slug, tipoSlug(p.property_type)] }]
     })
 
   const projectParams = projectsWithZone.map((p) => ({
@@ -143,14 +145,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params
   const resolved = await resolveSlug(slug)
 
-  if (resolved.kind === 'tipo' && resolved.data.tipo === 'casa') return { title: 'Página no encontrada | Sitúa' }
-  if (resolved.kind === 'zone-tipo' && resolved.data.tipo === 'casa') return { title: 'Página no encontrada | Sitúa' }
-
   switch (resolved.kind) {
     case 'tipo':
       const typeLabel = labelForTipo(resolved.data.tipo)
       const typeProjects = await getProjectsForIndex({ tipo: resolved.data.tipo })
       const typeProjectCount = typeProjects.length
+      const houseIndexIsThin =
+        resolved.data.tipo === 'casa' && typeProjectCount < HOUSE_INDEX_MIN_ACTIVE_PROJECTS
       return {
         title:
           resolved.data.tipo === 'apartamento'
@@ -158,6 +159,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
             : `${typeLabel} en venta en Guatemala | Sitúa`,
         description: `Compara ${typeProjectCount} ${typeProjectCount === 1 ? 'proyecto' : 'proyectos'} de ${typeLabel.toLowerCase()} en venta en Guatemala. Revisa precios, cuotas, modelos y zonas en Sitúa.`,
         alternates: { canonical: `/${tipoSlug(resolved.data.tipo)}` },
+        robots: houseIndexIsThin ? { index: false, follow: true } : undefined,
       }
     case 'zone': {
       const zoneProjects = await getProjectsForIndex({ zoneId: resolved.data.zone.id })
@@ -174,12 +176,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         zoneId: resolved.data.zone.id,
       })
       const zoneTypeProjectCount = zoneTypeProjects.length
+      const activeHouseCount =
+        resolved.data.tipo === 'casa'
+          ? (await getProjectsForIndex({ tipo: 'casa' })).length
+          : null
       return {
         title: `${labelForTipo(resolved.data.tipo)} en Venta en ${resolved.data.zone.name}, Guatemala | Sitúa`,
         description: `Compara ${zoneTypeProjectCount} ${zoneTypeProjectCount === 1 ? 'proyecto' : 'proyectos'} de ${labelForTipo(resolved.data.tipo).toLowerCase()} en venta en ${resolved.data.zone.name}. Consulta precios, cuotas, modelos y disponibilidad.`,
         alternates: {
           canonical: `/${resolved.data.zone.url_slug}/${tipoSlug(resolved.data.tipo)}`,
         },
+        robots:
+          activeHouseCount !== null && activeHouseCount < HOUSE_INDEX_MIN_ACTIVE_PROJECTS
+            ? { index: false, follow: true }
+            : undefined,
       }
     }
     case 'project': {
@@ -290,9 +300,6 @@ export default async function CatchAllPage({ params }: PageProps) {
   const resolved = await resolveSlug(slug)
 
   if (resolved.kind === 'not-found') notFound()
-  if (resolved.kind === 'tipo' && resolved.data.tipo === 'casa') notFound()
-  if (resolved.kind === 'zone-tipo' && resolved.data.tipo === 'casa') notFound()
-
   const { body, jsonLd } = await renderBody(resolved)
   const breadcrumbs = breadcrumbsFor(resolved)
   return (
@@ -324,7 +331,11 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
               subtitle={`Compara ${projects.length} ${projects.length === 1 ? 'proyecto' : 'proyectos'} de vivienda nueva por zona, precio, cuota y etapa de entrega.`}
             />
             <ProjectGrid projects={projects} title={`Proyectos de ${typeLabel.toLowerCase()} en Guatemala`} />
-            <IndexSeoContent projects={projects} propertyLabel={typeLabel} />
+            <IndexSeoContent
+              projects={projects}
+              propertyLabel={typeLabel}
+              propertyType={resolved.data.tipo}
+            />
           </>
         ),
         jsonLd: [buildItemList(projects)],
@@ -363,6 +374,7 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
             <IndexSeoContent
               projects={projects}
               propertyLabel={typeLabel}
+              propertyType={resolved.data.tipo}
               zoneName={resolved.data.zone.name}
             />
           </>

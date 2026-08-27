@@ -7,6 +7,9 @@ import { cheapestModelPricingByProject } from '@/lib/queries/pricing'
 type PropertyType = Database['public']['Enums']['property_type']
 type ZoneRow = Database['public']['Tables']['zones']['Row']
 
+// Keep thin house index pages out of search results until inventory is substantial.
+export const HOUSE_INDEX_MIN_ACTIVE_PROJECTS = 3
+
 interface IndexScope {
   tipo?: PropertyType
   zoneId?: string

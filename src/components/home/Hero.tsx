@@ -118,7 +118,7 @@ export async function Hero({ initial }: Props) {
               width={320}
               height={86}
               priority
-              className="h-[64px] w-auto sm:h-[64px]"
+              className="h-[64px] w-auto"
             />
           </Link>
           <h1 className="text-[clamp(2.35rem,3.5vw,3.75rem)] font-semibold leading-[1.01] tracking-[-0.02em]">

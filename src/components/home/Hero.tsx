@@ -109,22 +109,22 @@ export async function Hero({ initial }: Props) {
         <div aria-hidden />
       </div>
 
-      <div className="pointer-events-none relative z-10 mx-auto w-full max-w-7xl px-5 pb-8 pt-6 sm:px-6 md:pb-12 md:pt-10">
-        <div className="mb-8 max-w-2xl text-white">
-          <Link href="/" aria-label="Sitúa - Inicio" className="pointer-events-auto mb-7 inline-flex">
+      <div className="pointer-events-none relative z-10 mx-auto w-full max-w-7xl px-5 pb-8 pt-6 sm:px-6 md:pb-10 md:pt-6">
+        <div className="mb-6 max-w-2xl text-white">
+          <Link href="/" aria-label="Sitúa - Inicio" className="pointer-events-auto mb-5 inline-flex">
             <Image
               src="/logo_situa_blanco.png"
               alt="Sitúa"
               width={320}
               height={86}
               priority
-              className="h-[64px] w-auto sm:h-[78px]"
+              className="h-[64px] w-auto sm:h-[64px]"
             />
           </Link>
-          <h1 className="text-[clamp(2.35rem,5vw,4.5rem)] font-semibold leading-[1.02] tracking-[-0.02em]">
+          <h1 className="text-[clamp(2.35rem,3.5vw,3.75rem)] font-semibold leading-[1.01] tracking-[-0.02em]">
             Apartamentos en venta y vivienda nueva en Guatemala
           </h1>
-          <p className="mt-4 max-w-xl rounded-2xl border border-white/25 bg-white/12 px-5 py-4 text-lg leading-relaxed text-white/90 backdrop-blur-sm sm:text-2xl">
+          <p className="mt-3 max-w-xl rounded-2xl border border-white/25 bg-white/12 px-5 py-3 text-lg leading-relaxed text-white/90 backdrop-blur-sm sm:text-xl">
             Busca, compara, cotiza y compra la mejor opción en un solo lugar.
           </p>
         </div>

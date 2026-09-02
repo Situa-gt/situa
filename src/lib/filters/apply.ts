@@ -13,14 +13,35 @@ async function projectIdsMatchingModelFilters(
     f.dormitorios.length > 0 || f.precio_min !== null || f.precio_max !== null
   if (!needsModelScan) return null
 
-  let query = supabase.from('models').select('project_id').eq('is_active', true)
+  let query = supabase
+    .from('models')
+    .select('project_id, price_from, projects!inner(base_currency, exchange_rate)')
+    .eq('is_active', true)
+    .eq('projects.is_active', true)
   if (f.dormitorios.length > 0) query = query.in('bedrooms', f.dormitorios)
-  if (f.precio_min !== null) query = query.gte('price_from', f.precio_min)
-  if (f.precio_max !== null) query = query.lte('price_from', f.precio_max)
 
   const { data, error } = await query
   if (error) throw error
-  return Array.from(new Set((data ?? []).map((m) => m.project_id)))
+
+  const matchingProjectIds = (data ?? []).flatMap((model) => {
+    const project = model.projects as Pick<ProjectRow, 'base_currency' | 'exchange_rate'> | null
+    if (!project) return []
+
+    let priceUsd = model.price_from
+    if (project.base_currency !== 'USD') {
+      if (!Number.isFinite(project.exchange_rate) || project.exchange_rate <= 0) {
+        // Fail open: an unusable conversion rate must not silently hide a project.
+        return [model.project_id]
+      }
+      priceUsd /= project.exchange_rate
+    }
+
+    if (f.precio_min !== null && priceUsd < f.precio_min) return []
+    if (f.precio_max !== null && priceUsd > f.precio_max) return []
+    return [model.project_id]
+  })
+
+  return Array.from(new Set(matchingProjectIds))
 }
 
 async function zoneIdsForLocation(

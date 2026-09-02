@@ -279,6 +279,9 @@ export type Database = {
         Row: {
           channel: Database["public"]["Enums"]["lead_channel"]
           created_at: string
+          email_attempted_at: string | null
+          email_error: string | null
+          email_sent_at: string | null
           email: string
           full_name: string
           id: string
@@ -297,6 +300,9 @@ export type Database = {
         Insert: {
           channel?: Database["public"]["Enums"]["lead_channel"]
           created_at?: string
+          email_attempted_at?: string | null
+          email_error?: string | null
+          email_sent_at?: string | null
           email: string
           full_name: string
           id?: string
@@ -315,6 +321,9 @@ export type Database = {
         Update: {
           channel?: Database["public"]["Enums"]["lead_channel"]
           created_at?: string
+          email_attempted_at?: string | null
+          email_error?: string | null
+          email_sent_at?: string | null
           email?: string
           full_name?: string
           id?: string
@@ -403,6 +412,35 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      project_contacts: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          project_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_contacts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       legacy_redirects: {
         Row: {

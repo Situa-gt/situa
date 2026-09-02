@@ -10,7 +10,7 @@ function requireEmailEnv(name: string, value: string | undefined) {
 interface SendEmailOptions {
   subject: string
   html: string
-  to?: string | string[]
+  to: string | string[]
   cc?: string[]
   bcc?: string[]
   replyTo?: string
@@ -25,11 +25,11 @@ function recipient(email: string): BrevoRecipient {
 }
 
 export async function sendEmail({ subject, html, to, cc, bcc, replyTo }: SendEmailOptions): Promise<void> {
+  const toEmails = Array.isArray(to) ? to : to ? [to] : []
+  if (!toEmails.length) throw new Error('Brevo requires at least one recipient in the "to" field')
   const brevoApiKey = requireEmailEnv('BREVO_API_KEY', apiKey)
   const brevoFromEmail = requireEmailEnv('BREVO_FROM_EMAIL', fromEmail)
-  const toEmails = to ? (Array.isArray(to) ? to : [to]) : []
   const recipientCount = toEmails.length + (cc?.length ?? 0) + (bcc?.length ?? 0)
-  if (!recipientCount) throw new Error('Email requires at least one recipient')
   if (recipientCount > 2000) throw new Error('Brevo recipient limit exceeded')
 
   const response = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -44,7 +44,7 @@ export async function sendEmail({ subject, html, to, cc, bcc, replyTo }: SendEma
         email: brevoFromEmail,
         name: fromName,
       },
-      ...(toEmails.length ? { to: toEmails.map(recipient) } : {}),
+      to: toEmails.map(recipient),
       ...(cc?.length ? { cc: cc.map(recipient) } : {}),
       ...(bcc?.length ? { bcc: bcc.map(recipient) } : {}),
       ...(replyTo ? { replyTo: recipient(replyTo) } : {}),

@@ -224,11 +224,13 @@ export async function submitContactLead(
 
   try {
     if (!recipients.length && !situaBccEmails.length) throw new Error('No contact email recipient configured')
+    const to = recipients.length ? recipients : situaBccEmails
+    const bcc = recipients.length ? situaBccEmails : []
     await sendEmail({
       subject: `Nueva consulta — ${project.name}`,
       html,
-      to: recipients.length ? recipients : undefined,
-      bcc: situaBccEmails.length ? situaBccEmails : undefined,
+      to,
+      bcc: bcc.length ? bcc : undefined,
       replyTo: parsed.data.email,
     })
     const { error: trackingError } = await service

@@ -10,14 +10,14 @@ export function uniqueEmails(emails: Array<string | null | undefined>) {
 export function resolveContactRecipients({
   developerEmails,
   projectEmails,
-  fallbackEmail,
+  excludedEmails = [],
 }: {
   developerEmails: Array<string | null | undefined>
   projectEmails: Array<string | null | undefined>
-  fallbackEmail?: string | null
+  excludedEmails?: Array<string | null | undefined>
 }) {
-  const recipients = uniqueEmails([...developerEmails, ...projectEmails])
-  return recipients.length ? recipients : uniqueEmails([fallbackEmail])
+  const excluded = new Set(uniqueEmails(excludedEmails))
+  return uniqueEmails([...developerEmails, ...projectEmails]).filter((email) => !excluded.has(email))
 }
 
 export function redactEmails(value: string) {

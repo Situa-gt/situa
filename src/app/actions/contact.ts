@@ -6,6 +6,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendEmail } from '@/lib/email/send-email'
 import { redactEmails, resolveContactRecipients } from '@/lib/email/recipients'
+import { getLeadBccEmails } from '@/lib/site-settings'
 import { notifyWebhook } from '@/lib/webhook'
 import { normalizePhone } from '@/lib/phone'
 
@@ -209,23 +210,25 @@ export async function submitContactLead(
     </div>
   `
 
+  const situaBccEmails = await getLeadBccEmails(process.env.SITUA_ADMIN_EMAIL ?? '')
   const recipients = resolveContactRecipients({
     developerEmails: [
       developer?.contact_email,
       ...((developer?.notification_emails as string[] | null) ?? []),
     ],
     projectEmails: (projectContacts ?? []).map((contact) => contact.email),
-    fallbackEmail: process.env.SITUA_ADMIN_EMAIL,
+    excludedEmails: situaBccEmails,
   })
 
   const attemptedAt = new Date().toISOString()
 
   try {
-    if (!recipients.length) throw new Error('No contact email recipient configured')
+    if (!recipients.length && !situaBccEmails.length) throw new Error('No contact email recipient configured')
     await sendEmail({
       subject: `Nueva consulta — ${project.name}`,
       html,
-      to: recipients,
+      to: recipients.length ? recipients : undefined,
+      bcc: situaBccEmails.length ? situaBccEmails : undefined,
       replyTo: parsed.data.email,
     })
     const { error: trackingError } = await service

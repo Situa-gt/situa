@@ -3,7 +3,9 @@
 import { headers } from 'next/headers'
 import { z } from 'zod'
 import { createServerClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { sendEmail } from '@/lib/email/send-email'
+import { redactEmails, resolveContactRecipients } from '@/lib/email/recipients'
 import { getLeadBccEmails } from '@/lib/site-settings'
 import { notifyWebhook } from '@/lib/webhook'
 import { normalizePhone } from '@/lib/phone'
@@ -71,10 +73,6 @@ function infoRow(label: string, value: string): string {
     </tr>`
 }
 
-function uniqueEmails(emails: Array<string | null | undefined>) {
-  return [...new Set(emails.map((email) => email?.trim().toLowerCase()).filter((email): email is string => Boolean(email)))]
-}
-
 export async function submitContactLead(
   input: unknown,
 ): Promise<ActionResult> {
@@ -91,11 +89,13 @@ export async function submitContactLead(
   }
 
   const supabase = createServerClient()
+  const service = createServiceClient()
 
-  // Verify project exists and is active; fetch developer email for notification
+  // Public validation stays on the anon client. Recipient data is resolved only
+  // with the server-only service client and is never included in rendered HTML.
   const { data: project, error: projectErr } = await supabase
     .from('projects')
-    .select('id, name, developers(contact_email, notification_emails)')
+    .select('id, name, developer_id')
     .eq('id', parsed.data.project_id)
     .eq('is_active', true)
     .maybeSingle()
@@ -123,20 +123,40 @@ export async function submitContactLead(
     modelName = model.name
   }
 
+  const [{ data: developer, error: developerErr }, { data: projectContacts, error: contactsErr }] =
+    await Promise.all([
+      service
+        .from('developers')
+        .select('contact_email, notification_emails')
+        .eq('id', project.developer_id)
+        .maybeSingle(),
+      service
+        .from('project_contacts')
+        .select('email')
+        .eq('project_id', project.id),
+    ])
+
+  if (developerErr) console.error('[contact] developer recipient lookup failed', redactEmails(developerErr.message))
+  if (contactsErr) console.error('[contact] project recipient lookup failed', redactEmails(contactsErr.message))
+
   const h = await headers()
   const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
   const ua = h.get('user-agent') ?? null
 
   const { hp_company: _hp, ...payload } = parsed.data
-  const { error } = await supabase.from('contact_leads').insert({
-    ...payload,
-    channel: 'form',
-    ip_address: ip,
-    user_agent: ua,
-  })
+  const { data: lead, error } = await service
+    .from('contact_leads')
+    .insert({
+      ...payload,
+      channel: 'form',
+      ip_address: ip,
+      user_agent: ua,
+    })
+    .select('id')
+    .single()
 
   if (error) {
-    console.error('[contact] insert failed', error)
+    console.error('[contact] insert failed', redactEmails(error.message))
     return { error: 'Error al enviar. Intenta de nuevo.' }
   }
 
@@ -190,29 +210,43 @@ export async function submitContactLead(
     </div>
   `
 
-  const adminEmail = process.env.SITUA_ADMIN_EMAIL!
-  const situaBccEmails = await getLeadBccEmails(adminEmail)
-  const dev = project.developers
-  const devEmails = uniqueEmails([
-    dev?.contact_email,
-    ...((dev?.notification_emails as string[] | null) ?? []),
-  ]).filter((email) => !situaBccEmails.includes(email))
+  const situaBccEmails = await getLeadBccEmails(process.env.SITUA_ADMIN_EMAIL ?? '')
+  const recipients = resolveContactRecipients({
+    developerEmails: [
+      developer?.contact_email,
+      ...((developer?.notification_emails as string[] | null) ?? []),
+    ],
+    projectEmails: (projectContacts ?? []).map((contact) => contact.email),
+    excludedEmails: situaBccEmails,
+  })
 
-  const to = devEmails[0] ?? adminEmail
-  const cc = devEmails.slice(1)
-  const bcc = devEmails.length ? situaBccEmails : undefined
+  const attemptedAt = new Date().toISOString()
 
   try {
+    if (!recipients.length && !situaBccEmails.length) throw new Error('No contact email recipient configured')
+    const to = recipients.length ? recipients : situaBccEmails
+    const bcc = recipients.length ? situaBccEmails : []
     await sendEmail({
       subject: `Nueva consulta — ${project.name}`,
       html,
       to,
-      cc: cc.length ? cc : undefined,
-      bcc,
+      bcc: bcc.length ? bcc : undefined,
       replyTo: parsed.data.email,
     })
+    const { error: trackingError } = await service
+      .from('contact_leads')
+      .update({ email_attempted_at: attemptedAt, email_sent_at: new Date().toISOString(), email_error: null })
+      .eq('id', lead.id)
+    if (trackingError) console.error('[contact] email success tracking failed', redactEmails(trackingError.message))
   } catch (err) {
-    console.error('[contact] email failed', err)
+    const rawMessage = err instanceof Error ? err.message : String(err)
+    const safeMessage = redactEmails(rawMessage).slice(0, 2000)
+    console.error('[contact] email failed', safeMessage)
+    const { error: trackingError } = await service
+      .from('contact_leads')
+      .update({ email_attempted_at: attemptedAt, email_sent_at: null, email_error: safeMessage })
+      .eq('id', lead.id)
+    if (trackingError) console.error('[contact] email failure tracking failed', redactEmails(trackingError.message))
   }
 
   return { success: true }

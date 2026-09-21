@@ -5,6 +5,12 @@ create index if not exists contact_leads_project_created_at_idx
 create index if not exists analytics_events_created_cover_idx
   on public.analytics_events (created_at) include (event_type, project_id, model_id);
 
+-- Small partial index (~4k rows): lets the search/calculator filter groups be read
+-- index-only, so the admin overview does not fetch wide heap pages for them.
+create index if not exists analytics_events_search_filters_idx
+  on public.analytics_events (created_at) include (event_type, filters)
+  where event_type in ('search','calculator_submit');
+
 alter table public.analytics_events set (
   autovacuum_vacuum_insert_scale_factor = 0.02,
   autovacuum_vacuum_insert_threshold = 5000

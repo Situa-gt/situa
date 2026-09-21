@@ -2,15 +2,9 @@
 create index if not exists contact_leads_project_created_at_idx
   on public.contact_leads (project_id, created_at desc);
 
--- The existing date index still fetches heap rows for every event. Cover the
--- summary projection so PostgreSQL can choose an index-only range scan.
--- Not applied here: verify EXPLAIN after deployment (including heap fetches).
-create index if not exists analytics_events_summary_cover_idx
-  on public.analytics_events (created_at desc)
-  include (event_type, project_id, model_id, filters);
-
 create or replace function public.admin_analytics_summary(
-  p_from timestamptz, p_to timestamptz, p_developer_id uuid default null
+  p_from timestamptz, p_to timestamptz, p_developer_id uuid default null,
+  p_include_suggestions boolean default false
 ) returns jsonb
 language sql stable security invoker set search_path = ''
 as $function$
@@ -27,10 +21,15 @@ with projects as materialized (
  select e.event_type,e.project_id,e.model_id,e.filters,e.created_at
  from public.analytics_events e
  where p_developer_id is null and e.created_at >= p_from and e.created_at <= p_to
+ and (p_include_suggestions or e.event_type in
+   ('project_view','model_view','search','calculator_submit','contact_form_start','contact_form_submit'))
  union all
  select e.event_type,e.project_id,e.model_id,e.filters,e.created_at
  from projects p join public.analytics_events e on e.project_id=p.id
  where p_developer_id is not null and e.created_at >= p_from and e.created_at <= p_to
+ -- Affiliate callers never include suggestion payloads, even if they pass true.
+ and e.event_type in
+   ('project_view','model_view','search','calculator_submit','contact_form_start','contact_form_submit')
 ), events as materialized (
  select e.event_type,e.project_id,e.model_id,
    case when p_developer_id is null then
@@ -46,8 +45,16 @@ with projects as materialized (
  from public.contact_leads l
  where l.created_at >= p_from and l.created_at <= p_to
  and (p_developer_id is null or exists(select 1 from projects p where p.id=l.project_id))
+), counted_events as (
+ -- Independent, narrow projection: existing event/type/date indexes can cover
+ -- totals without fetching JSON payloads, including suggestion totals.
+ select e.event_type from public.analytics_events e
+ where p_developer_id is null and e.created_at >= p_from and e.created_at <= p_to
+ union all
+ select e.event_type from projects p join public.analytics_events e on e.project_id=p.id
+ where p_developer_id is not null and e.created_at >= p_from and e.created_at <= p_to
 ), event_counts as (
- select event_type::text as id,count(*) as count from events group by event_type
+ select event_type::text as id,count(*) as count from counted_events group by event_type
 ), project_counts as (
  select project_id as id,
  count(*) filter(where event_type='project_view') as project_views,
@@ -90,7 +97,7 @@ with projects as materialized (
  select e.project_id as source_id,btrim(e.filters->>'suggested_project_id') as target_id,
  count(*) filter(where event_type='suggested_project_impression') as impressions,
  count(*) filter(where event_type='suggested_project_click') as clicks
- from events e where p_developer_id is null
+ from events e where p_developer_id is null and p_include_suggestions
  and event_type in ('suggested_project_impression','suggested_project_click')
  group by e.project_id,btrim(e.filters->>'suggested_project_id')
 )
@@ -109,10 +116,12 @@ select jsonb_build_object(
  'trend',coalesce((select jsonb_agg(case when p_developer_id is null then to_jsonb(t) else to_jsonb(t)-'searches' end) from trend t),'[]'::jsonb)
 ) || case when p_developer_id is null then jsonb_build_object(
  'zones',coalesce((select jsonb_agg(jsonb_build_object('id',id,'name',name,'url_slug',url_slug)) from public.zones),'[]'::jsonb),
- 'searchGroups',coalesce((select jsonb_agg(to_jsonb(s)) from search_groups s),'[]'::jsonb),
+ 'searchGroups',coalesce((select jsonb_agg(to_jsonb(s)) from search_groups s),'[]'::jsonb)
+) || case when p_include_suggestions then jsonb_build_object(
  'suggestions',coalesce((select jsonb_agg(to_jsonb(s)) from suggestions s),'[]'::jsonb)
-) else jsonb_build_object('zones',coalesce((select jsonb_agg(jsonb_build_object('id',z.id,'name',z.name,'url_slug',z.url_slug)) from public.zones z where exists(select 1 from projects p where p.zone_id=z.id)),'[]'::jsonb)) end;
+) else '{}'::jsonb end
+else jsonb_build_object('zones',coalesce((select jsonb_agg(jsonb_build_object('id',z.id,'name',z.name,'url_slug',z.url_slug)) from public.zones z where exists(select 1 from projects p where p.zone_id=z.id)),'[]'::jsonb)) end;
 $function$;
 
-revoke all on function public.admin_analytics_summary(timestamptz,timestamptz,uuid) from public, anon, authenticated;
-grant execute on function public.admin_analytics_summary(timestamptz,timestamptz,uuid) to service_role;
+revoke all on function public.admin_analytics_summary(timestamptz,timestamptz,uuid,boolean) from public, anon, authenticated;
+grant execute on function public.admin_analytics_summary(timestamptz,timestamptz,uuid,boolean) to service_role;

@@ -2,9 +2,18 @@
 create index if not exists contact_leads_project_created_at_idx
   on public.contact_leads (project_id, created_at desc);
 
+create index if not exists analytics_events_created_cover_idx
+  on public.analytics_events (created_at) include (event_type, project_id, model_id);
+
+alter table public.analytics_events set (
+  autovacuum_vacuum_insert_scale_factor = 0.02,
+  autovacuum_vacuum_insert_threshold = 5000
+);
+
 create or replace function public.admin_analytics_summary(
   p_from timestamptz, p_to timestamptz, p_developer_id uuid default null,
-  p_include_suggestions boolean default false
+  p_include_suggestions boolean default false,
+  p_include_searches boolean default false
 ) returns jsonb
 language sql stable security invoker set search_path = ''
 as $function$
@@ -18,13 +27,13 @@ with projects as materialized (
 ), scoped_events as (
  -- Separate branches let the planner use the project/date index for affiliates,
  -- instead of scanning the global date range and filtering with a subplan.
- select e.event_type,e.project_id,e.model_id,e.filters,e.created_at
+ select e.created_at,e.event_type,e.project_id,e.model_id
  from public.analytics_events e
  where p_developer_id is null and e.created_at >= p_from and e.created_at <= p_to
- and (p_include_suggestions or e.event_type in
-   ('project_view','model_view','search','calculator_submit','contact_form_start','contact_form_submit'))
+ and e.event_type in
+   ('project_view','model_view','search','calculator_submit','contact_form_start','contact_form_submit')
  union all
- select e.event_type,e.project_id,e.model_id,e.filters,e.created_at
+ select e.created_at,e.event_type,e.project_id,e.model_id
  from projects p join public.analytics_events e on e.project_id=p.id
  where p_developer_id is not null and e.created_at >= p_from and e.created_at <= p_to
  -- Affiliate callers never include suggestion payloads, even if they pass true.
@@ -32,12 +41,6 @@ with projects as materialized (
    ('project_view','model_view','search','calculator_submit','contact_form_start','contact_form_submit')
 ), events as materialized (
  select e.event_type,e.project_id,e.model_id,
-   case when p_developer_id is null then
-     case when e.event_type in ('search','calculator_submit') then e.filters
-       when e.event_type in ('suggested_project_impression','suggested_project_click')
-         then jsonb_build_object('suggested_project_id',e.filters->>'suggested_project_id')
-     end
-   end as filters,
    (e.created_at at time zone 'America/Guatemala')::date as day
  from scoped_events e
 ), leads as materialized (
@@ -81,11 +84,16 @@ with projects as materialized (
  (p_to at time zone 'America/Guatemala')::date::timestamp,interval '1 day') d(day)
  left join daily_events e on e.day=d.day left join daily_leads l on l.day=d.day
  order by d.day
+), search_events as (
+ select e.event_type,e.filters from public.analytics_events e
+ where p_developer_id is null and p_include_searches
+ and e.created_at >= p_from and e.created_at <= p_to
+ and e.event_type in ('search','calculator_submit')
 ), search_groups as (
  -- Aggregate complete filter buckets, never sampled events. Presentation merges
  -- equivalent display labels before its explicit top-8 ranking.
  select event_type::text as event_type,coalesce(filters,'{}'::jsonb) as filters,count(*) as count
- from events where p_developer_id is null and event_type in ('search','calculator_submit')
+ from search_events
  group by event_type,filters
 ), zone_activity as (
  select p.zone_id as id,count(*) as count from events e join projects p on p.id=e.project_id
@@ -97,7 +105,8 @@ with projects as materialized (
  select e.project_id as source_id,btrim(e.filters->>'suggested_project_id') as target_id,
  count(*) filter(where event_type='suggested_project_impression') as impressions,
  count(*) filter(where event_type='suggested_project_click') as clicks
- from events e where p_developer_id is null and p_include_suggestions
+ from public.analytics_events e where p_developer_id is null and p_include_suggestions
+ and e.created_at >= p_from and e.created_at <= p_to
  and event_type in ('suggested_project_impression','suggested_project_click')
  group by e.project_id,btrim(e.filters->>'suggested_project_id')
 )
@@ -123,5 +132,5 @@ select jsonb_build_object(
 else jsonb_build_object('zones',coalesce((select jsonb_agg(jsonb_build_object('id',z.id,'name',z.name,'url_slug',z.url_slug)) from public.zones z where exists(select 1 from projects p where p.zone_id=z.id)),'[]'::jsonb)) end;
 $function$;
 
-revoke all on function public.admin_analytics_summary(timestamptz,timestamptz,uuid,boolean) from public, anon, authenticated;
-grant execute on function public.admin_analytics_summary(timestamptz,timestamptz,uuid,boolean) to service_role;
+revoke all on function public.admin_analytics_summary(timestamptz,timestamptz,uuid,boolean,boolean) from public, anon, authenticated;
+grant execute on function public.admin_analytics_summary(timestamptz,timestamptz,uuid,boolean,boolean) to service_role;

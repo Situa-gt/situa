@@ -75,10 +75,12 @@ try {
   }
   const template = botLeadEmail(input, id, project.name)
   check(!template.html.includes(id))
-  check(!template.html.includes('Correo') && !template.html.includes('Mascota') && !template.html.includes('Presupuesto'))
-  check(template.html.includes('&lt;Resumen&gt;') && template.html.includes('Score: 15/100 (regular)'))
+  check(!template.html.includes('Correo electrónico') && !template.html.includes('Mascota') && !template.html.includes('Presupuesto'))
+  check(template.html.includes('&lt;Resumen&gt;') && template.html.includes('Score 15/100 · Lead Regular'))
   const withValues = botLeadEmail({ ...input, qualification: { ...input.qualification, pets: false, bedrooms: 0, purchase_timing: 'este_mes' } }, id, project.name)
-  check(withValues.html.includes('Mascota:</strong> No') && withValues.html.includes('Dormitorios:</strong> 0') && withValues.html.includes('Este mes'))
+  check(/Mascota<\/td>\s*<td[^>]*>No</.test(withValues.html) && /Dormitorios<\/td>\s*<td[^>]*>0</.test(withValues.html) && withValues.html.includes('Este mes'))
+  const zoned = botLeadEmail({ ...input, qualification: { ...input.qualification, zones: ['zona-14'], budget_max_usd: 200000 } }, id, project.name)
+  check(zoned.html.includes('Zona 14') && !zoned.html.includes('zona-14') && zoned.html.includes('Hasta US$200,000'))
   const cases = [
     { developer: { contact_email: address('dev'), notification_emails: [address('DEV')] }, contacts: [{ email: address('project') }], bcc: [address('situa')] },
     { developer: { contact_email: address('dev') }, bcc: [address('situa')] },

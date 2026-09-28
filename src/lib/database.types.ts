@@ -277,6 +277,11 @@ export type Database = {
       }
       contact_leads: {
         Row: {
+          qualification: Json | null
+          lead_score: number | null
+          lead_tier: string | null
+          conversation_id: string | null
+          recommended_project_ids: string[] | null
           channel: Database["public"]["Enums"]["lead_channel"]
           created_at: string
           email_attempted_at: string | null
@@ -298,6 +303,11 @@ export type Database = {
           utm_term: string | null
         }
         Insert: {
+          qualification?: Json | null
+          lead_score?: number | null
+          lead_tier?: string | null
+          conversation_id?: string | null
+          recommended_project_ids?: string[] | null
           channel?: Database["public"]["Enums"]["lead_channel"]
           created_at?: string
           email_attempted_at?: string | null
@@ -319,6 +329,11 @@ export type Database = {
           utm_term?: string | null
         }
         Update: {
+          qualification?: Json | null
+          lead_score?: number | null
+          lead_tier?: string | null
+          conversation_id?: string | null
+          recommended_project_ids?: string[] | null
           channel?: Database["public"]["Enums"]["lead_channel"]
           created_at?: string
           email_attempted_at?: string | null
@@ -842,7 +857,7 @@ export type Database = {
         | "suggested_project_click"
         | "calculator_submit"
       currency_code: "USD" | "GTQ"
-      lead_channel: "form"
+      lead_channel: "form" | "bot"
       media_kind: "cover" | "gallery" | "floorplan" | "logo"
       project_stage:
         | "lanzamiento"
@@ -988,7 +1003,7 @@ export const Constants = {
         "calculator_submit",
       ],
       currency_code: ["USD", "GTQ"],
-      lead_channel: ["form"],
+      lead_channel: ["form", "bot"],
       media_kind: ["cover", "gallery", "floorplan", "logo"],
       project_stage: [
         "lanzamiento",

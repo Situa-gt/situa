@@ -56,7 +56,7 @@ export async function createLead(input: LeadInput, options: Options, deps = defa
     form: 'contact',
     full_name: input.full_name,
     email: input.email,
-    phone: input.phone ?? null,
+    phone: input.phone || null,
     project_id: input.project_id,
     project_name: project.name,
     model_id: input.model_id ?? null,

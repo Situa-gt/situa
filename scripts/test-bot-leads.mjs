@@ -73,6 +73,8 @@ try {
   for (const patch of [{ email: null }, { full_name: 'x' }, { phone: 'invalid' }, { lead_score: 101 }, { lead_score: 1.5 }, { lead_tier: 'invalid' }, { conversation_id: '' }, { conversation_id: 'x'.repeat(65) }, { message: 'x'.repeat(2001) }, { recommended_project_ids: ['invalid'] }]) {
     check(!BotLeadSchema.safeParse({ ...input, ...patch }).success)
   }
+  check(BotLeadSchema.safeParse({ ...input, phone: '', email: 'lead@example.com' }).success)
+  check(!BotLeadSchema.safeParse({ ...input, phone: '', email: '' }).success)
   const template = botLeadEmail(input, id, project.name)
   check(!template.html.includes(id))
   check(!template.html.includes('Correo electrónico') && !template.html.includes('Mascota') && !template.html.includes('Presupuesto'))

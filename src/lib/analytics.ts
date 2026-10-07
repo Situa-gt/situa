@@ -7,6 +7,8 @@ type EventType =
   | 'suggested_project_impression'
   | 'suggested_project_click'
   | 'calculator_submit'
+  | 'home_slot_impression'
+  | 'home_slot_click'
 
 interface TrackPayload {
   event_type: EventType

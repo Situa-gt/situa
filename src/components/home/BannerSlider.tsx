@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { TrackSlot } from '@/components/analytics/TrackSlot'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { ProjectCardData } from '@/lib/queries/home'
 import { formatPriceValue } from '@/lib/format/price'
@@ -74,6 +75,8 @@ export function BannerSlider({ projects }: BannerSliderProps) {
                     'linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.08) 100%)',
                 }}
               />
+              {/* Only the visible slide counts an impression. */}
+              <TrackSlot slot="bronce" position={i + 1} projectId={p.id} active={i === current} className="absolute inset-0 z-10">
               <Link
                 href={href}
                 target="_blank"
@@ -94,6 +97,7 @@ export function BannerSlider({ projects }: BannerSliderProps) {
                   </p>
                 )}
               </Link>
+              </TrackSlot>
             </div>
           )
         })}

@@ -16,7 +16,7 @@ export async function FeaturedProjects() {
 
   return (
     <ProjectGridSection
-      projects={projects}
+      projects={projects} slot="plata"
       title="Proyectos destacados"
       subtitle="Opciones activas con buena visibilidad dentro de Sitúa."
     />

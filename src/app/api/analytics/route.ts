@@ -51,6 +51,24 @@ const AnalyticsSchema = z.discriminatedUnion('event_type', [
     filters: z.record(z.string(), z.unknown()).optional(),
   }),
   BaseEventSchema.extend({
+    event_type: z.literal('home_slot_impression'),
+    project_id: z.string().uuid().optional(),
+    model_id: z.string().uuid().optional(),
+    filters: z.object({
+      slot: z.enum(['vip', 'plata', 'bronce', 'modelo', 'estandar']),
+      position: z.number().int().min(1).max(100),
+    }),
+  }),
+  BaseEventSchema.extend({
+    event_type: z.literal('home_slot_click'),
+    project_id: z.string().uuid().optional(),
+    model_id: z.string().uuid().optional(),
+    filters: z.object({
+      slot: z.enum(['vip', 'plata', 'bronce', 'modelo', 'estandar']),
+      position: z.number().int().min(1).max(100),
+    }),
+  }),
+  BaseEventSchema.extend({
     event_type: z.literal('calculator_submit'),
     filters: z.record(z.string(), z.unknown()).optional(),
   }),

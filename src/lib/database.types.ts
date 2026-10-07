@@ -856,6 +856,8 @@ export type Database = {
         | "suggested_project_impression"
         | "suggested_project_click"
         | "calculator_submit"
+        | "home_slot_impression"
+        | "home_slot_click"
       currency_code: "USD" | "GTQ"
       lead_channel: "form" | "bot"
       media_kind: "cover" | "gallery" | "floorplan" | "logo"
@@ -1001,6 +1003,8 @@ export const Constants = {
         "suggested_project_impression",
         "suggested_project_click",
         "calculator_submit",
+        "home_slot_impression",
+        "home_slot_click",
       ],
       currency_code: ["USD", "GTQ"],
       lead_channel: ["form", "bot"],

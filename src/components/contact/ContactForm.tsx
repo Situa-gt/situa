@@ -17,27 +17,28 @@ import { tipoSlug } from '@/lib/types/property'
 import type { SuggestedProjectData } from '@/lib/queries/suggestions'
 import { normalizePhone } from '@/lib/phone'
 
-const OptionalPhoneSchema = z
-  .string()
-  .trim()
-  .optional()
-  .transform((value, ctx) => {
-    if (!value) return undefined
-    const normalized = normalizePhone(value)
-    if (!normalized.ok) {
-      ctx.addIssue({ code: 'custom', message: normalized.error })
-      return z.NEVER
-    }
-    return normalized.phone
-  })
-
 const ClientSchema = z.object({
   full_name: z.string().trim().min(2, 'Ingresa tu nombre completo').max(100),
-  email: z.string().trim().email('Correo inválido').max(255).transform((email) => email.toLowerCase()),
-  phone: z.preprocess(
-    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
-    OptionalPhoneSchema,
-  ),
+  email: z
+    .string()
+    .trim()
+    .max(255)
+    .refine((value) => value === '' || z.string().email().safeParse(value).success, 'Correo inválido')
+    .transform((email) => email.toLowerCase())
+    .optional()
+    .transform((email) => email ?? ''),
+  phone: z
+    .string({ message: 'Ingresa tu teléfono' })
+    .trim()
+    .min(1, 'Ingresa tu teléfono')
+    .transform((value, ctx) => {
+      const normalized = normalizePhone(value)
+      if (!normalized.ok) {
+        ctx.addIssue({ code: 'custom', message: normalized.error })
+        return z.NEVER
+      }
+      return normalized.phone
+    }),
   message: z.string().trim().max(500, 'Máximo 500 caracteres').optional(),
 })
 
@@ -295,13 +296,12 @@ export function ContactForm({ projectId, modelId, projectName, modelName, sugges
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="email">Correo</Label>
+        <Label htmlFor="email">Correo (opcional)</Label>
         <Input
           id="email"
           name="email"
           type="email"
           autoComplete="email"
-          required
           value={values.email}
           onChange={(e) => update('email', e.target.value)}
           aria-invalid={!!errors.email}
@@ -315,12 +315,13 @@ export function ContactForm({ projectId, modelId, projectName, modelName, sugges
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="phone">Teléfono (opcional)</Label>
+        <Label htmlFor="phone">Teléfono</Label>
         <Input
           id="phone"
           name="phone"
           type="tel"
           autoComplete="tel"
+          required
           value={values.phone}
           onChange={(e) => update('phone', e.target.value)}
           onBlur={normalizePhoneField}

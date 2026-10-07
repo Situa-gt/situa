@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { FeaturedModelCard } from './FeaturedModelCard'
+import { TrackSlot } from '@/components/analytics/TrackSlot'
 import type { FeaturedModelCardData } from '@/lib/queries/home'
 
 const SCROLL_INTERVAL_MS = 3500
@@ -70,13 +71,16 @@ export function FeaturedModelsCarousel({ models }: Props) {
         ref={trackRef}
         className="flex gap-6 overflow-x-auto pb-4 [scroll-snap-type:x_mandatory] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {models.map((model) => (
-          <div
+        {models.map((model, index) => (
+          <TrackSlot
             key={model.id}
+            slot="modelo"
+            position={index + 1}
+            modelId={model.id}
             className="w-[80vw] shrink-0 [scroll-snap-align:start] sm:w-[340px] lg:w-[380px]"
           >
             <FeaturedModelCard model={model} />
-          </div>
+          </TrackSlot>
         ))}
       </div>
 

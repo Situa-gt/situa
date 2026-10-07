@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { TrackSlot } from '@/components/analytics/TrackSlot'
 import { Building2, Calculator, House, MapPinned, Search, Sparkles } from 'lucide-react'
 import {
   getHeroProjects,
@@ -85,11 +86,13 @@ export async function Hero({ initial }: Props) {
       />
       <HeroAccent />
       {heroProject && heroHref ? (
-        <Link
-          href={heroHref}
-          aria-label={`Ver proyecto destacado ${heroProject.name}`}
-          className="absolute inset-0 z-0 cursor-pointer"
-        />
+        <TrackSlot slot="vip" position={1} projectId={heroProject.id} className="absolute inset-0 z-0">
+          <Link
+            href={heroHref}
+            aria-label={`Ver proyecto destacado ${heroProject.name}`}
+            className="absolute inset-0 z-0 cursor-pointer"
+          />
+        </TrackSlot>
       ) : null}
 
       <div className="pointer-events-none relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-6">

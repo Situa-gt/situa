@@ -16,7 +16,7 @@ export async function AvailableProjects() {
 
   return (
     <ProjectGridSection
-      projects={projects}
+      projects={projects} slot="estandar"
       title="Explora proyectos disponibles"
       subtitle="Apartamentos y casas en Guatemala, listos para comparar por zona y etapa."
     />

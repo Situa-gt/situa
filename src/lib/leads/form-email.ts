@@ -28,7 +28,7 @@ export function formLeadEmail(input: { full_name: string; email: string; phone?:
             <h2 style="margin:0 0 14px;font-size:21px;line-height:1.25;color:#111827">Datos del prospecto</h2>
             <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:separate;border-spacing:0;border:1px solid #edf0f6;border-radius:14px;overflow:hidden;margin-bottom:28px">
               ${infoRow('Nombre', input.full_name)}
-              ${infoRow('Correo electrónico', input.email)}
+              ${infoRow('Correo electrónico', input.email || 'No indicado')}
               ${infoRow('Teléfono', input.phone ?? 'No indicado')}
             </table>
 

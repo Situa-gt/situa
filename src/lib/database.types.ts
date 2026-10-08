@@ -287,6 +287,11 @@ export type Database = {
           email_attempted_at: string | null
           email_error: string | null
           email_sent_at: string | null
+          verified_at: string | null
+          verified_by: string | null
+          blocked_at: string | null
+          phone_key: string | null
+          email_key: string | null
           email: string
           full_name: string
           id: string
@@ -313,6 +318,11 @@ export type Database = {
           email_attempted_at?: string | null
           email_error?: string | null
           email_sent_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          blocked_at?: string | null
+          phone_key?: never
+          email_key?: never
           email: string
           full_name: string
           id?: string
@@ -339,6 +349,11 @@ export type Database = {
           email_attempted_at?: string | null
           email_error?: string | null
           email_sent_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          blocked_at?: string | null
+          phone_key?: never
+          email_key?: never
           email?: string
           full_name?: string
           id?: string

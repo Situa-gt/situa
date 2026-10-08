@@ -44,7 +44,7 @@ export async function createLead(input: LeadInput, options: Options, deps = defa
       ip_address: ip,
       user_agent: ua,
     })
-    .select('id')
+    .select('id, blocked_at')
     .single()
 
   if (error) {
@@ -52,7 +52,11 @@ export async function createLead(input: LeadInput, options: Options, deps = defa
     return { error: 'Error al enviar. Intenta de nuevo.', code: error.code }
   }
 
-  if (channel === 'form') void deps.notifyWebhook({
+  // A person on Sitúa's blocklist (lead_blocklist): the insert trigger already marked the lead.
+  // It is kept for Sitúa, flagged, and never reaches the developer, by email or webhook.
+  const blocked = Boolean(lead.blocked_at)
+
+  if (channel === 'form' && !blocked) void deps.notifyWebhook({
     form: 'contact',
     full_name: input.full_name,
     email: input.email,
@@ -69,12 +73,13 @@ export async function createLead(input: LeadInput, options: Options, deps = defa
     ip: ip,
   })
 
-  const template = channel === 'bot'
+  const baseTemplate = channel === 'bot'
     ? botLeadEmail(input as BotLeadInput, lead.id, project.name)
     : formLeadEmail(input, project.name, modelName)
+  const template = blocked ? blockedLeadEmail(baseTemplate) : baseTemplate
 
   const situaBccEmails = await deps.getLeadBccEmails(process.env.SITUA_ADMIN_EMAIL ?? '')
-  const recipients = resolveContactRecipients({
+  const recipients = blocked ? [] : resolveContactRecipients({
     developerEmails: [
       developer?.contact_email,
       ...((developer?.notification_emails as string[] | null) ?? []),
@@ -114,4 +119,13 @@ export async function createLead(input: LeadInput, options: Options, deps = defa
   }
 
   return { lead_id: lead.id, email }
+}
+
+/** Sitúa-only copy of a blocklisted person's lead: flagged in the subject and at the top. */
+function blockedLeadEmail(template: { subject: string; html: string }) {
+  const notice =
+    '<p style="margin:0 0 16px;padding:12px 14px;border-radius:8px;background:#fff3ed;color:#b42318;font-family:Arial,sans-serif;font-size:14px">' +
+    '<strong>Contacto en lista negra.</strong> No se envió a la desarrolladora. ' +
+    'Está en el admin, en Contactos → Bloqueados.</p>'
+  return { subject: `[Lista negra] ${template.subject}`, html: notice + template.html }
 }

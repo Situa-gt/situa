@@ -32,9 +32,10 @@ export function botLeadHandler(deps = defaults) {
       if (!project) return json({ ok: false, error: 'Proyecto no válido.' }, 404)
       const { warm, ...lead } = parsed.data
       if (warm) {
-        // One warm lead per conversation: a repeated call returns the one already stored.
+        // One warm lead per conversation, and none once it already sent its information:
+        // a repeated or late call returns the lead already stored.
         const { data: existing, error: warmError } = await service.from('contact_leads')
-          .select('id').eq('conversation_id', lead.conversation_id).eq('is_warm', true).limit(1).maybeSingle()
+          .select('id').eq('conversation_id', lead.conversation_id).order('is_warm', { ascending: true }).limit(1).maybeSingle()
         if (warmError) return json({ ok: false, error: 'Error al consultar conversación.' }, 500)
         if (existing) return json({ ok: true, lead_id: existing.id, email: 'skipped' }, 201)
       }

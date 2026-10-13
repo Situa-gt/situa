@@ -292,6 +292,7 @@ export type Database = {
           blocked_at: string | null
           phone_key: string | null
           email_key: string | null
+          is_warm: boolean
           email: string
           full_name: string
           id: string
@@ -323,6 +324,7 @@ export type Database = {
           blocked_at?: string | null
           phone_key?: never
           email_key?: never
+          is_warm?: boolean
           email: string
           full_name: string
           id?: string
@@ -354,6 +356,7 @@ export type Database = {
           blocked_at?: string | null
           phone_key?: never
           email_key?: never
+          is_warm?: boolean
           email?: string
           full_name?: string
           id?: string

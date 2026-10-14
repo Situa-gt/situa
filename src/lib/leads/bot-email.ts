@@ -14,6 +14,9 @@ const labels: Record<string, string> = {
   planos: 'En planos', construccion: 'En construcción', entrega_inmediata: 'Entrega inmediata',
   propia: 'Vivienda propia', rentando: 'Rentando', familia: 'Con familia',
   solo: 'Solo', pareja: 'Pareja', pareja_hijos: 'Pareja con hijos', familia_grande: 'Familia grande',
+  renta_tradicional: 'Renta tradicional', renta_corta: 'Renta corta', plusvalia: 'Plusvalía',
+  contado: 'Contado', credito_bancario: 'Crédito bancario', financiamiento_directo: 'Financiamiento directo',
+  USD: 'Dólares', GTQ: 'Quetzales',
 }
 const tierLabels: Record<string, string> = {
   premium: 'Lead Premium', muy_bueno: 'Lead Muy Bueno', bueno: 'Lead Bueno', regular: 'Lead Regular',
@@ -106,6 +109,10 @@ export function botLeadEmail(input: BotLeadInput, leadId: string, projectName: s
             <h2 style="margin:0 0 14px;font-size:21px;line-height:1.25;color:#111827">Calificación</h2>
             ${table([
               ['Motivo', q.purpose],
+              ['Estrategia', q.strategy],
+              ['Forma de pago', q.payment_method],
+              ['Unidades', q.units],
+              ['Moneda', q.currency],
               ['Enganche', downPayment],
               ['Tiempo de compra', q.purchase_timing],
               ['Situación actual', q.living_situation],

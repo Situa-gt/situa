@@ -27,6 +27,11 @@ export const BotLeadSchema = z.object({
     living_situation: z.enum(['propia', 'rentando', 'familia']).nullable(),
     household: z.enum(['solo', 'pareja', 'pareja_hijos', 'familia_grande']).nullable(),
     pets: z.boolean().nullable(),
+    // Flow v2 (12-10-2026). Optional so a bot deployed before them keeps validating.
+    currency: z.enum(['USD', 'GTQ']).nullish(),
+    strategy: z.enum(['renta_tradicional', 'renta_corta', 'plusvalia']).nullish(),
+    payment_method: z.enum(['contado', 'credito_bancario', 'financiamiento_directo']).nullish(),
+    units: z.number().int().positive().nullish(),
     answered_all: z.boolean(),
     turns: z.number().int().nonnegative(),
     duration_seconds: nullableNumber,
@@ -35,5 +40,7 @@ export const BotLeadSchema = z.object({
   lead_tier: z.enum(['premium', 'muy_bueno', 'bueno', 'regular']),
   recommended_project_ids: z.array(z.string().uuid()),
   conversation_id: z.string().trim().min(1).max(64),
+  // Warm lead: left name and phone but did not ask to be contacted. Kept only for Sitúa.
+  warm: z.boolean().default(false),
 })
 export type BotLeadInput = z.infer<typeof BotLeadSchema>

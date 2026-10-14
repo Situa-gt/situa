@@ -15,11 +15,23 @@ type Options = {
   ua: string | null
   project: { id: string; name: string; developer_id: string }
   modelName?: string | null
+  /** Warm bot lead: stored for Sitúa only, without email or webhook. */
+  warm?: boolean
 }
 const defaultDeps = { createServiceClient, sendEmail, getLeadBccEmails, notifyWebhook }
 export async function createLead(input: LeadInput, options: Options, deps = defaultDeps) {
-  const { channel, ip, ua, project, modelName = null } = options
+  const { channel, ip, ua, project, modelName = null, warm = false } = options
   const service = deps.createServiceClient()
+  if (warm) {
+    const { data: lead, error } = await service.from('contact_leads')
+      .insert({ ...input, is_warm: true, channel, ip_address: ip, user_agent: ua })
+      .select('id').single()
+    if (error) {
+      console.error('[contact] warm insert failed', redactEmails(error.message))
+      return { error: 'Error al guardar. Intenta de nuevo.', code: error.code }
+    }
+    return { lead_id: lead.id, email: 'skipped' as const }
+  }
   const [{ data: developer, error: developerErr }, { data: projectContacts, error: contactsErr }] =
     await Promise.all([
       service

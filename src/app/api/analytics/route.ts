@@ -66,6 +66,10 @@ const AnalyticsSchema = z.discriminatedUnion('event_type', [
     filters: z.object({
       slot: z.enum(['vip', 'plata', 'bronce', 'modelo', 'estandar']),
       position: z.number().int().min(1).max(100),
+      // Click point inside the card (0–1 per axis) and the layout it was made on.
+      x: z.number().min(0).max(1).optional(),
+      y: z.number().min(0).max(1).optional(),
+      layout: z.enum(['mobile', 'tablet', 'desktop']).optional(),
     }),
   }),
   BaseEventSchema.extend({

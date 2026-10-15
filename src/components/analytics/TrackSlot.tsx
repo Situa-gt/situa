@@ -18,6 +18,12 @@ type TrackSlotProps = {
   children: ReactNode
 }
 
+/** Layout bucket by viewport width, matching the home grid breakpoints (sm 640, lg 1024). */
+function layoutBucket(): 'mobile' | 'tablet' | 'desktop' {
+  const width = window.innerWidth
+  return width < 640 ? 'mobile' : width < 1024 ? 'tablet' : 'desktop'
+}
+
 const SEEN_KEY = 'situa_slot_seen'
 
 /** One impression per session and element keeps the events table close to unique views. */
@@ -70,7 +76,17 @@ export function TrackSlot({ slot, position, projectId, modelId, active = true, c
       className={className}
       onClickCapture={(event) => {
         if (!(event.target as HTMLElement).closest('a')) return
-        trackEvent({ event_type: 'home_slot_click', ...ids, filters: { slot, position } })
+        // Where inside the card the click landed, 0–1 on each axis, so the heat map can place it
+        // on the card whatever the screen size. Keyboard activation has no pointer position.
+        const rect = ref.current?.getBoundingClientRect()
+        const point = rect && rect.width > 0 && rect.height > 0 && event.detail > 0
+          ? {
+              x: Math.round(Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width)) * 1000) / 1000,
+              y: Math.round(Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height)) * 1000) / 1000,
+              layout: layoutBucket(),
+            }
+          : {}
+        trackEvent({ event_type: 'home_slot_click', ...ids, filters: { slot, position, ...point } })
       }}
     >
       {children}

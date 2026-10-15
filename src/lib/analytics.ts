@@ -58,6 +58,8 @@ export function trackEvent(payload: TrackPayload): void {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...payload, ...getContext() }),
+      // A click usually navigates away; keepalive lets the request finish anyway.
+      keepalive: true,
     }).catch(() => {})
   } catch {
     // never throw for analytics

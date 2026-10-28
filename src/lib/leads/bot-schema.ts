@@ -5,8 +5,8 @@ const nullableNumber = z.number().nonnegative().nullable()
 export const BotLeadSchema = z.object({
   project_id: z.string().uuid(),
   full_name: z.string().trim().min(2).max(120),
-  // Phone required, email optional (client decision 07-10-2026); empty email means not given.
-  phone: z.string().min(8).max(20).regex(/^[\d +\-]+$/),
+  // Phone or email, at least one (client decision 28-10-2026); an empty string means not given.
+  phone: z.union([z.string().min(8).max(20).regex(/^[\d +\-]+$/), z.literal('')]),
   email: z.union([z.string().email(), z.literal('')]),
   message: z.string().max(2000),
   qualification: z.object({
@@ -40,7 +40,7 @@ export const BotLeadSchema = z.object({
   lead_tier: z.enum(['premium', 'muy_bueno', 'bueno', 'regular']),
   recommended_project_ids: z.array(z.string().uuid()),
   conversation_id: z.string().trim().min(1).max(64),
-  // Warm lead: left name and phone but did not ask to be contacted. Kept only for Sitúa.
+  // Warm lead: left name and phone or email but did not ask to be contacted. Kept only for Sitúa.
   warm: z.boolean().default(false),
-})
+}).refine(lead => lead.phone !== '' || lead.email !== '', { path: ['phone'], message: 'Falta teléfono o correo.' })
 export type BotLeadInput = z.infer<typeof BotLeadSchema>

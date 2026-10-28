@@ -89,7 +89,7 @@ export function botLeadEmail(input: BotLeadInput, leadId: string, projectName: s
             <h2 style="margin:0 0 14px;font-size:21px;line-height:1.25;color:#111827">Datos del prospecto</h2>
             ${table([
               ['Nombre', input.full_name],
-              ['Teléfono', input.phone],
+              ['Teléfono', input.phone || null],
               ['Correo electrónico', input.email || null],
             ])}
 

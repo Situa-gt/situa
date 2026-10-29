@@ -39,6 +39,17 @@ export function botLeadHandler(deps = defaults) {
         if (warmError) return json({ ok: false, error: 'Error al consultar conversación.' }, 500)
         if (existing) return json({ ok: true, lead_id: existing.id, email: 'skipped' }, 201)
       }
+      // A sent lead for this project already exists in the conversation (a bot retry after a timeout):
+      // return it without a second lead or a second email to the developer.
+      const alreadySent = async () => {
+        const { data } = await service.from('contact_leads').select('id')
+          .eq('conversation_id', lead.conversation_id).eq('project_id', lead.project_id).eq('is_warm', false).limit(1).maybeSingle()
+        return data?.id as string | undefined
+      }
+      if (!warm) {
+        const sentId = await alreadySent()
+        if (sentId) return json({ ok: true, lead_id: sentId, email: 'skipped' }, 201)
+      }
       const { count, error: countError } = await service.from('contact_leads')
         .select('id', { count: 'exact', head: true }).eq('conversation_id', lead.conversation_id).eq('is_warm', false)
       if (countError) return json({ ok: false, error: 'Error al consultar conversación.' }, 500)
@@ -50,6 +61,11 @@ export function botLeadHandler(deps = defaults) {
       })
       if ('error' in result) {
         if (result.code === 'P0429') return json({ ok: false, error: 'Límite de leads por conversación.' }, 429)
+        // Two identical calls in parallel: the unique index rejected the second one.
+        if (result.code === '23505' && !warm) {
+          const sentId = await alreadySent()
+          if (sentId) return json({ ok: true, lead_id: sentId, email: 'skipped' }, 201)
+        }
         return json({ ok: false, error: result.error }, 500)
       }
       if (!warm) {

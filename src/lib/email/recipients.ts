@@ -1,4 +1,4 @@
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const EMAIL_PATTERN = /^[^\s@.]+(\.[^\s@.]+)*@[^\s@.]+(\.[^\s@.]+)+$/
 
 export function uniqueEmails(emails: Array<string | null | undefined>) {
   const normalized = emails

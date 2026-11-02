@@ -1,6 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendEmail } from '@/lib/email/send-email'
-import { redactEmails, resolveContactRecipients } from '@/lib/email/recipients'
+import { isValidEmail, redactEmails, resolveContactRecipients } from '@/lib/email/recipients'
 import { getLeadBccEmails } from '@/lib/site-settings'
 import { notifyWebhook } from '@/lib/webhook'
 import type { Database } from '@/lib/database.types'
@@ -111,7 +111,7 @@ export async function createLead(input: LeadInput, options: Options, deps = defa
       ...template,
       to,
       bcc: bcc.length ? bcc : undefined,
-      replyTo: input.email || undefined,
+      replyTo: isValidEmail(input.email) ? input.email.trim() : undefined,
     })
     const { error: trackingError } = await service
       .from('contact_leads')
@@ -123,6 +123,14 @@ export async function createLead(input: LeadInput, options: Options, deps = defa
     const rawMessage = err instanceof Error ? err.message : String(err)
     const safeMessage = redactEmails(rawMessage).slice(0, 2000)
     console.error('[contact] email failed', safeMessage)
+    // A lead is never left without a recipient: when the send to the developer fails, Sitúa still gets it.
+    if (recipients.length && situaBccEmails.length) {
+      try {
+        await deps.sendEmail({ ...undeliveredLeadEmail(template, safeMessage), to: situaBccEmails })
+      } catch (fallbackErr) {
+        console.error('[contact] Sitúa fallback email failed', redactEmails(fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)))
+      }
+    }
     const { error: trackingError } = await service
       .from('contact_leads')
       .update({ email_attempted_at: attemptedAt, email_sent_at: null, email_error: safeMessage })
@@ -131,6 +139,15 @@ export async function createLead(input: LeadInput, options: Options, deps = defa
   }
 
   return { lead_id: lead.id, email }
+}
+
+/** Sitúa-only copy of a lead the developer did not receive, with the delivery error at the top. */
+function undeliveredLeadEmail(template: { subject: string; html: string }, error: string) {
+  const notice =
+    '<p style="margin:0 0 16px;padding:12px 14px;border-radius:8px;background:#fff3ed;color:#b42318;font-family:Arial,sans-serif;font-size:14px">' +
+    '<strong>No se pudo enviar a la desarrolladora.</strong> Reenvíalo a mano y revisa sus correos en el admin. ' +
+    'Error: ' + error.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</p>'
+  return { subject: `[Sin entregar] ${template.subject}`, html: notice + template.html }
 }
 
 /** Sitúa-only copy of a blocklisted person's lead: flagged in the subject and at the top. */

@@ -1,11 +1,8 @@
 import 'server-only'
 import { createServiceClient } from '@/lib/supabase/service'
+import { uniqueEmails } from '@/lib/email/recipients'
 
 const leadEmailSettingsKey = 'lead_email_settings'
-
-function uniqueEmails(emails: Array<string | null | undefined>) {
-  return [...new Set(emails.map((email) => email?.trim().toLowerCase()).filter((email): email is string => Boolean(email)))]
-}
 
 function emailList(value: string | undefined) {
   return uniqueEmails(value?.split(/[,\n;]/) ?? [])

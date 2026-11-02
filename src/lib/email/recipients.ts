@@ -1,5 +1,10 @@
 const EMAIL_PATTERN = /^[^\s@.]+(\.[^\s@.]+)*@[^\s@.]+(\.[^\s@.]+)+$/
 
+/** Brevo rejects the whole send when any address (to, bcc or replyTo) is malformed. */
+export function isValidEmail(email: string | null | undefined): email is string {
+  return typeof email === 'string' && EMAIL_PATTERN.test(email.trim())
+}
+
 export function uniqueEmails(emails: Array<string | null | undefined>) {
   const normalized = emails
     .map((email) => email?.trim().toLowerCase())

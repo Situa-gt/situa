@@ -24,7 +24,7 @@ interface Props {
 }
 
 const STAGE_LABEL: Record<Stage, string> = {
-  lanzamiento: 'Lanzamiento',
+  lanzamiento: 'En planos',
   preventa: 'Preventa',
   construccion: 'Construcción',
   entrega_inmediata: 'Entrega inmediata',

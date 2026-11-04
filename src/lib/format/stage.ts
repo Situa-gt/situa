@@ -1,24 +1,24 @@
-import { Megaphone, Tag, HardHat, KeyRound, type LucideIcon } from 'lucide-react'
+import { DraftingCompass, Tag, HardHat, KeyRound, type LucideIcon } from 'lucide-react'
 import type { Database } from '@/lib/database.types'
 
 type Stage = Database['public']['Enums']['project_stage']
 
 const LABELS: Record<Stage, string> = {
-  lanzamiento: 'Lanzamiento',
+  lanzamiento: 'En planos',
   preventa: 'Preventa',
   construccion: 'En construcción',
   entrega_inmediata: 'Entrega inmediata',
 }
 
 const ICONS: Record<Stage, LucideIcon> = {
-  lanzamiento:       Megaphone,
+  lanzamiento:       DraftingCompass,
   preventa:          Tag,
   construccion:      HardHat,
   entrega_inmediata: KeyRound,
 }
 
 const TOOLTIPS: Record<Stage, string> = {
-  lanzamiento:       'El proyecto acaba de anunciarse. Precios y disponibilidad son preliminares.',
+  lanzamiento:       'El proyecto está en planos. Precios y disponibilidad son preliminares.',
   preventa:          'Unidades disponibles antes de iniciar construcción, generalmente a mejor precio.',
   construccion:      'El proyecto está en obras. Fecha estimada de entrega según el desarrollador.',
   entrega_inmediata: 'El proyecto está listo. Puedes recibir tu unidad de forma inmediata.',

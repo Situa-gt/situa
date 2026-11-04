@@ -8,7 +8,7 @@ interface Props {
 }
 
 const STAGES: { id: Stage; label: string }[] = [
-  { id: 'lanzamiento', label: 'Lanzamiento' },
+  { id: 'lanzamiento', label: 'En planos' },
   { id: 'preventa', label: 'Preventa' },
   { id: 'construccion', label: 'En construcción' },
   { id: 'entrega_inmediata', label: 'Entrega inmediata' },

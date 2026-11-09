@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Check, ChevronDown, X } from 'lucide-react'
+import { Check, ChevronDown, Route, X } from 'lucide-react'
 
 interface Option {
   slug: string
@@ -108,7 +108,7 @@ export function ZonaMultiSelect({ options, value, onChange, inlineDropdown = fal
                   }`}
                 >
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-sm font-semibold text-brand-purple">
-                    {o.name.replace('Zona ', '')}
+                    {/^Zona \d+$/.test(o.name) ? o.name.replace('Zona ', '') : <Route className="h-5 w-5" aria-hidden />}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span

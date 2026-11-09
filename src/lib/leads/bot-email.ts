@@ -23,9 +23,13 @@ const tierLabels: Record<string, string> = {
 }
 const tierColors: Record<string, string> = { premium: '#15803d', muy_bueno: '#1d4ed8', bueno: '#b45309', regular: '#6b7280' }
 
+// Named zones, whose spelling the slug cannot rebuild.
+const namedZones: Record<string, string> = { 'carretera-a-el-salvador': 'Carretera a El Salvador' }
+
 function zoneLabel(slug: string): string {
   const match = /^zona-(\d+)$/i.exec(slug.trim())
-  return match ? `Zona ${match[1]}` : slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  if (match) return `Zona ${match[1]}`
+  return namedZones[slug.trim().toLowerCase()] ?? slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 function money(value: number, currency: 'USD' | 'GTQ'): string {
   const n = new Intl.NumberFormat('es-GT', { maximumFractionDigits: 0 }).format(value)

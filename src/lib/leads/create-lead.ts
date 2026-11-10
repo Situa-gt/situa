@@ -1,7 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendEmail } from '@/lib/email/send-email'
 import { isValidEmail, redactEmails, resolveContactRecipients } from '@/lib/email/recipients'
-import { getLeadBccEmails } from '@/lib/site-settings'
+import { getBotTestSettings, getLeadBccEmails } from '@/lib/site-settings'
 import { notifyWebhook } from '@/lib/webhook'
 import type { Database } from '@/lib/database.types'
 import type { BotLeadInput } from './bot-schema'
@@ -18,13 +18,16 @@ type Options = {
   /** Warm bot lead: stored for Sitúa only, without email or webhook. */
   warm?: boolean
 }
-const defaultDeps = { createServiceClient, sendEmail, getLeadBccEmails, notifyWebhook }
+const defaultDeps = { createServiceClient, sendEmail, getLeadBccEmails, getBotTestSettings, notifyWebhook }
 export async function createLead(input: LeadInput, options: Options, deps = defaultDeps) {
   const { channel, ip, ua, project, modelName = null, warm = false } = options
   const service = deps.createServiceClient()
+  // Bot in test mode (admin setting): the lead is flagged and goes only to the test addresses.
+  const botTest = channel === 'bot' ? await deps.getBotTestSettings() : null
+  const isTest = Boolean(botTest?.testMode)
   if (warm) {
     const { data: lead, error } = await service.from('contact_leads')
-      .insert({ ...input, is_warm: true, channel, ip_address: ip, user_agent: ua })
+      .insert({ ...input, is_warm: true, is_test: isTest, channel, ip_address: ip, user_agent: ua })
       .select('id').single()
     if (error) {
       console.error('[contact] warm insert failed', redactEmails(error.message))
@@ -52,6 +55,7 @@ export async function createLead(input: LeadInput, options: Options, deps = defa
     .from('contact_leads')
     .insert({
       ...input,
+      is_test: isTest,
       channel,
       ip_address: ip,
       user_agent: ua,
@@ -88,16 +92,19 @@ export async function createLead(input: LeadInput, options: Options, deps = defa
   const baseTemplate = channel === 'bot'
     ? botLeadEmail(input as BotLeadInput, lead.id, project.name)
     : formLeadEmail(input, project.name, modelName)
-  const template = blocked ? blockedLeadEmail(baseTemplate) : baseTemplate
+  const flagged = blocked ? blockedLeadEmail(baseTemplate) : baseTemplate
+  const template = isTest ? testLeadEmail(flagged) : flagged
 
-  const situaBccEmails = await deps.getLeadBccEmails(process.env.SITUA_ADMIN_EMAIL ?? '')
-  const recipients = blocked ? [] : resolveContactRecipients({
+  const leadBccEmails = await deps.getLeadBccEmails(process.env.SITUA_ADMIN_EMAIL ?? '')
+  // A test lead never reaches the developer; with no test address configured it falls back to Sitúa.
+  const situaBccEmails = isTest && botTest?.testEmails.length ? botTest.testEmails : leadBccEmails
+  const recipients = blocked || isTest ? [] : resolveContactRecipients({
     developerEmails: [
       developer?.contact_email,
       ...((developer?.notification_emails as string[] | null) ?? []),
     ],
     projectEmails: (projectContacts ?? []).map((contact) => contact.email),
-    excludedEmails: situaBccEmails,
+    excludedEmails: leadBccEmails,
   })
 
   const attemptedAt = new Date().toISOString()
@@ -157,4 +164,13 @@ function blockedLeadEmail(template: { subject: string; html: string }) {
     '<strong>Contacto en lista negra.</strong> No se envió a la desarrolladora. ' +
     'Está en el admin, en Contactos → Bloqueados.</p>'
   return { subject: `[Lista negra] ${template.subject}`, html: notice + template.html }
+}
+
+/** Lead sent while the bot is in test mode: only the test addresses get it. */
+function testLeadEmail(template: { subject: string; html: string }) {
+  const notice =
+    '<p style="margin:0 0 16px;padding:12px 14px;border-radius:8px;background:#eef4ff;color:#1d4ed8;font-family:Arial,sans-serif;font-size:14px">' +
+    '<strong>Lead de prueba del asistente.</strong> No se envió a la desarrolladora. ' +
+    'El modo prueba se apaga en el admin, en Ajustes → Asistente virtual.</p>'
+  return { subject: `[Prueba] ${template.subject}`, html: notice + template.html }
 }

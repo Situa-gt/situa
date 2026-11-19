@@ -17,7 +17,11 @@ export function ModelFloorplan({ floorplans, modelName }: Props) {
   const count = floorplans.length
   const floorplan = floorplans[Math.min(index, count - 1)]
   const alt = floorplan.alt ?? `Plano de ${modelName}`
-  const label = count > 1 ? `Plano ${index + 1} de ${count}` : 'Plano'
+  const position = count > 1 ? `${index + 1} de ${count}` : ''
+  const label = floorplan.label
+    ? [floorplan.label, position].filter(Boolean).join(' · ')
+    : count > 1 ? `Plano ${position}` : 'Plano'
+  const hasNames = floorplans.some((plan) => plan.label)
 
   const show = (next: number) => setIndex((next + count) % count)
 
@@ -66,6 +70,10 @@ export function ModelFloorplan({ floorplans, modelName }: Props) {
         </div>
       </button>
 
+      {floorplan.label && (
+        <p className="mt-3 text-sm font-medium text-ink">{floorplan.label}</p>
+      )}
+
       {count > 1 && (
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Planos del modelo">
           {floorplans.map((plan, i) => (
@@ -74,19 +82,30 @@ export function ModelFloorplan({ floorplans, modelName }: Props) {
               type="button"
               role="tab"
               aria-selected={i === index}
-              aria-label={`Plano ${i + 1} de ${count}`}
+              aria-label={plan.label ?? `Plano ${i + 1} de ${count}`}
               onClick={() => setIndex(i)}
-              className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-lg border bg-zinc-50 transition ${
-                i === index ? 'border-ink ring-1 ring-ink' : 'border-hairline opacity-70 hover:opacity-100'
+              className={`flex w-20 shrink-0 flex-col gap-1 text-left transition ${
+                i === index ? '' : 'opacity-70 hover:opacity-100'
               }`}
             >
-              <Image
-                src={plan.url_sm ?? plan.url}
-                alt=""
-                fill
-                className="object-contain"
-                sizes="80px"
-              />
+              <span
+                className={`relative block h-16 w-20 overflow-hidden rounded-lg border bg-zinc-50 ${
+                  i === index ? 'border-ink ring-1 ring-ink' : 'border-hairline'
+                }`}
+              >
+                <Image
+                  src={plan.url_sm ?? plan.url}
+                  alt=""
+                  fill
+                  className="object-contain"
+                  sizes="80px"
+                />
+              </span>
+              {hasNames && (
+                <span className="truncate text-xs font-medium text-ink">
+                  {plan.label ?? `Plano ${i + 1}`}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -109,11 +128,13 @@ export function ModelFloorplan({ floorplans, modelName }: Props) {
             <X className="h-5 w-5" />
           </button>
 
+          {(count > 1 || floorplan.label) && (
+            <span className="absolute left-4 top-5 z-10 rounded-full bg-black/70 px-3 py-1 text-sm font-medium text-white">
+              {label}
+            </span>
+          )}
           {count > 1 && (
             <>
-              <span className="absolute left-4 top-5 z-10 rounded-full bg-black/70 px-3 py-1 text-sm font-medium text-white">
-                {label}
-              </span>
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); show(index - 1) }}

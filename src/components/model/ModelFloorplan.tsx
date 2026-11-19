@@ -103,7 +103,7 @@ export function ModelFloorplan({ floorplans, modelName }: Props) {
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/25"
+            className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/70 text-white shadow-lg ring-1 ring-white/20 transition hover:bg-black/90"
             aria-label="Cerrar"
           >
             <X className="h-5 w-5" />
@@ -111,13 +111,13 @@ export function ModelFloorplan({ floorplans, modelName }: Props) {
 
           {count > 1 && (
             <>
-              <span className="absolute left-4 top-5 z-10 rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white">
+              <span className="absolute left-4 top-5 z-10 rounded-full bg-black/70 px-3 py-1 text-sm font-medium text-white">
                 {label}
               </span>
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); show(index - 1) }}
-                className="absolute left-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/25"
+                className="absolute left-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 text-white shadow-lg ring-1 ring-white/20 transition hover:bg-black/90"
                 aria-label="Plano anterior"
               >
                 <ChevronLeft className="h-6 w-6" />
@@ -125,7 +125,7 @@ export function ModelFloorplan({ floorplans, modelName }: Props) {
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); show(index + 1) }}
-                className="absolute right-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/25"
+                className="absolute right-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 text-white shadow-lg ring-1 ring-white/20 transition hover:bg-black/90"
                 aria-label="Plano siguiente"
               >
                 <ChevronRight className="h-6 w-6" />

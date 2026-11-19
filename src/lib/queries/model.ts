@@ -33,6 +33,7 @@ export interface ModelDetailData {
   cover: Pick<MediaRow, 'url' | 'url_md' | 'url_sm' | 'alt' | 'blur_data_url' | 'width' | 'height'> | null
   images: ModelImage[]
   floorplan: ModelImage | null
+  floorplans: ModelImage[]
   projectLogo: string | null
   developerLogo: string | null
   siblings: ModelRow[]
@@ -151,11 +152,11 @@ async function fetchModelDetail(
   const images: ModelImage[] = thisModelMedia.map(({ model_id: _omit, ...rest }) => rest)
   const cover = images.find((m) => m.kind === 'cover') ?? null
 
-  // Floorplan for this model
-  const floorplanItem = allMedia.find((m) => m.model_id === modelId && m.kind === 'floorplan')
-  const floorplan: ModelImage | null = floorplanItem
-    ? (({ model_id: _omit, ...rest }) => rest)(floorplanItem)
-    : null
+  // Floorplans for this model, in display_order; the first is the main one
+  const floorplans: ModelImage[] = allMedia
+    .filter((m) => m.model_id === modelId && m.kind === 'floorplan')
+    .map(({ model_id: _omit, ...rest }) => rest)
+  const floorplan: ModelImage | null = floorplans[0] ?? null
 
   // Sibling card images: prefer floorplan, fallback to gallery
   const siblingImages: Record<string, ModelImage> = {}
@@ -179,6 +180,7 @@ async function fetchModelDetail(
     cover,
     images,
     floorplan,
+    floorplans,
     projectLogo: projectLogoRow?.url ?? null,
     developerLogo: developerLogoData?.url ?? null,
     siblings: siblings ?? [],
@@ -197,7 +199,7 @@ export function getModelDetail(
 ): Promise<ModelDetailData | null> {
   return unstable_cache(
     () => fetchModelDetail(modelId, projectId),
-    ['model-detail-v7', modelId],
+    ['model-detail-v8', modelId],
     {
       tags: [
         'models:active',

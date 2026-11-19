@@ -498,10 +498,10 @@ async function renderBody(resolved: Exclude<Resolved, { kind: 'not-found' }>): P
                   exchangeRate={detail.project.exchange_rate}
                 />
               </div>
-              {detail.floorplan && (
+              {detail.floorplans.length > 0 && (
                 <div className="order-3 lg:col-start-1 lg:row-start-3">
                   <ModelFloorplan
-                    floorplan={detail.floorplan}
+                    floorplans={detail.floorplans}
                     modelName={detail.model.name}
                   />
                 </div>

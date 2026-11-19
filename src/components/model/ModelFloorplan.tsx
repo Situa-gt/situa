@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react'
 import type { ModelImage } from '@/lib/queries/model'
+import { setSelectedFloorplanLabel } from '@/lib/floorplan-selection'
 
 interface Props {
   floorplans: ModelImage[]
@@ -24,6 +25,12 @@ export function ModelFloorplan({ floorplans, modelName }: Props) {
   const hasNames = floorplans.some((plan) => plan.label)
 
   const show = (next: number) => setIndex((next + count) % count)
+
+  // Tell the contact form which plan is on screen.
+  useEffect(() => {
+    setSelectedFloorplanLabel(floorplan.label ?? null)
+  }, [floorplan.label])
+  useEffect(() => () => setSelectedFloorplanLabel(null), [])
 
   useEffect(() => {
     if (!open) return

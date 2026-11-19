@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -16,6 +16,7 @@ import { formatPriceFrom } from '@/lib/format/price'
 import { tipoSlug } from '@/lib/types/property'
 import type { SuggestedProjectData } from '@/lib/queries/suggestions'
 import { normalizePhone } from '@/lib/phone'
+import { getSelectedFloorplanLabel, subscribeSelectedFloorplan } from '@/lib/floorplan-selection'
 
 const ClientSchema = z.object({
   full_name: z.string().trim().min(2, 'Ingresa tu nombre completo').max(100),
@@ -76,10 +77,11 @@ interface ContactFormProps {
 
 const EMPTY = { full_name: '', email: '', phone: '', message: '' }
 
-function buildDefaultMessage(projectName?: string, modelName?: string) {
+function buildDefaultMessage(projectName?: string, modelName?: string, planLabel?: string | null) {
   if (!projectName) return ''
   if (modelName) {
-    return `Tengo interés en conocer más sobre ${projectName} el modelo ${modelName}`
+    const plan = planLabel ? `, plano ${planLabel}` : ''
+    return `Tengo interés en conocer más sobre ${projectName} el modelo ${modelName}${plan}`
   }
   return `Tengo interés en conocer más sobre ${projectName}`
 }
@@ -183,6 +185,14 @@ export function ContactForm({ projectId, modelId, projectName, modelName, sugges
   const [isPending, startTransition] = useTransition()
   const [submitted, setSubmitted] = useState(false)
   const hasTrackedStart = useRef(false)
+  const messageEdited = useRef(false)
+  // The floor plan on screen (model page); the default message names it until the visitor writes their own.
+  const planLabel = useSyncExternalStore(subscribeSelectedFloorplan, getSelectedFloorplanLabel, () => null)
+
+  useEffect(() => {
+    if (!modelName || messageEdited.current) return
+    setValues((v) => ({ ...v, message: buildDefaultMessage(projectName, modelName, planLabel) }))
+  }, [projectName, modelName, planLabel])
 
   function update<K extends keyof typeof INITIAL>(key: K, value: string) {
     if (!hasTrackedStart.current) {
@@ -343,7 +353,10 @@ export function ContactForm({ projectId, modelId, projectName, modelName, sugges
           rows={4}
           maxLength={500}
           value={values.message}
-          onChange={(e) => update('message', e.target.value)}
+          onChange={(e) => {
+            messageEdited.current = true
+            update('message', e.target.value)
+          }}
           aria-invalid={!!errors.message}
           disabled={isPending}
           className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground hover:border-brand-purple focus-visible:border-brand-purple disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm"

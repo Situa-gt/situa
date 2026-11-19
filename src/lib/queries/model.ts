@@ -9,7 +9,7 @@ type MediaRow = Database['public']['Tables']['project_media']['Row']
 
 export type ModelImage = Pick<
   MediaRow,
-  'id' | 'url' | 'url_md' | 'url_sm' | 'alt' | 'blur_data_url' | 'width' | 'height' | 'kind' | 'display_order'
+  'id' | 'url' | 'url_md' | 'url_sm' | 'alt' | 'blur_data_url' | 'width' | 'height' | 'kind' | 'display_order' | 'label'
 >
 
 export interface ModelDetailData {
@@ -71,7 +71,7 @@ async function fetchModelDetail(
       .maybeSingle(),
     supabase
       .from('project_media')
-      .select('id, url, url_md, url_sm, alt, blur_data_url, width, height, kind, display_order, model_id')
+      .select('id, url, url_md, url_sm, alt, blur_data_url, width, height, kind, display_order, label, model_id')
       .eq('project_id', projectId)
       .in('kind', ['cover', 'gallery', 'floorplan'])
       .order('kind', { ascending: true })
@@ -199,7 +199,7 @@ export function getModelDetail(
 ): Promise<ModelDetailData | null> {
   return unstable_cache(
     () => fetchModelDetail(modelId, projectId),
-    ['model-detail-v8', modelId],
+    ['model-detail-v9', modelId],
     {
       tags: [
         'models:active',
